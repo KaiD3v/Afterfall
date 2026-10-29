@@ -1,4 +1,4 @@
-# Gera o bairro e o interior da casa a partir dos mapas ASCII abaixo:
+# Gera o bairro e o interior da casa a partir dos mapas ASCII abaixo, com a arte da Fase D:
 #   scenes/world/neighborhood_greybox.tscn e scenes/world/house_interior.tscn
 # Rodar: godot --headless --path . --script res://tools/build_greybox.gd
 # ponytail: greybox descartável; quando a arte final cobrir tudo, os mapas passam a ser editados no editor.
@@ -14,23 +14,23 @@ const NEIGHBORHOOD := [
 	"#,,,,FFFFFFFFFFF,,,,,,,,,,,-....-,,,,,,,,,,,,,GGGG,,,,,,,,,#",
 	"#,,,,F,,,,,,,,,F,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
 	"#,,,,F,,,,,,,,,F,,,,,,,,,,,-.C..-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,F,,,HHH,,,F,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,F,,,HHH,,,F,,,,,,,V,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
+	"#,,,,F,,,HHH,,,F,,,,,,,,,,,-.C..-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
+	"#,,,,F,,,HHH,,,F,,,,,,,V,,,-....-,,,,,,,PP,,,,,,,,,,,,,,,,,#",
 	"#,,,,F,,,HDH,,,F,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
 	"#,,,,F,,,,,,,,,F,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,V,,,#",
 	"#,,,,FFFFF,FFFFF,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#---------------------------....---------------------------#",
-	"#C.........................-....-.........................C#",
-	"#C..................CC.....-....-.........................C#",
-	"#C.........................-....-.....C...................C#",
-	"#C.........................-....-.........................C#",
-	"#---------------------------....---------------------------#",
+	"#---------------------------zzzz---------------------------#",
+	"#C.........................z....z.........................C#",
+	"#C..................CC.....z....z.........................C#",
+	"#C.........................z....z.....CC..................C#",
+	"#C.........................z....z.........................C#",
+	"#---------------------------zzzz---------------------------#",
 	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
 	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
 	"#,,,,,,,,,WWWW,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
 	"#,,,,,,,,,WWWW,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
 	"#,,,,,,,,,WWWW,,,,,,,,,,,,,-..C.-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,VV,,,,,,,,,,,,,,,,,#",
+	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-..C.-,,,,,,,VV,,,,,,,,,,,,,,,,,#",
 	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
 	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
 	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,V,,,,,,,,#",
@@ -41,22 +41,26 @@ const NEIGHBORHOOD := [
 	"############################################################",
 ]
 
-# Casa por dentro: cozinha à esquerda, sala/quarto à direita, porta de saída embaixo.
+# Casa por dentro: cozinha (azulejo) à esquerda, sala/quarto à direita, porta de saída embaixo.
 const INTERIOR := [
-	"###############",
-	"#_____#_______#",
-	"#_____#_______#",
-	"#_____________#",
-	"#_____#_______#",
-	"#_____#_______#",
-	"#_____#_______#",
-	"#_____#_______#",
+	"###+######+####",
+	"#kkkkk#_______#",
+	"#kkkkk#_______#",
+	"#kkkkk________#",
+	"#kkkkk#_______#",
+	"#kkkkk#_______#",
+	"#kkkkk#_______#",
+	"#kkkkk#_______#",
 	"#########D#####",
 ]
 
 # símbolo: [cor (paleta_afterfall.gpl), sólido]
 const TILES := {
 	".": [Color8(43, 43, 51), false],     # asfalto
+	"z": [Color8(110, 110, 118), false],  # faixa de pedestre
+	"k": [Color8(154, 154, 160), false],  # azulejo
+	"+": [Color8(26, 26, 46), true],      # janela na parede
+	"P": [Color8(92, 70, 50), true],      # poste caído
 	"-": [Color8(110, 110, 118), false],  # calçada
 	",": [Color8(74, 74, 82), false],     # terreno
 	"_": [Color8(110, 74, 50), false],    # piso de madeira
@@ -86,19 +90,41 @@ const CONTAINERS := [
 	[&"comoda", "Cômoda", "res://data/loot/comoda.tres", Vector2i(13, 1), Color8(155, 122, 84)],
 ]
 
+# Arte da Fase D. Sheet que ainda não existe é pulada: o mapa fica no greybox colorido.
+const STREET_TILES := "res://assets/sprites/d/street-tiles.json"
+const STREET_PROPS := "res://assets/sprites/d/street-props.json"
+const INTERIOR_TILES := "res://assets/sprites/d/interior-tiles.json"
+const FURNITURE := "res://assets/sprites/d/furniture.json"
+# Container -> móvel da sheet de móveis
+const FURNITURE_OF := {&"geladeira": "fridge", &"armario": "cabinet", &"mesa": "table", &"comoda": "dresser"}
+# Chão de cada símbolo e sorteio de variantes: [tile, peso]
+const VARIANTS := {
+	".": [["asphalt_0", 60], ["asphalt_1", 20], ["asphalt_2", 14], ["asphalt_veg", 6]],
+	",": [["terrain_0", 60], ["terrain_1", 25], ["terrain_2", 15]],
+	"_": [["wood_0", 60], ["wood_1", 25], ["wood_2", 15]],
+	"k": [["tile_0", 60], ["tile_1", 25], ["tile_2", 15]],
+}
+const GROUND := ".z-,_k"  # símbolos de chão; o resto é sólido e herda o chão do vizinho
+const GRASS_CHANCE := 5    # % dos tiles de terreno com grama alta (decoração, dá para passar)
+
 var DOOR: PackedScene  # carregados em _initialize, depois dos autoloads (RunState)
 var CONTAINER: PackedScene
 const T := 32
 const H := T / 2.0
+const SOLID := 1  # source do tile invisível com colisão (camada Walls)
 
 var tileset: TileSet
 var keys: Array
+var sheets := {}  # json -> {texture, rects: nome -> Rect2i, meta, source}
 
 
 func _initialize() -> void:
 	DOOR = load("res://scenes/props/door.tscn")
 	CONTAINER = load("res://scenes/props/loot_container.tscn")
 	keys = TILES.keys()
+	for path in [STREET_TILES, STREET_PROPS, INTERIOR_TILES, FURNITURE]:
+		if FileAccess.file_exists(path):
+			sheets[path] = _sheet(path)
 	tileset = _tileset()
 
 	# Bairro: prédio com sprite vira sólido sem cor, menos a fileira de cima do bloco, que fica
@@ -112,7 +138,7 @@ func _initialize() -> void:
 			map[y] = map[y].replace(ch, "," if y == top else "X")
 			if ch == "H":
 				map[y] = map[y].replace("D", "X")
-	var hood := _scene("Neighborhood", map)
+	var hood := _scene("Neighborhood", map, false)
 	for ch in BUILDINGS:
 		var b: Array = BUILDINGS[ch]
 		if ResourceLoader.exists(b[0]):
@@ -131,14 +157,16 @@ func _initialize() -> void:
 			l.add_theme_font_size_override("font_size", 10)
 			l.add_theme_color_override("font_color", Color8(232, 197, 71))
 			_add(hood, l)
+	if sheets.has(STREET_PROPS):
+		_props(hood, map)
 	var door_tile := _find(NEIGHBORHOOD, "D")
 	_door(hood, "HouseDoor", "enter_house", _center(door_tile) + Vector2(0, 28))
 	_marker(hood, "HouseExit", _center(door_tile) + Vector2(0, 32))
 	_marker(hood, "PlayerSpawn", _center(Vector2i(10, 14)))  # calçada em frente ao portão
 	_save(hood, "res://scenes/world/neighborhood_greybox.tscn")
 
-	# Interior: porta de saída acima do tile D; containers nos cômodos.
-	var house := _scene("HouseInterior", INTERIOR)
+	# Interior: porta de saída acima do tile D; containers nos cômodos (o móvel é o container).
+	var house := _scene("HouseInterior", INTERIOR, true)
 	door_tile = _find(INTERIOR, "D")
 	_door(house, "ExitDoor", "exit_house", _center(door_tile) + Vector2(0, -28))
 	_marker(house, "PlayerSpawn", _center(door_tile) + Vector2(0, -32))
@@ -150,11 +178,30 @@ func _initialize() -> void:
 		box.table = load(c[2])
 		box.position = _center(c[3])
 		box.color = c[4]
+		if sheets.has(FURNITURE):
+			box.sprite = _atlas(FURNITURE, FURNITURE_OF[c[0]])
 		_add(house, box)
 	_save(house, "res://scenes/world/house_interior.tscn")
 	quit()
 
 
+func _sheet(path: String) -> Dictionary:
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var rects := {}
+	for f in data.frames:
+		rects[f.filename] = Rect2i(f.frame.x, f.frame.y, f.frame.w, f.frame.h)
+	return {"texture": load(path.get_base_dir().path_join(data.meta.image)), "rects": rects, "meta": data.meta}
+
+
+func _atlas(sheet: String, frame: String) -> AtlasTexture:
+	var a := AtlasTexture.new()
+	a.atlas = sheets[sheet].texture
+	a.region = sheets[sheet].rects[frame]
+	return a
+
+
+# Source 0: greybox colorido. Source 1: tile invisível com colisão, na camada Walls (a colisão
+# vem do mapa, não da arte). Demais: uma por sheet de tiles, cada tile com as versões giradas.
 func _tileset() -> TileSet:
 	var img := Image.create(T * keys.size(), T, false, Image.FORMAT_RGBA8)
 	for i in keys.size():
@@ -172,17 +219,40 @@ func _tileset() -> TileSet:
 	src.texture = ImageTexture.create_from_image(img)
 	src.texture_region_size = Vector2i(T, T)
 	ts.add_source(src, 0)
-	var square := PackedVector2Array([Vector2(-H, -H), Vector2(H, -H), Vector2(H, H), Vector2(-H, H)])
 	for i in keys.size():
 		src.create_tile(Vector2i(i, 0))
-		if TILES[keys[i]][1]:
-			var td := src.get_tile_data(Vector2i(i, 0), 0)
-			td.add_collision_polygon(0)
-			td.set_collision_polygon_points(0, 0, square)
+
+	var solid := TileSetAtlasSource.new()
+	solid.texture = ImageTexture.create_from_image(Image.create(T, T, false, Image.FORMAT_RGBA8))
+	solid.texture_region_size = Vector2i(T, T)
+	ts.add_source(solid, SOLID)
+	solid.create_tile(Vector2i.ZERO)
+	var td := solid.get_tile_data(Vector2i.ZERO, 0)
+	td.add_collision_polygon(0)
+	td.set_collision_polygon_points(0, 0, PackedVector2Array([Vector2(-H, -H), Vector2(H, -H), Vector2(H, H), Vector2(-H, H)]))
+
+	for path in [STREET_TILES, INTERIOR_TILES]:
+		if not sheets.has(path):
+			continue
+		var art := TileSetAtlasSource.new()
+		art.texture = sheets[path].texture
+		art.texture_region_size = Vector2i(T, T)
+		sheets[path].source = ts.add_source(art)
+		for r in sheets[path].rects.values():
+			var at := Vector2i(r.position) / T
+			art.create_tile(at)
+			# alternativas: 1 espelho vertical, 2 transposto, 3 transposto + espelho horizontal.
+			# O Godot transpõe antes de espelhar: borda de baixo -> 1 em cima, 2 à direita, 3 à esquerda.
+			for flags in [[false, true, false], [false, false, true], [true, false, true]]:
+				var alt := art.create_alternative_tile(at)
+				var d := art.get_tile_data(at, alt)
+				d.flip_h = flags[0]
+				d.flip_v = flags[1]
+				d.transpose = flags[2]
 	return ts
 
 
-func _scene(scene_name: String, map: Array) -> Node2D:
+func _scene(scene_name: String, map: Array, interior: bool) -> Node2D:
 	var scene := Node2D.new()
 	scene.name = scene_name
 	scene.y_sort_enabled = true  # prédios e props ordenam pela base junto com jogador e zumbis
@@ -191,15 +261,175 @@ func _scene(scene_name: String, map: Array) -> Node2D:
 	layer.tile_set = tileset
 	layer.z_index = -1  # chão sempre por baixo
 	_add(scene, layer)
+	var walls := TileMapLayer.new()
+	walls.name = "Walls"
+	walls.tile_set = tileset
+	_add(scene, walls)
+	var under := _ground_under(map)
+	var sheet := INTERIOR_TILES if interior else STREET_TILES
 	for y in map.size():
 		for x in map[y].length():
-			layer.set_cell(Vector2i(x, y), 0, Vector2i(keys.find(map[y][x]), 0))
+			var ch: String = map[y][x]
+			var cell := Vector2i(x, y)
+			if TILES[ch][1]:
+				walls.set_cell(cell, SOLID, Vector2i.ZERO)
+			var pick := _art_cell(map, under, cell, interior) if sheets.has(sheet) else []
+			if pick.is_empty():
+				layer.set_cell(cell, 0, Vector2i(keys.find(ch), 0))
+			else:
+				layer.set_cell(cell, sheets[sheet].source, Vector2i(sheets[sheet].rects[pick[0]].position) / T, pick[1])
 	return scene
+
+
+# Tile de arte [nome, alternativa] para a célula; [] deixa o greybox. Sólido sem arte própria
+# (carro, cerca, borda do mapa, base de prédio) mostra o chão em volta, e o prop vai por cima.
+func _art_cell(map: Array, under: Dictionary, cell: Vector2i, interior: bool) -> Array:
+	var ch: String = map[cell.y][cell.x]
+	if interior and ch in "#+D":
+		if ch == "D":
+			return ["door", 0]
+		if ch == "+":
+			return ["window", 0]
+		var below := cell + Vector2i.DOWN
+		var floor_below: bool = below.y < map.size() and map[below.y][below.x] in GROUND
+		return ["wall_face" if floor_below else "wall_cap", 0]
+	if not TILES[ch][1]:
+		pass
+	elif ch == "X" or ch == "#" or sheets.has(STREET_PROPS):
+		ch = under[cell]
+	else:
+		return []  # prop sem sheet ainda: bloco colorido
+	match ch:
+		"z":  # listras na direção da rua: asfalto puro à esquerda é rua horizontal, transposto
+			return ["crosswalk", 2 if _ground(map, under, cell + Vector2i.LEFT) == "." else 0]
+		"-":
+			for side in [[Vector2i.DOWN, 0], [Vector2i.UP, 1], [Vector2i.RIGHT, 2], [Vector2i.LEFT, 3]]:
+				if _ground(map, under, cell + side[0]) in ".z":
+					return ["sidewalk_curb", side[1]]
+			return ["sidewalk", 0]
+	return [_variant(ch, cell), 0]
+
+
+func _ground(map: Array, under: Dictionary, cell: Vector2i) -> String:
+	if cell.y < 0 or cell.y >= map.size() or cell.x < 0 or cell.x >= map[cell.y].length():
+		return ""
+	var ch: String = map[cell.y][cell.x]
+	return ch if ch in GROUND else under.get(cell, ",")
+
+
+# Chão debaixo de cada célula sólida: o mais comum entre os vizinhos, espalhando a partir do
+# chão de verdade. Sem vizinho de chão (canto do mapa), terreno.
+func _ground_under(map: Array) -> Dictionary:
+	var under := {}
+	var todo := []
+	for y in map.size():
+		for x in map[y].length():
+			if not map[y][x] in GROUND:
+				todo.append(Vector2i(x, y))
+	while not todo.is_empty():
+		var found := {}
+		for cell in todo:
+			var count := {}
+			for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				var n: Vector2i = cell + d
+				if n.y < 0 or n.y >= map.size() or n.x < 0 or n.x >= map[n.y].length():
+					continue
+				var g: String = map[n.y][n.x] if map[n.y][n.x] in GROUND else under.get(n, "")
+				if g == "z":
+					g = "."
+				if g != "":
+					count[g] = count.get(g, 0) + 1
+			if not count.is_empty():
+				var best: String = count.keys()[0]
+				for g in count:
+					if count[g] > count[best]:
+						best = g
+				found[cell] = best
+		if found.is_empty():
+			for cell in todo:
+				found[cell] = ","
+		under.merge(found)
+		todo = todo.filter(func(c): return not found.has(c))
+	return under
+
+
+# Sorteio fixo por posição: o mapa sai igual a cada build.
+func _roll(cell: Vector2i) -> int:
+	return absi(cell.x * 73856093 ^ cell.y * 19349663) % 100
+
+
+func _variant(ch: String, cell: Vector2i) -> String:
+	var r := _roll(cell)
+	for v in VARIANTS[ch]:
+		r -= v[1]
+		if r < 0:
+			return v[0]
+	return VARIANTS[ch][0][0]
+
+
+# Props da rua por cima do chão, na ordem de profundidade. A colisão continua na camada Walls.
+# Carros: 2 C seguidos; 3 ou mais em linha é barricada fechando a rua.
+func _props(hood: Node2D, map: Array) -> void:
+	var props := Node2D.new()
+	props.name = "Props"
+	props.y_sort_enabled = true
+	_add(hood, props)
+	var at := func(c: Vector2i) -> String:
+		return map[c.y][c.x] if c.y >= 0 and c.y < map.size() and c.x >= 0 and c.x < map[c.y].length() else ""
+	for y in map.size():
+		for x in map[y].length():
+			var c := Vector2i(x, y)
+			match map[y][x]:
+				"C":
+					var h := _run(map, c, Vector2i.RIGHT)
+					var v := _run(map, c, Vector2i.DOWN)
+					if h == 2 and at.call(c + Vector2i.LEFT) != "C":
+						_prop(props, "car_h", c)
+					elif v == 2 and at.call(c + Vector2i.UP) != "C":
+						_prop(props, "car_v", c)
+					elif h != 2 and v != 2:
+						_prop(props, "barricade", c)
+				"P":
+					if at.call(c + Vector2i.LEFT) != "P":
+						_prop(props, "fallen_pole", c)
+				"V":
+					_prop(props, "bush", c)
+				"F":
+					var fh: bool = at.call(c + Vector2i.LEFT) == "F" or at.call(c + Vector2i.RIGHT) == "F"
+					var fv: bool = at.call(c + Vector2i.UP) == "F" or at.call(c + Vector2i.DOWN) == "F"
+					_prop(props, "fence_h" if fh and not fv else ("fence_v" if fv and not fh else "fence_post"), c)
+				",":
+					if _roll(c + Vector2i(7, 3)) < GRASS_CHANCE:
+						_prop(props, "tall_grass", c)
+
+
+# Tamanho da fileira de símbolos iguais que passa pela célula, na direção dada.
+func _run(map: Array, cell: Vector2i, dir: Vector2i) -> int:
+	var ch: String = map[cell.y][cell.x]
+	var n := 1
+	for s in [dir, -dir]:
+		var p: Vector2i = cell + s
+		while p.y >= 0 and p.y < map.size() and p.x >= 0 and p.x < map[p.y].length() and map[p.y][p.x] == ch:
+			n += 1
+			p += s
+	return n
+
+
+# Quadro de 64×64 com a pegada centralizada e a base na linha 62: origem no meio da base da pegada.
+func _prop(parent: Node, frame: String, cell: Vector2i) -> void:
+	var fp: Array = sheets[STREET_PROPS].meta.footprint[frame]
+	var s := Sprite2D.new()
+	s.name = "%s_%d_%d" % [frame, cell.x, cell.y]
+	s.texture = _atlas(STREET_PROPS, frame)
+	s.centered = false
+	s.offset = Vector2(-32, -63)
+	s.position = Vector2((cell.x + fp[0] / 2.0) * T, (cell.y + fp[1]) * T)
+	_add(parent, s)
 
 
 func _add(scene: Node, child: Node) -> void:
 	scene.add_child(child)
-	child.owner = scene
+	child.owner = scene if scene.owner == null else scene.owner  # dono é a raiz, para salvar
 
 
 func _door(scene: Node, door_name: String, action: String, pos: Vector2) -> void:

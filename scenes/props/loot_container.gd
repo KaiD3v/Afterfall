@@ -4,12 +4,22 @@ extends StaticBody2D
 @export var id: StringName
 @export var label := "Armário"
 @export var table: LootTable
-@export var color := Color8(155, 122, 84)  # greybox; a arte do interior troca isto
+@export var color := Color8(155, 122, 84)  # greybox, enquanto não há móvel
+@export var sprite: Texture2D  # o móvel (quadro de 64×64, base na linha 62); substitui o greybox
 
 
 func _ready() -> void:
 	add_to_group("interactables")
 	$Body.color = color
+	if sprite:
+		$Body.hide()
+		$Sprite.texture = sprite
+		# contorno de foco e nome em volta do móvel inteiro, não só da pegada
+		var used := Rect2(sprite.get_image().get_used_rect())
+		used.position += $Sprite.offset
+		$Focus.position = used.position - Vector2.ONE
+		$Focus.size = used.size + Vector2(2, 2)
+		$Name.position.y = used.position.y - 12
 	$Name.text = label
 	_refresh()
 

@@ -1,0 +1,99 @@
+{
+  "frames": [
+    {
+      "filename": "fridge",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 64
+      },
+      "duration": 250
+    },
+    {
+      "filename": "cabinet",
+      "frame": {
+        "x": 64,
+        "y": 0,
+        "w": 64,
+        "h": 64
+      },
+      "duration": 250
+    },
+    {
+      "filename": "table",
+      "frame": {
+        "x": 128,
+        "y": 0,
+        "w": 64,
+        "h": 64
+      },
+      "duration": 250
+    },
+    {
+      "filename": "dresser",
+      "frame": {
+        "x": 192,
+        "y": 0,
+        "w": 64,
+        "h": 64
+      },
+      "duration": 250
+    }
+  ],
+  "meta": {
+    "app": "Afterfall D",
+    "version": "1",
+    "image": "furniture.png",
+    "format": "I8",
+    "size": {
+      "w": 256,
+      "h": 64
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "fridge",
+        "from": 0,
+        "to": 0,
+        "direction": "forward"
+      },
+      {
+        "name": "cabinet",
+        "from": 1,
+        "to": 1,
+        "direction": "forward"
+      },
+      {
+        "name": "table",
+        "from": 2,
+        "to": 2,
+        "direction": "forward"
+      },
+      {
+        "name": "dresser",
+        "from": 3,
+        "to": 3,
+        "direction": "forward"
+      }
+    ],
+    "footprint": {
+      "fridge": [
+        1,
+        1
+      ],
+      "cabinet": [
+        1,
+        1
+      ],
+      "table": [
+        1,
+        1
+      ],
+      "dresser": [
+        1,
+        1
+      ]
+    }
+  }
+}

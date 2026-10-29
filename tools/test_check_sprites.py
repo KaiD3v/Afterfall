@@ -1,4 +1,5 @@
-"""Autoteste do check_sprites: pé estável passa, pé que pula 3 px falha.
+"""Autoteste do check_sprites: pé estável passa, pé que pula 3 px falha; tile sem costura passa,
+tile com faixa escura na borda falha.
 Rodar: python -I tools/test_check_sprites.py
 """
 import json
@@ -38,4 +39,26 @@ def feet_ok(png):
 with tempfile.TemporaryDirectory() as d:
     assert feet_ok(sheet(d, "estavel", [0, 0, 1, 0])) == (True, True)
     assert feet_ok(sheet(d, "pula", [0, 3, 0, 0])) == (False, False)
+
+
+def tiles(folder, band):
+    """Dois tiles 8x8 de ruído leve; com band, o segundo ganha uma coluna escura na borda direita."""
+    a, b = (74, 74, 82), (110, 110, 118)
+    img = Image.new("RGBA", (16, 8), (0, 0, 0, 255))
+    for t in (0, 1):
+        for y in range(8):
+            for x in range(8):
+                c = b if band and t == 1 and x == 7 else (a if (x + y) % 3 else (43, 43, 51))
+                img.putpixel((8 * t + x, y), (*c, 255))
+    png = Path(folder) / f"tiles{int(band)}.png"
+    img.save(png)
+    png.with_suffix(".json").write_text(json.dumps({
+        "frames": [{"filename": n, "frame": {"x": 8 * i, "y": 0, "w": 8, "h": 8}} for i, n in enumerate(("a", "b"))],
+        "meta": {"seamless": [["a", "b"]]}}))
+    return all(ok for _, ok, _ in cs.check(png, 6, 0.95, cs.palette(), tiles=True))
+
+
+with tempfile.TemporaryDirectory() as d:
+    assert tiles(d, False)
+    assert not tiles(d, True)
 print("check_sprites: PASS")
