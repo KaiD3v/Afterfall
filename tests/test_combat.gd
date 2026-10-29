@@ -3,12 +3,13 @@
 extends SceneTree
 
 const HZ := 60.0
-const ZOMBIE := preload("res://scenes/zombie/zombie.tscn")
+var ZOMBIE: PackedScene  # load em _initialize: zombie.gd usa o autoload RunState
 var player: CharacterBody2D
 var failed := false
 
 
 func _initialize() -> void:
+	ZOMBIE = load("res://scenes/zombie/zombie.tscn")
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	for z in main.get_node("Zombies").get_children():  # cada caso monta os próprios zumbis
 		z.free()

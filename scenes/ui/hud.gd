@@ -1,4 +1,4 @@
-# HUD mínimo: vida, stamina, munição (pente | reserva), inventário, mensagens e aviso de morte.
+# HUD mínimo: vida, stamina, munição (pente | reserva), inventário, mensagens e tela de resultado.
 extends CanvasLayer
 
 const BAR_W := 60.0
@@ -10,14 +10,13 @@ var _toast_left := 0.0
 
 @onready var health_fill: ColorRect = $Health/Fill
 @onready var stamina_fill: ColorRect = $Stamina/Fill
-@onready var death: Label = $Death
+@onready var result: ColorRect = $Result
 @onready var ammo: Label = $Ammo
 @onready var inventory: Label = $Inventory
 @onready var toast: Label = $Toast
 
 
 func _ready() -> void:
-	player.died.connect(death.show)
 	RunState.message.connect(_show_toast)
 
 
@@ -30,6 +29,14 @@ func _process(delta: float) -> void:
 	inventory.text = "Inventário: %s (%d livres)" % [_items_text(), RunState.SLOTS - RunState.items.size()]
 	_toast_left -= delta
 	toast.visible = _toast_left > 0.0
+
+
+# Chamado por main.gd quando o jogador morre.
+func show_result() -> void:
+	var t := int(RunState.run_time)
+	result.get_node("Text").text = "VOCÊ MORREU\n\nSobreviveu %d:%02d · %d zumbis · %d itens\nMortes: %d\n\nE para uma nova run" % [
+		t / 60, t % 60, RunState.kills, RunState.looted, RunState.deaths]
+	result.show()
 
 
 func _show_toast(text: String) -> void:

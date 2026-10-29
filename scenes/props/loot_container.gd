@@ -26,4 +26,5 @@ func interact(player: Node) -> void:
 			continue  # inventário cheio: o item fica no container
 		loot.erase(item)
 		got.append(RunState.NAMES[item])
+		RunState.looted += 1
 	RunState.notify("%s: %s" % [label, ", ".join(got)] if got else "%s: inventário cheio" % label)

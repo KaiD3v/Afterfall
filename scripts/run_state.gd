@@ -1,4 +1,5 @@
-# Autoload RunState: inventário, loot sorteado por container e mortes. new_run() zera tudo (M6).
+# Autoload RunState: inventário, loot sorteado por container e números da run.
+# new_run() zera tudo menos as mortes, que contam entre runs.
 extends Node
 
 signal message(text: String)
@@ -9,12 +10,18 @@ const NAMES := {&"bandage": "Bandagem", &"ammo_9mm": "Munição 9 mm"}
 
 var items: Array[StringName] = []  # um item por slot, sem peso
 var deaths := 0
+var run_time := 0.0  # segundos vivo nesta run
+var kills := 0
+var looted := 0      # itens tirados de containers, munição incluída
 var _loot := {}  # id do container -> itens que ainda estão nele
 
 
 func new_run() -> void:
 	items.clear()
 	_loot.clear()
+	run_time = 0.0
+	kills = 0
+	looted = 0
 
 
 # Sorteia o container na primeira abertura da run; depois devolve o que sobrou nele.

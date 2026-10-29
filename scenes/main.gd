@@ -1,12 +1,15 @@
 # Cena principal: bairro, jogador, zumbis e HUD. Entrar na casa tira o bairro e os zumbis
 # da árvore (ficam congelados, sem ouvir nada) e põe o interior; sair faz o inverso.
+# Morte: tela de resultado; E começa uma nova run recarregando a cena do zero.
 extends Node2D
 
 const INTERIOR := preload("res://scenes/world/house_interior.tscn")
 const FADE_TIME := 0.25
+const RESTART_DELAY := 1.0  # evita pular o resultado com um E apertado no susto
 
 var interior: Node2D
 var _busy := false
+var _dead_for := -1.0  # segundos desde a morte; -1 = vivo
 
 @onready var player: CharacterBody2D = $Player
 @onready var outside: Array[Node] = [$Neighborhood, $Zombies]
@@ -15,7 +18,30 @@ var _busy := false
 
 func _ready() -> void:
 	add_to_group("main")
+	player.died.connect(_on_player_died)
 	_fit_camera($Neighborhood)
+
+
+func _process(delta: float) -> void:
+	if _dead_for < 0.0:
+		RunState.run_time += delta
+		return
+	_dead_for += delta
+	if _dead_for >= RESTART_DELAY and Input.is_action_just_pressed("interact"):
+		new_run()
+
+
+# Zera o RunState (inventário, loot sorteado, números) e recarrega a cena: jogador, zumbis
+# e casa voltam ao estado inicial. Os containers sorteiam de novo na primeira abertura.
+func new_run() -> void:
+	RunState.new_run()
+	get_tree().reload_current_scene()
+
+
+func _on_player_died() -> void:
+	RunState.deaths += 1
+	_dead_for = 0.0
+	$HUD.show_result()
 
 
 func enter_house() -> void:

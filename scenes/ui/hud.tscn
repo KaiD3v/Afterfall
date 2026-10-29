@@ -33,8 +33,17 @@ offset_right = 61.0
 offset_bottom = 5.0
 color = Color(0.909804, 0.772549, 0.278431, 1)
 
-[node name="Death" type="Label" parent="."]
+[node name="Result" type="ColorRect" parent="."]
 visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.101961, 0.101961, 0.180392, 0.784314)
+
+[node name="Text" type="Label" parent="Result"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -42,8 +51,8 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.784314, 0.784314, 0.768627, 1)
 theme_override_colors/font_outline_color = Color(0.101961, 0.101961, 0.180392, 1)
-theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 16
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 12
 text = "VOCÊ MORREU"
 horizontal_alignment = 1
 vertical_alignment = 1

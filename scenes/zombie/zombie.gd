@@ -88,6 +88,7 @@ func take_damage(amount: float) -> void:
 		target_pos = player.global_position
 		return
 	remove_from_group("zombies")
+	RunState.kills += 1
 	set_physics_process(false)
 	$CollisionShape2D.set_deferred("disabled", true)
 	create_tween().tween_property(sprite, "modulate:a", 0.0, 0.4).finished.connect(queue_free)
