@@ -1,0 +1,85 @@
+{
+  "frames": [
+    {
+      "filename": "protagonist_idle_down",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_left",
+      "frame": {
+        "x": 32,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_right",
+      "frame": {
+        "x": 64,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_up",
+      "frame": {
+        "x": 96,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    }
+  ],
+  "meta": {
+    "app": "Afterfall M1",
+    "version": "1",
+    "image": "character.png",
+    "format": "I8",
+    "size": {
+      "w": 128,
+      "h": 32
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "idle_down",
+        "from": 0,
+        "to": 0,
+        "direction": "forward",
+        "loop": true
+      },
+      {
+        "name": "idle_left",
+        "from": 1,
+        "to": 1,
+        "direction": "forward",
+        "loop": true
+      },
+      {
+        "name": "idle_right",
+        "from": 2,
+        "to": 2,
+        "direction": "forward",
+        "loop": true
+      },
+      {
+        "name": "idle_up",
+        "from": 3,
+        "to": 3,
+        "direction": "forward",
+        "loop": true
+      }
+    ]
+  }
+}
