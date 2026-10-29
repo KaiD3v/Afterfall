@@ -10,7 +10,8 @@ var failed := false
 
 func _initialize() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
-	main.get_node("Zombies").free()  # cada caso monta os próprios zumbis
+	for z in main.get_node("Zombies").get_children():  # cada caso monta os próprios zumbis
+		z.free()
 	root.add_child(main)
 	player = main.get_node("Player")
 	_run.call_deferred()

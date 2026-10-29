@@ -21,6 +21,16 @@ func _run() -> void:
 	await physics_frame
 	rs.new_run()
 
+	# 0. Regressão do crash de 2026-10-29: zumbis do main.tscn vêm antes do Player na árvore
+	# e precisam achar o jogador; levar tiro não pode dar erro.
+	var zs := get_nodes_in_group("zombies")
+	check("os 4 zumbis da cena acham o jogador", zs.size() == 4 and zs.all(func(z): return z.player == player))
+	var z0: Node = zs[0]
+	z0.take_damage(10.0)
+	check("zumbi da cena leva dano e persegue", z0.health == 50.0 and z0.state == z0.State.CHASE)
+	z0.state = z0.State.IDLE
+	z0.health = z0.max_health
+
 	# 1. Porta: E na frente da casa entra; spawn do interior; bairro e zumbis fora da árvore.
 	player.position = main.get_node("Neighborhood/HouseExit").position
 	check("E na porta interage", player.interact())

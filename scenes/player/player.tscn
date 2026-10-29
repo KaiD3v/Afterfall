@@ -9,7 +9,7 @@
 [sub_resource type="RectangleShape2D" id="feet"]
 size = Vector2(12, 6)
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" groups=["player"]]
 collision_layer = 2
 collision_mask = 5
 motion_mode = 1

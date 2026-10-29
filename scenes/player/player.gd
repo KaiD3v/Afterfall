@@ -51,7 +51,6 @@ func _ready() -> void:
 	health = max_health
 	stamina = max_stamina
 	ammo = mag_size
-	add_to_group("player")
 
 
 func _physics_process(delta: float) -> void:
