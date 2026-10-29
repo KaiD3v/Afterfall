@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/neighborhood_greybox.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/zombie/zombie.tscn" id="4"]
 
 [node name="Main" type="Node2D"]
 
@@ -10,6 +11,21 @@
 
 [node name="Player" parent="." instance=ExtResource("2")]
 position = Vector2(336, 464)
+
+[node name="Zombies" type="Node2D" parent="."]
+
+[node name="ZombiePosto" parent="Zombies" instance=ExtResource("4")]
+position = Vector2(1500, 330)
+
+[node name="ZombieTransversal" parent="Zombies" instance=ExtResource("4")]
+position = Vector2(960, 200)
+
+[node name="ZombieSudeste" parent="Zombies" instance=ExtResource("4")]
+position = Vector2(1500, 800)
+facing = Vector2(-1, 0)
+
+[node name="ZombieOficina" parent="Zombies" instance=ExtResource("4")]
+position = Vector2(420, 900)
 
 [node name="HUD" parent="." node_paths=PackedStringArray("player") instance=ExtResource("3")]
 player = NodePath("../Player")

@@ -1,12 +1,17 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/player.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/m1/character.png" id="2"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/shot.mp3" id="3"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/machete.mp3" id="4"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/reload.mp3" id="5"]
 
 [sub_resource type="RectangleShape2D" id="feet"]
 size = Vector2(12, 6)
 
 [node name="Player" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 5
 motion_mode = 1
 script = ExtResource("1")
 
@@ -23,3 +28,18 @@ limit_left = 0
 limit_top = 0
 limit_right = 1920
 limit_bottom = 1088
+
+[node name="Tracer" type="Line2D" parent="."]
+visible = false
+top_level = true
+width = 1.0
+default_color = Color(0.909804, 0.772549, 0.278431, 1)
+
+[node name="SfxShot" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3")
+
+[node name="SfxMachete" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4")
+
+[node name="SfxReload" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("5")
