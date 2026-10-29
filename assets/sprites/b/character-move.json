@@ -1,0 +1,299 @@
+{
+  "frames": [
+    {
+      "filename": "protagonist_idle_down_0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_down_1",
+      "frame": {
+        "x": 32,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_down_2",
+      "frame": {
+        "x": 64,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_down_3",
+      "frame": {
+        "x": 96,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_walk_down_0",
+      "frame": {
+        "x": 0,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    },
+    {
+      "filename": "protagonist_walk_down_1",
+      "frame": {
+        "x": 32,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    },
+    {
+      "filename": "protagonist_walk_down_2",
+      "frame": {
+        "x": 64,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    },
+    {
+      "filename": "protagonist_walk_down_3",
+      "frame": {
+        "x": 96,
+        "y": 32,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    },
+    {
+      "filename": "protagonist_idle_right_0",
+      "frame": {
+        "x": 0,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_right_1",
+      "frame": {
+        "x": 32,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_right_2",
+      "frame": {
+        "x": 64,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_right_3",
+      "frame": {
+        "x": 96,
+        "y": 64,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_walk_right_0",
+      "frame": {
+        "x": 0,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    },
+    {
+      "filename": "protagonist_walk_right_1",
+      "frame": {
+        "x": 32,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    },
+    {
+      "filename": "protagonist_walk_right_2",
+      "frame": {
+        "x": 64,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    },
+    {
+      "filename": "protagonist_walk_right_3",
+      "frame": {
+        "x": 96,
+        "y": 96,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    },
+    {
+      "filename": "protagonist_idle_up_0",
+      "frame": {
+        "x": 0,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_up_1",
+      "frame": {
+        "x": 32,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_up_2",
+      "frame": {
+        "x": 64,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_idle_up_3",
+      "frame": {
+        "x": 96,
+        "y": 128,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_walk_up_0",
+      "frame": {
+        "x": 0,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    },
+    {
+      "filename": "protagonist_walk_up_1",
+      "frame": {
+        "x": 32,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    },
+    {
+      "filename": "protagonist_walk_up_2",
+      "frame": {
+        "x": 64,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    },
+    {
+      "filename": "protagonist_walk_up_3",
+      "frame": {
+        "x": 96,
+        "y": 160,
+        "w": 32,
+        "h": 32
+      },
+      "duration": 120
+    }
+  ],
+  "meta": {
+    "app": "Afterfall M1",
+    "version": "1",
+    "image": "character-move.png",
+    "format": "I8",
+    "size": {
+      "w": 128,
+      "h": 192
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "idle_down",
+        "from": 0,
+        "to": 3,
+        "direction": "forward",
+        "loop": true
+      },
+      {
+        "name": "walk_down",
+        "from": 4,
+        "to": 7,
+        "direction": "forward",
+        "loop": true
+      },
+      {
+        "name": "idle_right",
+        "from": 8,
+        "to": 11,
+        "direction": "forward",
+        "loop": true
+      },
+      {
+        "name": "walk_right",
+        "from": 12,
+        "to": 15,
+        "direction": "forward",
+        "loop": true
+      },
+      {
+        "name": "idle_up",
+        "from": 16,
+        "to": 19,
+        "direction": "forward",
+        "loop": true
+      },
+      {
+        "name": "walk_up",
+        "from": 20,
+        "to": 23,
+        "direction": "forward",
+        "loop": true
+      }
+    ]
+  }
+}

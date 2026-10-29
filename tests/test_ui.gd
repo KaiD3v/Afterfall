@@ -27,20 +27,37 @@ func _run() -> void:
 	rs.new_run()
 	var sprite: AnimatedSprite2D = player.get_node("Sprite")
 
-	# 1. Animações: estado_direção com fallback para idle_direção.
+	# 1. Animações, com sheets de teste (independem da arte real): só down/right/up,
+	# a esquerda vem da direita espelhada.
 	check("direções", Facing.dir_name(Vector2.LEFT) == "left" and Facing.dir_name(Vector2(0.3, -1)) == "up" and Facing.dir_name(Vector2(1, 1)) == "right")
+	var tex := sprite.sprite_frames.get_frame_texture(&"idle_right", 0)
+	var frames := SpriteFrames.new()
+	frames.remove_animation(&"default")
+	for d in ["down", "right", "up"]:
+		add_anim(frames, "idle_" + d, tex, 1, true)
+	sprite.sprite_frames = frames
 	player.position = Vector2(760, 592)
 	await hold("move_left", 0.2)
-	check("andando sem walk_* na sheet: idle_left (%s)" % sprite.animation, sprite.animation == &"idle_left")
+	check("sem walk_*: idle_right espelhado para a esquerda (%s, flip %s)" % [sprite.animation, sprite.flip_h], sprite.animation == &"idle_right" and sprite.flip_h)
+
+	add_anim(frames, "walk_right", tex, 4, true)
+	var steps0: int = player.steps_taken
+	await hold("move_left", 0.45)  # 10 fps: frames 0..3, contato em 0 e 2
+	check("andando para a esquerda: walk_right espelhado", sprite.animation == &"walk_right" and sprite.flip_h)
+	check("passos nos frames de contato (%d)" % (player.steps_taken - steps0), player.steps_taken - steps0 >= 2)
+	check("passo na rua usa o som da rua", player.get_node("SfxSteps").stream == player.STEPS[&"street"])
+	await hold("move_right", 0.1)
+	check("para a direita: sem espelho", sprite.animation == &"walk_right" and not sprite.flip_h)
+	Input.action_press("sprint")
+	await hold("move_right", 0.1)
+	Input.action_release("sprint")
+	check("correndo, o ciclo acelera (%.3f)" % sprite.speed_scale, is_equal_approx(sprite.speed_scale, player.run_speed / player.walk_speed))
+	await frames_for(0.1)
+	check("parado: idle", sprite.animation == &"idle_right" and sprite.speed_scale == 1.0)
 
 	# 2. Golpe no frame de contato quando existe melee_*.
-	var frames: SpriteFrames = sprite.sprite_frames.duplicate()
-	frames.add_animation(&"melee_right")
-	frames.set_animation_loop(&"melee_right", false)
-	frames.set_animation_speed(&"melee_right", 10.0)
-	for i in 4:
-		frames.add_frame(&"melee_right", frames.get_frame_texture(&"idle_right", 0))
-	sprite.sprite_frames = frames
+	add_anim(frames, "melee_right", tex, 4, false)
+	player.position = Vector2(760, 592)
 	var z: Node = load("res://scenes/zombie/zombie.tscn").instantiate()
 	z.position = player.position + Vector2(24, 0)
 	z.facing = Vector2.LEFT
@@ -72,6 +89,7 @@ func _run() -> void:
 	box.table = LootTable.new()
 	box.table.items = [&"bandage"] as Array[StringName]
 	box.table.weights = [1.0] as Array[float]
+	check("dentro da casa: passos de madeira", player.surface == &"wood")
 	player.position = box.position + Vector2(0, 22)
 	await physics_frame
 	await process_frame
@@ -86,6 +104,7 @@ func _run() -> void:
 	await frames_for(0.7)
 	await process_frame
 	check("sem erro com o foco liberado na troca de cena", main.interior == null)
+	check("de volta à rua: passos da rua", player.surface == &"street")
 
 	# 5. Mira: dispersão cresce com a distância; cor avisa pente vazio; cursor escondido.
 	var cross: Node2D = hud.get_node("Crosshair")
@@ -112,6 +131,14 @@ func settle() -> void:
 	await physics_frame
 	await physics_frame
 	await process_frame
+
+
+func add_anim(frames: SpriteFrames, anim: String, tex: Texture2D, count: int, loop: bool) -> void:
+	frames.add_animation(anim)
+	frames.set_animation_loop(anim, loop)
+	frames.set_animation_speed(anim, 10.0)
+	for i in count:
+		frames.add_frame(anim, tex)
 
 
 func hold(action: String, seconds: float) -> void:

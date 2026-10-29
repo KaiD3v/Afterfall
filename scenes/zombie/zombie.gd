@@ -95,4 +95,6 @@ func take_damage(amount: float) -> void:
 
 
 func _update_frame() -> void:
+	# ciclo de andar no ritmo da perseguição; investigando, mais lento, para o pé não deslizar
+	sprite.speed_scale = velocity.length() / chase_speed if velocity != Vector2.ZERO else 1.0
 	Facing.play(sprite, "walk" if velocity != Vector2.ZERO else "idle", facing)

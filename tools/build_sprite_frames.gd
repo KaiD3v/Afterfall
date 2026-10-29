@@ -5,8 +5,8 @@
 extends SceneTree
 
 const SHEETS := {
-	"res://assets/sprites/m1/character.json": "res://assets/sprites/character_frames.tres",
-	"res://assets/sprites/m1/zombie.json": "res://assets/sprites/zombie_frames.tres",
+	"res://assets/sprites/b/character-move.json": "res://assets/sprites/character_frames.tres",
+	"res://assets/sprites/b/zombie-move.json": "res://assets/sprites/zombie_frames.tres",
 }
 # Ações tocam uma vez e destravam o movimento ao terminar, mesmo que o JSON diga loop.
 const ONE_SHOT := ["melee", "shoot", "attack", "hurt", "death"]

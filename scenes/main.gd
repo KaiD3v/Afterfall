@@ -54,6 +54,7 @@ func enter_house() -> void:
 		add_child(interior)
 		move_child(interior, 0)
 		player.position = interior.get_node("PlayerSpawn").position
+		player.surface = &"wood"
 		_fit_camera(interior))
 
 
@@ -67,6 +68,7 @@ func exit_house() -> void:
 			add_child(outside[i])
 			move_child(outside[i], i)
 		player.position = $Neighborhood/HouseExit.position
+		player.surface = &"street"
 		_fit_camera($Neighborhood))
 
 

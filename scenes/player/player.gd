@@ -34,6 +34,8 @@ signal died
 @export var reserve := 24               # munição fora do pente; o loot soma a ela
 
 const MELEE_CONTACT_FRAME := 2  # melee_*: 0 antecipação, 1 golpe, 2 contato, 3 recuperação
+const STEP_FRAMES := [0, 2]     # walk_*: frames de contato do pé com o chão
+const STEPS := {&"street": preload("res://assets/audio/steps_street.tres"), &"wood": preload("res://assets/audio/steps_wood.tres")}
 
 var health := max_health
 var stamina := max_stamina
@@ -46,6 +48,9 @@ var _moving := false
 var _action := ""         # animação de ação tocando (melee, shoot); trava a de movimento
 var _hit_pending := false # golpe esperando o frame de contato
 var focus: Node2D        # interagível mais próximo ao alcance; a HUD mostra o aviso de E
+var surface := &"street"  # piso dos passos; main.gd troca para wood dentro da casa
+var _running := false
+var steps_taken := 0  # para teste e, depois, para o ruído dos passos
 var _regen_wait := 0.0
 var _weapon_wait := 0.0
 
@@ -68,6 +73,7 @@ func _physics_process(delta: float) -> void:
 	_weapon_wait -= delta
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var running := dir != Vector2.ZERO and Input.is_action_pressed("sprint") and not exhausted
+	_running = running
 	if running:
 		_drain(run_cost * delta)
 	else:
@@ -160,6 +166,10 @@ func _melee_hit() -> void:
 
 
 func _on_frame_changed() -> void:
+	if String(sprite.animation).begins_with("walk") and sprite.frame in STEP_FRAMES:
+		$SfxSteps.stream = STEPS[surface]
+		$SfxSteps.play()
+		steps_taken += 1
 	if _hit_pending and sprite.frame == MELEE_CONTACT_FRAME:
 		_hit_pending = false
 		_melee_hit()
@@ -239,15 +249,19 @@ func _drain(amount: float) -> void:
 
 # Toca estado_direção da ação (melee, shoot) se a sheet tiver; devolve se tocou.
 func _play_action(state: String) -> bool:
-	var anim := StringName("%s_%s" % [state, Facing.dir_name(facing)])
-	if not sprite.sprite_frames.has_animation(anim):
+	var pick := Facing.resolve(sprite, state, facing)
+	if pick[0] == &"":
 		return false
 	_action = state
-	sprite.play(anim)
+	sprite.flip_h = pick[1]
+	sprite.speed_scale = 1.0
+	sprite.play(pick[0])
 	return true
 
 
 func _update_anim() -> void:
 	if _action != "":
 		return
+	# correndo, o mesmo ciclo de andar fica mais rápido; os passos acompanham
+	sprite.speed_scale = run_speed / walk_speed if _running else 1.0
 	Facing.play(sprite, "aim" if aiming else ("walk" if _moving else "idle"), facing)
