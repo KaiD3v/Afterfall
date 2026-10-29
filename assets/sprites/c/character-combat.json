@@ -5,38 +5,38 @@
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 48,
-        "h": 48
+        "w": 64,
+        "h": 64
       },
       "duration": 120
     },
     {
       "filename": "protagonist_melee_down_1",
       "frame": {
-        "x": 48,
+        "x": 64,
         "y": 0,
-        "w": 48,
-        "h": 48
+        "w": 64,
+        "h": 64
       },
       "duration": 80
     },
     {
       "filename": "protagonist_melee_down_2",
       "frame": {
-        "x": 96,
+        "x": 128,
         "y": 0,
-        "w": 48,
-        "h": 48
+        "w": 64,
+        "h": 64
       },
       "duration": 150
     },
     {
       "filename": "protagonist_melee_down_3",
       "frame": {
-        "x": 144,
+        "x": 192,
         "y": 0,
-        "w": 48,
-        "h": 48
+        "w": 64,
+        "h": 64
       },
       "duration": 120
     },
@@ -44,39 +44,39 @@
       "filename": "protagonist_melee_right_0",
       "frame": {
         "x": 0,
-        "y": 48,
-        "w": 48,
-        "h": 48
+        "y": 64,
+        "w": 64,
+        "h": 64
       },
       "duration": 120
     },
     {
       "filename": "protagonist_melee_right_1",
       "frame": {
-        "x": 48,
-        "y": 48,
-        "w": 48,
-        "h": 48
+        "x": 64,
+        "y": 64,
+        "w": 64,
+        "h": 64
       },
       "duration": 80
     },
     {
       "filename": "protagonist_melee_right_2",
       "frame": {
-        "x": 96,
-        "y": 48,
-        "w": 48,
-        "h": 48
+        "x": 128,
+        "y": 64,
+        "w": 64,
+        "h": 64
       },
       "duration": 150
     },
     {
       "filename": "protagonist_melee_right_3",
       "frame": {
-        "x": 144,
-        "y": 48,
-        "w": 48,
-        "h": 48
+        "x": 192,
+        "y": 64,
+        "w": 64,
+        "h": 64
       },
       "duration": 120
     },
@@ -84,39 +84,39 @@
       "filename": "protagonist_melee_up_0",
       "frame": {
         "x": 0,
-        "y": 96,
-        "w": 48,
-        "h": 48
+        "y": 128,
+        "w": 64,
+        "h": 64
       },
       "duration": 120
     },
     {
       "filename": "protagonist_melee_up_1",
       "frame": {
-        "x": 48,
-        "y": 96,
-        "w": 48,
-        "h": 48
+        "x": 64,
+        "y": 128,
+        "w": 64,
+        "h": 64
       },
       "duration": 80
     },
     {
       "filename": "protagonist_melee_up_2",
       "frame": {
-        "x": 96,
-        "y": 96,
-        "w": 48,
-        "h": 48
+        "x": 128,
+        "y": 128,
+        "w": 64,
+        "h": 64
       },
       "duration": 150
     },
     {
       "filename": "protagonist_melee_up_3",
       "frame": {
-        "x": 144,
-        "y": 96,
-        "w": 48,
-        "h": 48
+        "x": 192,
+        "y": 128,
+        "w": 64,
+        "h": 64
       },
       "duration": 120
     },
@@ -124,9 +124,9 @@
       "filename": "protagonist_aim_down_0",
       "frame": {
         "x": 0,
-        "y": 144,
-        "w": 48,
-        "h": 48
+        "y": 192,
+        "w": 64,
+        "h": 64
       },
       "duration": 250
     },
@@ -134,9 +134,9 @@
       "filename": "protagonist_aim_right_0",
       "frame": {
         "x": 0,
-        "y": 192,
-        "w": 48,
-        "h": 48
+        "y": 256,
+        "w": 64,
+        "h": 64
       },
       "duration": 250
     },
@@ -144,9 +144,9 @@
       "filename": "protagonist_aim_up_0",
       "frame": {
         "x": 0,
-        "y": 240,
-        "w": 48,
-        "h": 48
+        "y": 320,
+        "w": 64,
+        "h": 64
       },
       "duration": 250
     },
@@ -154,19 +154,19 @@
       "filename": "protagonist_shoot_down_0",
       "frame": {
         "x": 0,
-        "y": 288,
-        "w": 48,
-        "h": 48
+        "y": 384,
+        "w": 64,
+        "h": 64
       },
       "duration": 60
     },
     {
       "filename": "protagonist_shoot_down_1",
       "frame": {
-        "x": 48,
-        "y": 288,
-        "w": 48,
-        "h": 48
+        "x": 64,
+        "y": 384,
+        "w": 64,
+        "h": 64
       },
       "duration": 100
     },
@@ -174,19 +174,19 @@
       "filename": "protagonist_shoot_right_0",
       "frame": {
         "x": 0,
-        "y": 336,
-        "w": 48,
-        "h": 48
+        "y": 448,
+        "w": 64,
+        "h": 64
       },
       "duration": 60
     },
     {
       "filename": "protagonist_shoot_right_1",
       "frame": {
-        "x": 48,
-        "y": 336,
-        "w": 48,
-        "h": 48
+        "x": 64,
+        "y": 448,
+        "w": 64,
+        "h": 64
       },
       "duration": 100
     },
@@ -194,19 +194,19 @@
       "filename": "protagonist_shoot_up_0",
       "frame": {
         "x": 0,
-        "y": 384,
-        "w": 48,
-        "h": 48
+        "y": 512,
+        "w": 64,
+        "h": 64
       },
       "duration": 60
     },
     {
       "filename": "protagonist_shoot_up_1",
       "frame": {
-        "x": 48,
-        "y": 384,
-        "w": 48,
-        "h": 48
+        "x": 64,
+        "y": 512,
+        "w": 64,
+        "h": 64
       },
       "duration": 100
     }
@@ -217,8 +217,8 @@
     "image": "character-combat.png",
     "format": "I8",
     "size": {
-      "w": 192,
-      "h": 432
+      "w": 256,
+      "h": 576
     },
     "scale": "1",
     "frameTags": [
@@ -288,16 +288,16 @@
     ],
     "muzzle": {
       "down": [
-        24,
-        33
+        32,
+        41
       ],
       "right": [
-        38,
-        19
+        46,
+        27
       ],
       "up": [
-        24,
-        0
+        32,
+        8
       ]
     }
   }
