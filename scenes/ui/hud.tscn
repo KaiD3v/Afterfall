@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/hud.gd" id="1"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1")
+
+[node name="Health" type="ColorRect" parent="."]
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 68.0
+offset_bottom = 12.0
+color = Color(0.101961, 0.101961, 0.180392, 1)
+
+[node name="Fill" type="ColorRect" parent="Health"]
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 61.0
+offset_bottom = 5.0
+color = Color(0.478431, 0.180392, 0.180392, 1)
+
+[node name="Stamina" type="ColorRect" parent="."]
+offset_left = 6.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 20.0
+color = Color(0.101961, 0.101961, 0.180392, 1)
+
+[node name="Fill" type="ColorRect" parent="Stamina"]
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 61.0
+offset_bottom = 5.0
+color = Color(0.909804, 0.772549, 0.278431, 1)
+
+[node name="Death" type="Label" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.784314, 0.784314, 0.768627, 1)
+theme_override_colors/font_outline_color = Color(0.101961, 0.101961, 0.180392, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 16
+text = "VOCÊ MORREU"
+horizontal_alignment = 1
+vertical_alignment = 1
