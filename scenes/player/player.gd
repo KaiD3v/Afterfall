@@ -31,7 +31,9 @@ signal died
 @export var shot_noise := 320.0         # raio de ruído do tiro (10 tiles)
 @export var mag_size := 12
 @export var reload_time := 1.5
-@export var reserve := 24               # munição fora do pente; vem do loot a partir do M6
+@export var reserve := 24               # munição fora do pente; o loot soma a ela
+
+const MELEE_CONTACT_FRAME := 2  # melee_*: 0 antecipação, 1 golpe, 2 contato, 3 recuperação
 
 var health := max_health
 var stamina := max_stamina
@@ -39,10 +41,15 @@ var exhausted := false
 var ammo := mag_size
 var reloading := false
 var facing := Vector2.DOWN
+var aiming := false
+var _moving := false
+var _action := ""         # animação de ação tocando (melee, shoot); trava a de movimento
+var _hit_pending := false # golpe esperando o frame de contato
+var focus: Node2D        # interagível mais próximo ao alcance; a HUD mostra o aviso de E
 var _regen_wait := 0.0
 var _weapon_wait := 0.0
 
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: AnimatedSprite2D = $Sprite
 @onready var tracer: Line2D = $Tracer
 
 
@@ -51,6 +58,8 @@ func _ready() -> void:
 	health = max_health
 	stamina = max_stamina
 	ammo = mag_size
+	sprite.animation_finished.connect(func(): _action = "")
+	sprite.frame_changed.connect(_on_frame_changed)
 
 
 func _physics_process(delta: float) -> void:
@@ -67,11 +76,12 @@ func _physics_process(delta: float) -> void:
 			stamina = minf(stamina + stamina_regen * delta, max_stamina)
 		if exhausted and stamina >= recover_at:
 			exhausted = false
+	_moving = dir != Vector2.ZERO
 	velocity = dir * (run_speed if running else walk_speed)
 	move_and_slide()
 
 	# Mirando (botão direito), o clique atira; sem mirar, o clique golpeia com o machete.
-	var aiming := Input.is_action_pressed("aim")
+	aiming = Input.is_action_pressed("aim")
 	if aiming:
 		facing = global_position.direction_to(get_global_mouse_position())
 	elif dir != Vector2.ZERO:
@@ -86,11 +96,19 @@ func _physics_process(delta: float) -> void:
 		interact()
 	if Input.is_action_just_pressed("heal"):
 		use_bandage()
-	_update_frame()
+	_update_anim()
+	_update_focus()
 
 
 # Usa o interagível mais próximo (porta, container) dentro do alcance.
 func interact() -> bool:
+	var best := _nearest_interactable()
+	if best:
+		best.interact(self)
+	return best != null
+
+
+func _nearest_interactable() -> Node2D:
 	var best: Node2D = null
 	var best_dist := interact_range
 	for n in get_tree().get_nodes_in_group("interactables"):
@@ -98,9 +116,18 @@ func interact() -> bool:
 		if d <= best_dist:
 			best = n
 			best_dist = d
-	if best:
-		best.interact(self)
-	return best != null
+	return best
+
+
+func _update_focus() -> void:
+	var best := _nearest_interactable()
+	if best == focus:
+		return
+	if is_instance_valid(focus):  # some na troca bairro ↔ interior
+		focus.set_focus(false)
+	focus = best
+	if focus:
+		focus.set_focus(true)
 
 
 func use_bandage() -> bool:
@@ -110,18 +137,32 @@ func use_bandage() -> bool:
 	return true
 
 
-# ponytail: acerto por distância e ângulo no instante do golpe, sem Area2D; trocar quando houver frames de ataque.
+# Com animação melee_* na sheet, o dano sai no frame de contato; sem ela, na hora.
 func melee() -> bool:
 	if is_dead() or _weapon_wait > 0.0 or not spend_stamina(machete_cost):
 		return false
 	_weapon_wait = machete_cooldown
 	$SfxMachete.play()
+	_noise(melee_noise)
+	if _play_action("melee"):
+		_hit_pending = true
+	else:
+		_melee_hit()
+	return true
+
+
+# ponytail: acerto por distância e ângulo no frame de contato, sem Area2D; basta para 3–5 zumbis.
+func _melee_hit() -> void:
 	for z in get_tree().get_nodes_in_group("zombies"):
 		var to: Vector2 = z.global_position - global_position
 		if to.length() <= machete_range and absf(rad_to_deg(facing.angle_to(to))) <= machete_half_angle:
 			z.take_damage(machete_damage)
-	_noise(melee_noise)
-	return true
+
+
+func _on_frame_changed() -> void:
+	if _hit_pending and sprite.frame == MELEE_CONTACT_FRAME:
+		_hit_pending = false
+		_melee_hit()
 
 
 func shoot(dir: Vector2) -> bool:
@@ -142,6 +183,7 @@ func shoot(dir: Vector2) -> bool:
 	tracer.show()
 	get_tree().create_timer(0.05).timeout.connect(tracer.hide)
 	$SfxShot.play()
+	_play_action("shoot")
 	_noise(shot_noise)
 	return true
 
@@ -195,9 +237,17 @@ func _drain(amount: float) -> void:
 		exhausted = true
 
 
-func _update_frame() -> void:
-	# frames do character.png: 0 baixo, 1 esquerda, 2 direita, 3 cima
-	if absf(facing.x) >= absf(facing.y):
-		sprite.frame = 1 if facing.x < 0 else 2
-	else:
-		sprite.frame = 3 if facing.y < 0 else 0
+# Toca estado_direção da ação (melee, shoot) se a sheet tiver; devolve se tocou.
+func _play_action(state: String) -> bool:
+	var anim := StringName("%s_%s" % [state, Facing.dir_name(facing)])
+	if not sprite.sprite_frames.has_animation(anim):
+		return false
+	_action = state
+	sprite.play(anim)
+	return true
+
+
+func _update_anim() -> void:
+	if _action != "":
+		return
+	Facing.play(sprite, "aim" if aiming else ("walk" if _moving else "idle"), facing)

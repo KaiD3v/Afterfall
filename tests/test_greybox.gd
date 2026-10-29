@@ -42,13 +42,26 @@ func _run() -> void:
 	t = await walk_to(Vector2(336, 690))
 	report("casa → oficina", t)
 	await hold("move_down", 1.0)
-	check("oficina é sólida", player.position.y < 704)
+	# a fileira de cima do bloco é livre (atrás do telhado); a base, a partir da linha 23, é sólida
+	check("base da oficina é sólida", player.position.y > 704 and player.position.y < 23 * 32)
 
 	# 4. Portão da cerca aberto, porta da casa sólida (entrada só no M5).
 	player.position = spawn
 	await hold("move_up", 3.0)
 	check("passa pelo portão", player.position.y < 13 * 32)
 	check("para na porta da casa", player.position.y > 12 * 32)
+
+	# 5. Profundidade 3/4: atrás do telhado da casa o jogador fica por baixo do sprite.
+	var main: Node = player.get_parent()
+	var house: Sprite2D = main.get_node("Neighborhood/CasaSprite")
+	player.position = Vector2(336, 300)  # fileira de cima do bloco da casa, agora livre
+	await physics_frame
+	var y0 := player.position.y
+	await hold("move_left", 0.3)
+	check("fileira do telhado é andável", absf(player.position.y - y0) < 1.0 and player.position.x < 336)
+	check("ordenação por altura ligada", main.y_sort_enabled and main.get_node("Neighborhood").y_sort_enabled and main.get_node("Zombies").y_sort_enabled)
+	check("chão por baixo de tudo", main.get_node("Neighborhood/Ground").z_index < 0)
+	check("casa desenhada na frente de quem está atrás dela", house.position.y > player.position.y)
 
 	print("RESULT: ", "FAIL" if failed else "PASS")
 	quit(1 if failed else 0)

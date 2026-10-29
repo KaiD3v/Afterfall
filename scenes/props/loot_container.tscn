@@ -25,5 +25,15 @@ theme_override_font_sizes/font_size = 8
 text = "Armário"
 horizontal_alignment = 1
 
+[node name="Focus" type="ReferenceRect" parent="."]
+visible = false
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+mouse_filter = 2
+border_color = Color(0.909804, 0.772549, 0.278431, 1)
+editor_only = false
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("box")

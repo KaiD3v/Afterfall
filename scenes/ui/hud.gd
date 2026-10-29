@@ -18,6 +18,7 @@ var _toast_left := 0.0
 
 func _ready() -> void:
 	RunState.message.connect(_show_toast)
+	$Crosshair.player = player
 
 
 func _process(delta: float) -> void:
@@ -27,6 +28,10 @@ func _process(delta: float) -> void:
 	stamina_fill.color = Color8(107, 58, 31) if player.exhausted else Color8(232, 197, 71)
 	ammo.text = "RECARREGANDO" if player.reloading else "%d | %d" % [player.ammo, player.reserve]
 	inventory.text = "Inventário: %s (%d livres)" % [_items_text(), RunState.SLOTS - RunState.items.size()]
+	var f = player.focus  # sem tipo: o foco pode ter sido liberado na troca bairro ↔ interior
+	$Prompt.visible = is_instance_valid(f) and not player.is_dead()
+	if $Prompt.visible:
+		$Prompt.text = f.prompt()
 	_toast_left -= delta
 	toast.visible = _toast_left > 0.0
 

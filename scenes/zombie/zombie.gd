@@ -22,7 +22,7 @@ var target_pos := Vector2.ZERO
 var player: Node2D
 var _attack_wait := 0.0
 
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: AnimatedSprite2D = $Sprite
 @onready var groan: AudioStreamPlayer2D = $Groan
 
 
@@ -95,8 +95,4 @@ func take_damage(amount: float) -> void:
 
 
 func _update_frame() -> void:
-	# frames do zombie.png: 0 baixo, 1 esquerda, 2 direita, 3 cima
-	if absf(facing.x) >= absf(facing.y):
-		sprite.frame = 1 if facing.x < 0 else 2
-	else:
-		sprite.frame = 3 if facing.y < 0 else 0
+	Facing.play(sprite, "walk" if velocity != Vector2.ZERO else "idle", facing)

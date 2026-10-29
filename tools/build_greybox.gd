@@ -101,15 +101,17 @@ func _initialize() -> void:
 	keys = TILES.keys()
 	tileset = _tileset()
 
-	# Bairro: prédios com sprite viram sólido sem cor; porta da casa na frente do tile D.
+	# Bairro: prédio com sprite vira sólido sem cor, menos a fileira de cima do bloco, que fica
+	# livre para o jogador passar atrás do telhado (3/4). Porta da casa na frente do tile D.
 	var map := NEIGHBORHOOD.duplicate()
-	var with_sprite := ""
 	for ch in BUILDINGS:
-		if ResourceLoader.exists(BUILDINGS[ch][0]):
-			with_sprite += ch + ("D" if ch == "H" else "")
-	for y in map.size():
-		for ch in with_sprite:
-			map[y] = map[y].replace(ch, "X")
+		if not ResourceLoader.exists(BUILDINGS[ch][0]):
+			continue
+		var top: int = BUILDINGS[ch][1].y
+		for y in map.size():
+			map[y] = map[y].replace(ch, "," if y == top else "X")
+			if ch == "H":
+				map[y] = map[y].replace("D", "X")
 	var hood := _scene("Neighborhood", map)
 	for ch in BUILDINGS:
 		var b: Array = BUILDINGS[ch]
@@ -118,7 +120,8 @@ func _initialize() -> void:
 			s.name = b[2].capitalize() + "Sprite"
 			s.texture = load(b[0])
 			s.centered = false
-			s.position = Vector2(b[1] * T)
+			s.offset = Vector2(0, -s.texture.get_height())  # origem na base: ordena com quem passa na frente
+			s.position = Vector2(b[1].x * T, b[1].y * T + s.texture.get_height())
 			_add(hood, s)
 		else:
 			var l := Label.new()
@@ -182,9 +185,11 @@ func _tileset() -> TileSet:
 func _scene(scene_name: String, map: Array) -> Node2D:
 	var scene := Node2D.new()
 	scene.name = scene_name
+	scene.y_sort_enabled = true  # prédios e props ordenam pela base junto com jogador e zumbis
 	var layer := TileMapLayer.new()
 	layer.name = "Ground"
 	layer.tile_set = tileset
+	layer.z_index = -1  # chão sempre por baixo
 	_add(scene, layer)
 	for y in map.size():
 		for x in map[y].length():
