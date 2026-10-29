@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scenes/main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/neighborhood_greybox.tscn" id="2"]
@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" path="res://scenes/zombie/zombie.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/door.mp3" id="6"]
+[ext_resource type="AudioStream" path="res://assets/audio/ambience/exterior.ogg" id="7"]
+[ext_resource type="AudioStream" path="res://assets/audio/ambience/interior.ogg" id="8"]
 
 [node name="Main" type="Node2D"]
 y_sort_enabled = true
@@ -50,3 +52,13 @@ color = Color(0.101961, 0.101961, 0.180392, 0)
 [node name="SfxDoor" type="AudioStreamPlayer" parent="."]
 bus = &"SFX"
 stream = ExtResource("6")
+
+[node name="AmbOutside" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("7")
+autoplay = true
+bus = &"Ambience"
+
+[node name="AmbInside" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("8")
+autoplay = true
+bus = &"Ambience"

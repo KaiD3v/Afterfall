@@ -1,11 +1,13 @@
 # Cena principal: bairro, jogador, zumbis e HUD. Entrar na casa tira o bairro e os zumbis
 # da árvore (ficam congelados, sem ouvir nada) e põe o interior; sair faz o inverso.
 # Morte: tela de resultado; E começa uma nova run recarregando a cena do zero.
+# Ambiente: os dois loops tocam o tempo todo; a porta troca qual se ouve.
 extends Node2D
 
 const INTERIOR := preload("res://scenes/world/house_interior.tscn")
 const FADE_TIME := 0.25
 const RESTART_DELAY := 1.0  # evita pular o resultado com um E apertado no susto
+const AMBIENCE_FADE := FADE_TIME * 2  # a troca dura o escurecer e o clarear da porta
 
 var interior: Node2D
 var _busy := false
@@ -20,6 +22,7 @@ func _ready() -> void:
 	add_to_group("main")
 	player.died.connect(_on_player_died)
 	_fit_camera($Neighborhood)
+	$AmbInside.volume_linear = 0.0
 
 
 func _process(delta: float) -> void:
@@ -47,6 +50,7 @@ func _on_player_died() -> void:
 func enter_house() -> void:
 	if interior or _busy:
 		return
+	_ambience(true)
 	await _transition(func():
 		for n in outside:
 			remove_child(n)
@@ -61,6 +65,7 @@ func enter_house() -> void:
 func exit_house() -> void:
 	if not interior or _busy:
 		return
+	_ambience(false)
 	await _transition(func():
 		interior.free()
 		interior = null
@@ -81,6 +86,13 @@ func _transition(swap: Callable) -> void:
 	await create_tween().tween_property(fade, "color:a", 0.0, FADE_TIME).finished
 	player.set_physics_process(true)
 	_busy = false
+
+
+# Crossfade em volume linear (em dB a troca soaria com um buraco no meio).
+func _ambience(inside: bool) -> void:
+	var t := create_tween().set_parallel()
+	t.tween_property($AmbOutside, "volume_linear", 0.0 if inside else 1.0, AMBIENCE_FADE)
+	t.tween_property($AmbInside, "volume_linear", 1.0 if inside else 0.0, AMBIENCE_FADE)
 
 
 func _fit_camera(world: Node) -> void:
