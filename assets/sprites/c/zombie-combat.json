@@ -1,0 +1,410 @@
+{
+  "frames": [
+    {
+      "filename": "zombie_attack_down_0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_attack_down_1",
+      "frame": {
+        "x": 48,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    {
+      "filename": "zombie_attack_down_2",
+      "frame": {
+        "x": 96,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_attack_down_3",
+      "frame": {
+        "x": 144,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_attack_right_0",
+      "frame": {
+        "x": 0,
+        "y": 48,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_attack_right_1",
+      "frame": {
+        "x": 48,
+        "y": 48,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    {
+      "filename": "zombie_attack_right_2",
+      "frame": {
+        "x": 96,
+        "y": 48,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_attack_right_3",
+      "frame": {
+        "x": 144,
+        "y": 48,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_attack_up_0",
+      "frame": {
+        "x": 0,
+        "y": 96,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_attack_up_1",
+      "frame": {
+        "x": 48,
+        "y": 96,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    {
+      "filename": "zombie_attack_up_2",
+      "frame": {
+        "x": 96,
+        "y": 96,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_attack_up_3",
+      "frame": {
+        "x": 144,
+        "y": 96,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_hurt_down_0",
+      "frame": {
+        "x": 0,
+        "y": 144,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 80
+    },
+    {
+      "filename": "zombie_hurt_down_1",
+      "frame": {
+        "x": 48,
+        "y": 144,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 120
+    },
+    {
+      "filename": "zombie_hurt_right_0",
+      "frame": {
+        "x": 0,
+        "y": 192,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 80
+    },
+    {
+      "filename": "zombie_hurt_right_1",
+      "frame": {
+        "x": 48,
+        "y": 192,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 120
+    },
+    {
+      "filename": "zombie_hurt_up_0",
+      "frame": {
+        "x": 0,
+        "y": 240,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 80
+    },
+    {
+      "filename": "zombie_hurt_up_1",
+      "frame": {
+        "x": 48,
+        "y": 240,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 120
+    },
+    {
+      "filename": "zombie_death_down_0",
+      "frame": {
+        "x": 0,
+        "y": 288,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    {
+      "filename": "zombie_death_down_1",
+      "frame": {
+        "x": 48,
+        "y": 288,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    {
+      "filename": "zombie_death_down_2",
+      "frame": {
+        "x": 96,
+        "y": 288,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 120
+    },
+    {
+      "filename": "zombie_death_down_3",
+      "frame": {
+        "x": 144,
+        "y": 288,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_death_down_4",
+      "frame": {
+        "x": 192,
+        "y": 288,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 400
+    },
+    {
+      "filename": "zombie_death_right_0",
+      "frame": {
+        "x": 0,
+        "y": 336,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    {
+      "filename": "zombie_death_right_1",
+      "frame": {
+        "x": 48,
+        "y": 336,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    {
+      "filename": "zombie_death_right_2",
+      "frame": {
+        "x": 96,
+        "y": 336,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 120
+    },
+    {
+      "filename": "zombie_death_right_3",
+      "frame": {
+        "x": 144,
+        "y": 336,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_death_right_4",
+      "frame": {
+        "x": 192,
+        "y": 336,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 400
+    },
+    {
+      "filename": "zombie_death_up_0",
+      "frame": {
+        "x": 0,
+        "y": 384,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    {
+      "filename": "zombie_death_up_1",
+      "frame": {
+        "x": 48,
+        "y": 384,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    {
+      "filename": "zombie_death_up_2",
+      "frame": {
+        "x": 96,
+        "y": 384,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 120
+    },
+    {
+      "filename": "zombie_death_up_3",
+      "frame": {
+        "x": 144,
+        "y": 384,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 150
+    },
+    {
+      "filename": "zombie_death_up_4",
+      "frame": {
+        "x": 192,
+        "y": 384,
+        "w": 48,
+        "h": 48
+      },
+      "duration": 400
+    }
+  ],
+  "meta": {
+    "app": "Afterfall C",
+    "version": "1",
+    "image": "zombie-combat.png",
+    "format": "I8",
+    "size": {
+      "w": 240,
+      "h": 432
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "attack_down",
+        "from": 0,
+        "to": 3,
+        "direction": "forward",
+        "loop": false
+      },
+      {
+        "name": "attack_right",
+        "from": 4,
+        "to": 7,
+        "direction": "forward",
+        "loop": false
+      },
+      {
+        "name": "attack_up",
+        "from": 8,
+        "to": 11,
+        "direction": "forward",
+        "loop": false
+      },
+      {
+        "name": "hurt_down",
+        "from": 12,
+        "to": 13,
+        "direction": "forward",
+        "loop": false
+      },
+      {
+        "name": "hurt_right",
+        "from": 14,
+        "to": 15,
+        "direction": "forward",
+        "loop": false
+      },
+      {
+        "name": "hurt_up",
+        "from": 16,
+        "to": 17,
+        "direction": "forward",
+        "loop": false
+      },
+      {
+        "name": "death_down",
+        "from": 18,
+        "to": 22,
+        "direction": "forward",
+        "loop": false
+      },
+      {
+        "name": "death_right",
+        "from": 23,
+        "to": 27,
+        "direction": "forward",
+        "loop": false
+      },
+      {
+        "name": "death_up",
+        "from": 28,
+        "to": 32,
+        "direction": "forward",
+        "loop": false
+      }
+    ]
+  }
+}

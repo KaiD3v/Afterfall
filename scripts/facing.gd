@@ -21,6 +21,18 @@ static func resolve(sprite: AnimatedSprite2D, state: String, v: Vector2) -> Arra
 	return [&"", false]
 
 
+# Toca a ação estado_direção (melee, attack, hurt...) do início; devolve se a sheet tem.
+static func play_action(sprite: AnimatedSprite2D, state: String, v: Vector2) -> bool:
+	var pick := resolve(sprite, state, v)
+	if pick[0] == &"":
+		return false
+	sprite.flip_h = pick[1]
+	sprite.speed_scale = 1.0
+	sprite.stop()
+	sprite.play(pick[0])
+	return true
+
+
 # Toca estado_direção; sem essa animação, cai para idle_direção. Assim a arte nova entra
 # só gerando a sheet, sem mexer no código.
 static func play(sprite: AnimatedSprite2D, state: String, v: Vector2) -> void:

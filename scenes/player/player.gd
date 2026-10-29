@@ -189,7 +189,7 @@ func shoot(dir: Vector2) -> bool:
 		end = hit.position
 		if hit.collider.has_method("take_damage"):
 			hit.collider.take_damage(pistol_damage)
-	tracer.points = PackedVector2Array([global_position + Vector2(0, -10), end])
+	tracer.points = PackedVector2Array([muzzle_position(), end])
 	tracer.show()
 	get_tree().create_timer(0.05).timeout.connect(tracer.hide)
 	$SfxShot.play()
@@ -249,14 +249,24 @@ func _drain(amount: float) -> void:
 
 # Toca estado_direção da ação (melee, shoot) se a sheet tiver; devolve se tocou.
 func _play_action(state: String) -> bool:
-	var pick := Facing.resolve(sprite, state, facing)
-	if pick[0] == &"":
+	if not Facing.play_action(sprite, state, facing):
 		return false
 	_action = state
-	sprite.flip_h = pick[1]
-	sprite.speed_scale = 1.0
-	sprite.play(pick[0])
 	return true
+
+
+# Boca do cano no mundo, a partir do ponto que o Codex marcou no frame de mira de cada direção.
+func muzzle_position() -> Vector2:
+	var frames := sprite.sprite_frames
+	if not frames.has_meta("muzzle"):
+		return global_position + Vector2(0, -10)
+	var dir := Facing.dir_name(facing)
+	var mirrored := dir == "left"
+	var p: Array = frames.get_meta("muzzle")["right" if mirrored else dir]
+	var local: Vector2 = Vector2(p[0], p[1]) - frames.get_meta("muzzle_frame") / 2.0 + sprite.offset
+	if mirrored:
+		local.x = -local.x
+	return global_position + local
 
 
 func _update_anim() -> void:

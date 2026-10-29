@@ -48,8 +48,8 @@ def check(png, max_colors, min_outline, pal):
     inside = all(x + w <= img.width and y + h <= img.height for _, (x, y, w, h) in frames)
     rows.append(("frames do mesmo tamanho, dentro da imagem", len(sizes) == 1 and inside, f"{sorted(sizes)}"))
 
-    worst_colors, edge, edge_ok, feet, heights = 0, 0, 0, [], []
-    for _, (fx, fy, w, h) in frames:
+    worst_colors, edge, edge_ok, feet, heights, clipped = 0, 0, 0, [], [], []
+    for fname, (fx, fy, w, h) in frames:
         solid = {(x, y) for y in range(h) for x in range(w) if px[fx + x, fy + y][3] == 255}
         worst_colors = max(worst_colors, len({px[fx + x, fy + y][:3] for x, y in solid}))
         for x, y in solid:
@@ -57,21 +57,31 @@ def check(png, max_colors, min_outline, pal):
                 edge += 1
                 edge_ok += px[fx + x, fy + y][:3] == OUTLINE
         ys = [y for _, y in solid]
+        if len(frames) > 1 and any(x in (0, w - 1) or y in (0, h - 1) for x, y in solid):
+            clipped.append(fname)  # encostou na borda: a arte provavelmente foi cortada
         feet.append(max(ys) if ys else None)
         heights.append(max(ys) - min(ys) + 1 if ys else 0)
     rows.append((f"até {max_colors} cores por frame", worst_colors <= max_colors, f"máx {worst_colors}"))
+    rows.append(("nada encostado na borda do frame (corte)", not clipped,
+                 f"{len(clipped)} frames: {', '.join(clipped[:6])}" if clipped else "0 frames"))
     ratio = edge_ok / edge if edge else 1.0
     rows.append((f"contorno {OUTLINE} em ≥{min_outline:.0%} da borda", ratio >= min_outline, f"{ratio:.1%}"))
 
     # Dentro de cada animação, o pé não pode pular nem o corpo esticar.
+    # A morte cai no chão de propósito: ali o pé muda. Golpe, mira e ataque erguem a arma ou os
+    # braços acima da cabeça, então a altura só é exigida onde o corpo não deveria mudar.
     for name, idx in tags.items():
-        if len(idx) < 2:
+        if len(idx) < 2 or name.startswith("death"):
             continue
         f = [feet[i] for i in idx if feet[i] is not None]
-        hs = [heights[i] for i in idx]
-        jump, stretch = max(f) - min(f), max(hs) - min(hs)
-        rows.append((f"{name}: linha dos pés estável (≤1 px) e altura (≤2 px)", jump <= 1 and stretch <= 2,
-                     f"pé varia {jump} px, altura {stretch} px"))
+        jump = max(f) - min(f)
+        if name.split("_")[0] in ("idle", "walk", "hurt"):
+            hs = [heights[i] for i in idx]
+            stretch = max(hs) - min(hs)
+            rows.append((f"{name}: linha dos pés estável (≤1 px) e altura (≤2 px)", jump <= 1 and stretch <= 2,
+                         f"pé varia {jump} px, altura {stretch} px"))
+        else:
+            rows.append((f"{name}: linha dos pés estável (≤1 px)", jump <= 1, f"pé varia {jump} px"))
     return rows
 
 

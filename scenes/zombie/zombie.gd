@@ -21,6 +21,10 @@ var state := State.IDLE
 var target_pos := Vector2.ZERO
 var player: Node2D
 var _attack_wait := 0.0
+var _action := ""         # attack, hurt ou death tocando; trava o andar
+var _hit_pending := false # mordida esperando o frame de contato
+
+const ATTACK_CONTACT_FRAME := 2  # attack_*: 0 preparo, 1 avanço, 2 contato, 3 recuperação
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var groan: AudioStreamPlayer2D = $Groan
@@ -30,6 +34,8 @@ func _ready() -> void:
 	health = max_health
 	add_to_group("zombies")
 	player = get_tree().get_first_node_in_group("player")
+	sprite.animation_finished.connect(_on_animation_finished)
+	sprite.frame_changed.connect(_on_frame_changed)
 	_update_frame()
 
 
@@ -42,14 +48,19 @@ func _physics_process(delta: float) -> void:
 		target_pos = player.global_position
 
 	velocity = Vector2.ZERO
-	if state != State.IDLE:
+	if _action != "":
+		pass  # atacando ou tomando o tranco: parado
+	elif state != State.IDLE:
 		var to := target_pos - global_position
 		var near_player := state == State.CHASE and player.global_position.distance_to(global_position) <= attack_range
 		if near_player:
 			facing = to.normalized()
 			if _attack_wait <= 0.0:
 				_attack_wait = attack_cooldown
-				player.take_damage(attack_damage)
+				if _play_action("attack"):
+					_hit_pending = true  # dá para fugir no preparo
+				else:
+					player.take_damage(attack_damage)
 		elif to.length() < 4.0:
 			state = State.IDLE  # chegou ao ruído ou à última posição vista e não achou ninguém
 		else:
@@ -83,18 +94,49 @@ func take_damage(amount: float) -> void:
 	health = maxf(health - amount, 0.0)
 	sprite.modulate = Color(1.6, 0.6, 0.6)
 	get_tree().create_timer(0.1).timeout.connect(func(): sprite.modulate = Color.WHITE)
+	_hit_pending = false  # apanhar interrompe a mordida
 	if health > 0.0:
 		state = State.CHASE  # quem apanha vira para quem bateu
 		target_pos = player.global_position
+		_play_action("hurt")
 		return
 	remove_from_group("zombies")
 	RunState.kills += 1
 	set_physics_process(false)
 	$CollisionShape2D.set_deferred("disabled", true)
+	if not _play_action("death"):
+		_fade_out()
+
+
+func _fade_out() -> void:
 	create_tween().tween_property(sprite, "modulate:a", 0.0, 0.4).finished.connect(queue_free)
 
 
+func _play_action(action: String) -> bool:
+	if not Facing.play_action(sprite, action, facing):
+		return false
+	_action = action
+	return true
+
+
+func _on_frame_changed() -> void:
+	if _hit_pending and _action == "attack" and sprite.frame == ATTACK_CONTACT_FRAME:
+		_hit_pending = false
+		# só acerta se o jogador ainda está perto: recuar no preparo esquiva
+		if player.global_position.distance_to(global_position) <= attack_range + 4.0:
+			player.take_damage(attack_damage)
+
+
+func _on_animation_finished() -> void:
+	if _action == "death":
+		_fade_out()  # corpo some depois de cair
+		return
+	_action = ""
+
+
 func _update_frame() -> void:
+	if _action != "":
+		return
 	# ciclo de andar no ritmo da perseguição; investigando, mais lento, para o pé não deslizar
 	sprite.speed_scale = velocity.length() / chase_speed if velocity != Vector2.ZERO else 1.0
 	Facing.play(sprite, "walk" if velocity != Vector2.ZERO else "idle", facing)

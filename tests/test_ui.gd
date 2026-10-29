@@ -72,6 +72,17 @@ func _run() -> void:
 	check("ação termina e volta ao idle (%s)" % sprite.animation, player._action == "" and String(sprite.animation).begins_with("idle"))
 	z.queue_free()
 
+	# 2b. Cano da pistola: ponto do JSON (frame 48×48) vira posição no mundo; esquerda espelha.
+	frames.set_meta("muzzle", {"down": [24, 30], "right": [40, 20], "up": [24, 10]})
+	frames.set_meta("muzzle_frame", Vector2(48, 48))
+	player.facing = Vector2.RIGHT
+	check("cano à direita", player.muzzle_position() == player.global_position + Vector2(16, -18))
+	player.facing = Vector2.LEFT
+	check("cano à esquerda espelhado", player.muzzle_position() == player.global_position + Vector2(-16, -18))
+
+	# 2c. Zumbi com sheet de teste: mordida no frame de contato (dá para esquivar), tranco, morte.
+	await zombie_cases(tex)
+
 	# 3. Foco e aviso: porta do bairro.
 	player.position = main.get_node("Neighborhood/HouseExit").position
 	await physics_frame
@@ -131,6 +142,53 @@ func settle() -> void:
 	await physics_frame
 	await physics_frame
 	await process_frame
+
+
+func zombie_cases(tex: Texture2D) -> void:
+	var zf := SpriteFrames.new()
+	zf.remove_animation(&"default")
+	for d in ["down", "right", "up"]:
+		add_anim(zf, "idle_" + d, tex, 1, true)
+	add_anim(zf, "attack_right", tex, 4, false)  # 10 fps: contato (frame 2) em 0,2 s
+	add_anim(zf, "hurt_right", tex, 2, false)
+	add_anim(zf, "death_right", tex, 5, false)
+	var spawn := func(offset: Vector2) -> Node:
+		var zz: Node = load("res://scenes/zombie/zombie.tscn").instantiate()
+		zz.position = player.position + offset
+		zz.facing = Vector2.LEFT
+		main.add_child(zz)
+		zz.get_node("Sprite").sprite_frames = zf
+		return zz
+
+	player.position = Vector2(760, 592)
+	player.health = player.max_health
+	var z: Node = spawn.call(Vector2(18, 0))
+	await frames_for(0.1)
+	check("zumbi começa a morder (%s)" % z._action, z._action == "attack")
+	check("sem dano no preparo", player.health == 100.0)
+	await frames_for(0.25)
+	check("dano no contato da mordida (vida %.0f)" % player.health, player.health == 85.0)
+	for i in 120:  # espera a próxima mordida começar (frame 0, o preparo)
+		if z._action == "attack" and z.get_node("Sprite").frame == 0:
+			break
+		await physics_frame
+	var hp: float = player.health
+	player.position.x -= 60.0  # recua no preparo, antes do contato
+	await frames_for(0.35)
+	check("recuar no preparo esquiva (vida %.0f → %.0f)" % [hp, player.health], player.health == hp)
+	player.position = z.position + Vector2(-18, 0)
+	z.take_damage(10.0)
+	check("tranco ao apanhar", z._action == "hurt")
+	await physics_frame
+	await physics_frame
+	check("parado durante o tranco", z.velocity == Vector2.ZERO)
+	await frames_for(0.3)
+	check("tranco termina", z._action != "hurt")
+	z.take_damage(100.0)
+	check("morte toca a animação", z._action == "death" and z.get_node("Sprite").animation == &"death_right")
+	await frames_for(1.2)  # 5 frames a 10 fps + fade de 0,4 s
+	check("corpo some depois de cair", not is_instance_valid(z))
+	player.health = player.max_health
 
 
 func add_anim(frames: SpriteFrames, anim: String, tex: Texture2D, count: int, loop: bool) -> void:
