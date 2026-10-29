@@ -12,6 +12,8 @@ signal died
 @export var stamina_regen := 15.0  # stamina por segundo parado ou andando
 @export var regen_delay := 0.8     # segundos sem gastar antes de recuperar
 @export var recover_at := 25.0     # sem fôlego: só volta a correr ou golpear acima disso
+@export var interact_range := 32.0
+@export var bandage_heal := 30.0
 
 @export_group("Machete")
 @export var machete_damage := 25.0      # zumbi tem 60: 3 golpes
@@ -81,7 +83,32 @@ func _physics_process(delta: float) -> void:
 		melee()
 	if Input.is_action_just_pressed("reload"):
 		reload()
+	if Input.is_action_just_pressed("interact"):
+		interact()
+	if Input.is_action_just_pressed("heal"):
+		use_bandage()
 	_update_frame()
+
+
+# Usa o interagível mais próximo (porta, container) dentro do alcance.
+func interact() -> bool:
+	var best: Node2D = null
+	var best_dist := interact_range
+	for n in get_tree().get_nodes_in_group("interactables"):
+		var d := global_position.distance_to(n.global_position)
+		if d <= best_dist:
+			best = n
+			best_dist = d
+	if best:
+		best.interact(self)
+	return best != null
+
+
+func use_bandage() -> bool:
+	if is_dead() or health >= max_health or not RunState.take_item(&"bandage"):
+		return false
+	health = minf(health + bandage_heal, max_health)
+	return true
 
 
 # ponytail: acerto por distância e ângulo no instante do golpe, sem Area2D; trocar quando houver frames de ataque.

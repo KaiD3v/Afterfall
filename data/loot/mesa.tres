@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LootTable" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/loot_table.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+items = Array[StringName]([&"ammo_9mm", &""])
+weights = Array[float]([2.0, 2.0])
+rolls = 1

@@ -24,10 +24,6 @@ hframes = 4
 shape = SubResource("feet")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-limit_left = 0
-limit_top = 0
-limit_right = 1920
-limit_bottom = 1088
 
 [node name="Tracer" type="Line2D" parent="."]
 visible = false
