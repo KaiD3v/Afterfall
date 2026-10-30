@@ -1,4 +1,4 @@
-# HUD mínimo: retrato, vida, stamina, cartão da arma (pente em traços + reserva), inventário,
+# HUD mínimo: retrato, vida, stamina, cartão da arma (pente em traços + reserva),
 # mensagens e tela de resultado. Fome, sede e temperatura (Needs, Temperature) ficam escondidas até
 # os sistemas existirem (fora da v0.1).
 # Tudo por sinais dos componentes do jogador e do RunState; nada é lido a cada frame.
@@ -21,18 +21,16 @@ var _reload_fill: Tween
 @onready var result: ColorRect = $Result
 @onready var mag: Control = $WeaponCard/Mag
 @onready var reserve: Label = $WeaponCard/Reserve
-@onready var inventory: Label = $Inventory
 @onready var toast: Label = $Toast
 @onready var prompt: Label = $Prompt
 
 
 func _ready() -> void:
 	$Crosshair.player = player
-	for n in [$BottomPanel, $Inventory, $WeaponCard]:
+	for n in [$WeaponCard]:
 		n.add_to_group(Groups.HIDE_WITH_MENU)
 	$PortraitFrame/Portrait.texture = _face()
 	RunState.message.connect(_show_toast)
-	RunState.inventory.changed.connect(_on_inventory)
 	player.health.changed.connect(_on_health)
 	player.stamina.changed.connect(_on_stamina)
 	player.firearm.changed.connect(_on_ammo)
@@ -44,7 +42,6 @@ func _ready() -> void:
 	_on_health()
 	_on_stamina()
 	_on_weapons()
-	_on_inventory()
 	_on_focus(player.focus)
 
 
@@ -133,12 +130,6 @@ func _face() -> AtlasTexture:
 	return face
 
 
-func _on_inventory() -> void:
-	inventory.text = "Inventário: %s (%d livres)" % [_items_text(), RunState.inventory.free_slots()]
-	$BottomPanel.size.x = inventory.get_minimum_size().x + 8  # o fundo acompanha o texto
-
-
-# Troca de foco: passa a ouvir o aviso do novo interativo (o do container muda ao esvaziar).
 func _on_focus(target: Interactable) -> void:
 	if is_instance_valid(_focus):
 		_focus.prompt_changed.disconnect(_update_prompt)
@@ -163,15 +154,3 @@ func _show_toast(text: String) -> void:
 		_toast_timer.kill()
 	_toast_timer = create_tween()
 	_toast_timer.tween_callback(toast.hide).set_delay(TOAST_TIME)
-
-
-func _items_text() -> String:
-	if RunState.inventory.is_empty():
-		return "vazio"
-	var counts := {}  # nome -> quantidade, na ordem em que entraram
-	for item in RunState.inventory.items:
-		counts[item.display_name] = counts.get(item.display_name, 0) + 1
-	var parts: Array[String] = []
-	for item_name in counts:
-		parts.append("%s ×%d" % [item_name, counts[item_name]])
-	return ", ".join(parts)

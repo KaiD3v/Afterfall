@@ -279,25 +279,6 @@ text = "VOCÊ MORREU"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BottomPanel" type="ColorRect" parent="."]
-offset_left = 4.0
-offset_top = 250.0
-offset_right = 210.0
-offset_bottom = 266.0
-mouse_filter = 2
-color = Color(0.0784314, 0.0941176, 0.12549, 0.85)
-
-[node name="Inventory" type="Label" parent="."]
-offset_left = 8.0
-offset_top = 251.0
-offset_right = 306.0
-offset_bottom = 265.0
-theme_override_colors/font_color = Color(0.658824, 0.682353, 0.701961, 1)
-theme_override_colors/font_outline_color = Color(0.0509804, 0.0627451, 0.0901961, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 16
-text = "Inventário: vazio (8 livres)"
-
 [node name="Toast" type="Label" parent="."]
 visible = false
 offset_left = 90.0

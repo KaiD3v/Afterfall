@@ -65,7 +65,7 @@ func _run(main: Node) -> void:
 	menu._unhandled_input(_key(KEY_E))
 	check("E abre o menu", menu.is_open() and player.input_locked)
 	check("o mundo não pausa", not paused)
-	check("a linha de inventário da HUD some por trás do menu", not main.get_node("HUD/Inventory").visible and not main.get_node("HUD/BottomPanel").visible)
+	check("o cartão da arma some por trás do menu", not main.get_node("HUD/WeaponCard").visible)
 	check("4 slots de equipamento e 9 blocos de mochila", menu.gear_slots.size() == 4 and menu.bag_slots.size() == 9)
 	var x0: float = player.position.x
 	Input.action_press("move_right")
@@ -167,7 +167,7 @@ func _run(main: Node) -> void:
 
 	menu._unhandled_input(_key(KEY_ESCAPE))
 	check("Esc fecha e devolve o controle", not menu.is_open() and not player.input_locked)
-	check("e a linha da HUD volta", main.get_node("HUD/Inventory").visible)
+	check("e o cartão da arma volta", main.get_node("HUD/WeaponCard").visible)
 
 	# 4d. I5: saque pela tela. O móvel abre ao lado da mochila; pega um a um, guarda, pega tudo.
 	var crate: Node = load("res://scenes/props/loot_container.tscn").instantiate()

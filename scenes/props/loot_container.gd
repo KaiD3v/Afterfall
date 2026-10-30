@@ -19,14 +19,12 @@ func _ready() -> void:
 	if sprite:
 		$Body.hide()
 		$Sprite.texture = sprite
-		# contorno de foco e nome em volta do móvel inteiro, não só da pegada
+		# contorno de foco em volta do móvel inteiro, não só da pegada
 		var used := Rect2(sprite.get_image().get_used_rect())
 		used.position = (used.position + $Sprite.offset) * $Sprite.scale
 		used.size *= $Sprite.scale
 		$Focus.position = used.position - Vector2.ONE
 		$Focus.size = used.size + Vector2(2, 2)
-		$Name.position.y = used.position.y - 12
-	$Name.text = label
 	_refresh()
 
 
