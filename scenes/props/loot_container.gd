@@ -34,7 +34,7 @@ func interact(player: Node) -> void:
 	var got: Array[String] = []
 	for item in loot.duplicate():
 		if item == &"ammo_9mm":
-			player.reserve += RunState.AMMO_PER_BOX
+			player.firearm.reserve += RunState.AMMO_PER_BOX
 		elif not RunState.add_item(item):
 			continue  # inventário cheio: o item fica no container
 		loot.erase(item)

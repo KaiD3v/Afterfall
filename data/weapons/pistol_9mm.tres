@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="FirearmData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/firearm_data.gd" id="1"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/shot.mp3" id="2"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/reload.mp3" id="3"]
+
+[resource]
+script = ExtResource("1")
+max_range = 320.0
+spread = 4.0
+move_spread = 9.0
+mag_size = 12
+reload_time = 1.5
+reload_sound = ExtResource("3")
+display_name = "Pistola 9 mm"
+damage = 40.0
+cooldown = 0.25
+noise = 320.0
+anim = "shoot"
+sound = ExtResource("2")

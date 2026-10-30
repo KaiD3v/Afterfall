@@ -1,15 +1,17 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/player.gd" id="1"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/character_frames.tres" id="2"]
-[ext_resource type="AudioStream" path="res://assets/audio/sfx/shot.mp3" id="3"]
-[ext_resource type="AudioStream" path="res://assets/audio/sfx/machete.mp3" id="4"]
-[ext_resource type="AudioStream" path="res://assets/audio/sfx/reload.mp3" id="5"]
 [ext_resource type="Texture2D" path="res://assets/sprites/fx/drop_shadow.png" id="6"]
 [ext_resource type="Texture2D" path="res://assets/sprites/fx/flashlight_cone.png" id="7"]
 [ext_resource type="Texture2D" path="res://assets/sprites/fx/point_light.png" id="8"]
 [ext_resource type="Script" path="res://scripts/components/health.gd" id="health"]
 [ext_resource type="Script" path="res://scripts/components/stamina.gd" id="stamina"]
+[ext_resource type="Script" path="res://scenes/player/flashlight.gd" id="flashlight"]
+[ext_resource type="Script" path="res://scripts/weapons/melee_weapon.gd" id="melee"]
+[ext_resource type="Resource" path="res://data/weapons/machete.tres" id="machete"]
+[ext_resource type="Script" path="res://scripts/weapons/firearm.gd" id="firearm"]
+[ext_resource type="Resource" path="res://data/weapons/pistol_9mm.tres" id="pistol"]
 
 [sub_resource type="RectangleShape2D" id="feet"]
 size = Vector2(12, 6)
@@ -41,6 +43,7 @@ texture = ExtResource("8")
 texture_scale = 0.48
 
 [node name="Flashlight" type="PointLight2D" parent="."]
+script = ExtResource("flashlight")
 position = Vector2(5.5, -20)
 color = Color(0.88, 0.94, 1, 1)
 energy = 1.08
@@ -66,24 +69,21 @@ shape = SubResource("feet")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 
-[node name="Tracer" type="Line2D" parent="."]
+[node name="Machete" type="Node2D" parent="."]
+script = ExtResource("melee")
+data = ExtResource("machete")
+
+[node name="Pistol" type="Node2D" parent="."]
+script = ExtResource("firearm")
+data = ExtResource("pistol")
+muzzle_light = ExtResource("8")
+
+[node name="Tracer" type="Line2D" parent="Pistol"]
 visible = false
 top_level = true
 width = 1.0
 default_color = Color(0.890196, 0.603922, 0.231373, 1)
 
-[node name="SfxShot" type="AudioStreamPlayer2D" parent="."]
-bus = &"SFX"
-stream = ExtResource("3")
-
-[node name="SfxMachete" type="AudioStreamPlayer2D" parent="."]
-bus = &"SFX"
-stream = ExtResource("4")
-
 [node name="SfxSteps" type="AudioStreamPlayer2D" parent="."]
 volume_db = -8.0
 bus = &"Steps"
-
-[node name="SfxReload" type="AudioStreamPlayer2D" parent="."]
-bus = &"SFX"
-stream = ExtResource("5")

@@ -1,5 +1,6 @@
-# Checagem da R1: Health e Stamina como componentes. Um objeto qualquer com um nó Health
-# (aqui, uma barricada sem script) leva tiro sem código novo; ação nova cancela o golpe pendente.
+# Checagem da R1 e R2: Health e Stamina como componentes. Um objeto qualquer com um nó Health
+# (aqui, uma barricada sem script) leva tiro sem código novo; ação nova cancela o golpe pendente;
+# arma nova é só um Resource de dados num nó MeleeWeapon, o mesmo da mordida do zumbi.
 # Rodar: godot --headless --path . --fixed-fps 60 --script res://tests/test_components.gd
 extends SceneTree
 
@@ -16,7 +17,7 @@ func _initialize() -> void:
 
 func _run(main: Node) -> void:
 	await physics_frame
-	var player: Actor = main.get_node("Player")
+	var player = main.get_node("Player")  # sem tipo: player.gd usa o autoload, que o teste ainda não tem ao compilar
 	player.position = Vector2(760, 592)  # rua principal, livre entre x 700 e 860
 
 	# 1. Health: sinais, cura limitada ao máximo, morte uma vez só.
@@ -60,9 +61,9 @@ func _run(main: Node) -> void:
 	main.add_child(box)
 	await physics_frame
 	await physics_frame
-	player.pistol_spread = 0.0
+	player.firearm.gun().spread = 0.0
 	player.shoot(Vector2.RIGHT)
-	check("tiro acha o Health da barricada (vida %.0f)" % box_health.current, box_health.current == 100.0 - player.pistol_damage)
+	check("tiro acha o Health da barricada (vida %.0f)" % box_health.current, box_health.current == 100.0 - player.firearm.gun().damage)
 
 	# 4. Ação nova cancela o golpe pendente: recarregar no meio do golpe não acerta depois.
 	await frames(0.6)
@@ -72,11 +73,28 @@ func _run(main: Node) -> void:
 	main.add_child(z)
 	await physics_frame
 	player.facing = Vector2.LEFT
-	player.ammo = 0
+	player.firearm.ammo = 0
 	player.melee()
 	player.reload()
 	await frames(0.5)
 	check("golpe cancelado pela recarga (vida %.0f)" % z.health.current, z.health.current == z.health.maximum)
+
+	# 5. Arma nova só por dado: um pé de cabra (MeleeData criado aqui) num nó MeleeWeapon.
+	await frames(1.6)  # a recarga termina e o machete esfria
+	var crowbar := MeleeData.new()
+	crowbar.damage = 50.0
+	crowbar.reach = 30.0
+	crowbar.half_angle = 60.0
+	crowbar.target_group = Groups.ZOMBIES
+	crowbar.anim = "sem_animacao"  # sem a ação na sheet, o golpe sai na hora
+	var weapon := MeleeWeapon.new()
+	weapon.data = crowbar
+	player.add_child(weapon)
+	await physics_frame
+	var swung: bool = weapon.attack()
+	check("pé de cabra acerta sem código novo (vida %.0f)" % z.health.current, swung and z.health.current == z.health.maximum - 50.0)
+	check("e respeita a própria espera", not weapon.attack())
+	check("mordida do zumbi é o mesmo MeleeWeapon do machete", z.get_node("Bite") is MeleeWeapon and player.get_node("Machete") is MeleeWeapon)
 
 	print("RESULT: ", "FAIL" if failed else "PASS")
 	quit(1 if failed else 0)

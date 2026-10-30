@@ -58,9 +58,9 @@ func _run() -> void:
 	var ammo_box: Node = main.interior.get_node("Mesa")
 	ammo_box.table = table([&"ammo_9mm"], 1)
 	ammo_box.id = &"teste_municao"
-	var reserve0: int = player.reserve
+	var reserve0: int = player.firearm.reserve
 	ammo_box.interact(player)
-	check("munição soma 6 na reserva", player.reserve == reserve0 + 6 and rs.items.size() == 2)
+	check("munição soma 6 na reserva", player.firearm.reserve == reserve0 + 6 and rs.items.size() == 2)
 
 	# 3. Inventário cheio: o item fica no container e sai depois.
 	for i in 6:

@@ -54,7 +54,7 @@ func _run() -> void:
 	await frames(0.1)
 	check("golpe não é ouvido a ~100 px", z.state == z.State.IDLE)
 	z.position = Vector2(1010, 560)
-	await frames(player.machete_cooldown)  # golpe e tiro dividem a espera
+	await frames(player.melee_weapon.data.cooldown)  # golpe e tiro dividem a espera
 	player.shoot(Vector2.UP)
 	await frames(0.1)
 	check("tiro é ouvido a 250 px e o zumbi vai até o ruído", z.state == z.State.INVESTIGATE and z.target_pos == player.global_position)
@@ -79,16 +79,16 @@ func _run() -> void:
 	player.stamina.exhausted = false
 
 	# 5. Pistola: 2 tiros matam a 100 px; tiro alinhado ao cano; pente de 12; recarga usa a reserva.
-	player.ammo = player.mag_size
-	player.pistol_spread = 0.0
-	var cooldown0: float = player.pistol_cooldown
-	player.pistol_cooldown = 0.0  # tiros seguidos no mesmo frame
+	player.firearm.ammo = player.firearm.gun().mag_size
+	player.firearm.gun().spread = 0.0
+	var cooldown0: float = player.firearm.gun().cooldown
+	player.firearm.gun().cooldown = 0.0  # tiros seguidos no mesmo frame
 	player.facing = Vector2.RIGHT
 	z = await spawn(player.position + Vector2(100, 0), Vector2.RIGHT)
 	for i in 2:
 		player.shoot(Vector2.RIGHT)
 		if i == 0:
-			var pts: PackedVector2Array = player.get_node("Tracer").points
+			var pts: PackedVector2Array = player.firearm.tracer.points
 			check("tiro sai na linha exata do cano (y=%.1f -> %.1f)" % [pts[0].y, pts[1].y], is_equal_approx(pts[0].y, player.muzzle_position().y) and is_equal_approx(pts[0].y, pts[1].y))
 		await physics_frame
 	check("2 tiros matam", dead(z))
@@ -97,14 +97,14 @@ func _run() -> void:
 	for i in 15:
 		if player.shoot(Vector2.UP):
 			shots += 1
-	check("pente dá 12 tiros (deu %d)" % (shots + 2), shots + 2 == 12 and player.ammo == 0)
-	var reserve0: int = player.reserve
+	check("pente dá 12 tiros (deu %d)" % (shots + 2), shots + 2 == 12 and player.firearm.ammo == 0)
+	var reserve0: int = player.firearm.reserve
 	player.reload()
 	await frames(0.2)
-	check("recarga toca animação reload_*", player.reloading and player.action == "reload" and String(player.get_node("Sprite").animation).begins_with("reload"))
-	await frames(player.reload_time)
-	check("recarga enche o pente com a reserva e destrava ação", player.ammo == 12 and player.reserve == reserve0 - 12 and player.action == "")
-	player.pistol_cooldown = cooldown0
+	check("recarga toca animação reload_*", player.firearm.reloading and player.action == "reload" and String(player.get_node("Sprite").animation).begins_with("reload"))
+	await frames(player.firearm.gun().reload_time)
+	check("recarga enche o pente com a reserva e destrava ação", player.firearm.ammo == 12 and player.firearm.reserve == reserve0 - 12 and player.action == "")
+	player.firearm.gun().cooldown = cooldown0
 
 	# 6. Zumbi ataca de perto, 15 por golpe, 1 por segundo; jogador mais rápido que ele.
 	player.health.current = player.health.maximum

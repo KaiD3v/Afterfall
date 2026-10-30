@@ -22,20 +22,20 @@ func _process(_delta: float) -> void:
 	queue_redraw()
 
 
-# Raio em px da dispersão a uma distância: o tiro cai dentro de ±pistol_spread graus (ou maior andando).
+# Raio em px da dispersão a uma distância: o tiro cai dentro da dispersão atual da arma.
 func gap_at(distance: float) -> float:
-	var spread: float = player.current_spread() if player.has_method("current_spread") else player.pistol_spread
-	return maxf(MIN_GAP, roundf(distance * tan(deg_to_rad(spread))))
+	return maxf(MIN_GAP, roundf(distance * tan(deg_to_rad(player.firearm.spread_now()))))
 
 
 func _aim_origin() -> Vector2:
-	return player.muzzle_position() if player.has_method("muzzle_position") else player.global_position
+	return player.muzzle_position()
 
 
 func color_now() -> Color:
-	if player.reloading or player.ammo == 0:
+	var gun: Firearm = player.firearm
+	if gun.reloading or gun.ammo == 0:
 		return EMPTY
-	if _aim_origin().distance_to(player.get_global_mouse_position()) > player.pistol_range:
+	if _aim_origin().distance_to(player.get_global_mouse_position()) > gun.gun().max_range:
 		return FAR
 	return NORMAL
 

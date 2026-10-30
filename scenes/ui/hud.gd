@@ -26,7 +26,8 @@ func _process(delta: float) -> void:
 	stamina_fill.size.x = roundf(BAR_W * player.stamina.current / player.stamina.maximum)
 	# sem fôlego: barra escurece até recuperar (paleta Scavland: ferrugem escura vs verde-oliva tático)
 	stamina_fill.color = Color8(66, 40, 29) if player.stamina.exhausted else Color8(99, 117, 80)
-	ammo.text = "RECARREGANDO" if player.reloading else "%d | %d" % [player.ammo, player.reserve]
+	var gun: Firearm = player.firearm
+	ammo.text = "RECARREGANDO" if gun.reloading else "%d | %d" % [gun.ammo, gun.reserve]
 	inventory.text = "Inventário: %s (%d livres)" % [_items_text(), RunState.SLOTS - RunState.items.size()]
 	var f = player.focus  # sem tipo: o foco pode ter sido liberado na troca bairro ↔ interior
 	$Prompt.visible = is_instance_valid(f) and not player.is_dead()

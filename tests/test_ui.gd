@@ -136,29 +136,30 @@ func _run() -> void:
 	Input.action_press("move_right")
 	await physics_frame  # physics_frame sai antes do _physics_process: 2 frames para o jogador ler
 	await physics_frame
-	check("andando mirando: dispersão aumenta (±9° -> 16 px a 100 px)", player.current_spread() > player.pistol_spread and cross.gap_at(100.0) == 16.0)
+	check("andando mirando: dispersão aumenta (±9° -> 16 px a 100 px)", player.firearm.spread_now() > player.firearm.gun().spread and cross.gap_at(100.0) == 16.0)
 	Input.action_release("move_right")
 	await physics_frame
 	Input.action_press("flashlight")
 	await physics_frame
 	await physics_frame
 	Input.action_release("flashlight")
-	check("tecla T desliga a lanterna", not player.flashlight_on and not player.get_node("Flashlight").visible)
+	check("tecla T desliga a lanterna", not player.flashlight.on and not player.get_node("Flashlight").visible)
 	Input.action_press("flashlight")
 	await physics_frame
 	await physics_frame
 	Input.action_release("flashlight")
-	check("tecla T religa a lanterna", player.flashlight_on and player.get_node("Flashlight").visible)
-	player.ammo = 0
+	check("tecla T religa a lanterna", player.flashlight.on and player.get_node("Flashlight").visible)
+	player.firearm.ammo = 0
 	check("pente vazio muda a cor", cross.color_now() == cross.EMPTY)
-	player.ammo = player.mag_size
+	player.firearm.ammo = player.firearm.gun().mag_size
 	# headless não tem mouse e ignora o modo do cursor; só dá para checar com janela
 	if DisplayServer.get_name() != "headless":
 		check("cursor do sistema escondido", Input.mouse_mode == Input.MOUSE_MODE_HIDDEN)
 
 	# 6. Áudio: canais próprios; efeitos no SFX.
 	check("canais SFX, Ambience e Steps", AudioServer.get_bus_index(&"SFX") > 0 and AudioServer.get_bus_index(&"Ambience") > 0 and AudioServer.get_bus_index(&"Steps") > 0)
-	check("efeitos no canal SFX", player.get_node("SfxShot").bus == &"SFX" and main.get_node("SfxDoor").bus == &"SFX")
+	var gun_sounds: Array = player.firearm.get_children().filter(func(c): return c is AudioStreamPlayer2D)
+	check("efeitos no canal SFX (tiro, recarga, porta)", gun_sounds.size() == 2 and gun_sounds.all(func(c): return c.bus == &"SFX") and main.get_node("SfxDoor").bus == &"SFX")
 
 	print("RESULT: ", "FAIL" if failed else "PASS")
 	quit(1 if failed else 0)

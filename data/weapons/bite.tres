@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="MeleeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/melee_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+reach = 24.0
+half_angle = 180.0
+target_group = &"player"
+display_name = "Mordida"
+damage = 15.0
+cooldown = 1.0
+anim = "attack"

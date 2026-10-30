@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MeleeData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/melee_data.gd" id="1"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/machete.mp3" id="2"]
+
+[resource]
+script = ExtResource("1")
+reach = 30.0
+half_angle = 60.0
+target_group = &"zombies"
+display_name = "Machete"
+damage = 25.0
+cooldown = 0.5
+stamina_cost = 20.0
+noise = 64.0
+anim = "melee"
+sound = ExtResource("2")

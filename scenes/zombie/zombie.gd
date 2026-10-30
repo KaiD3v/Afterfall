@@ -10,16 +10,14 @@ enum State { IDLE, INVESTIGATE, CHASE }
 @export var sight_range := 140.0
 @export var sight_half_angle := 45.0   # graus; cone de 90° à frente
 @export var feel_range := 24.0         # percebe quem encosta, mesmo de costas
-@export var attack_range := 20.0
-@export var attack_damage := 15.0
-@export var attack_cooldown := 1.0
+@export var attack_range := 20.0  # começa a morder a esta distância; dano e alcance no nó Bite
 
 var state := State.IDLE
 var target_pos := Vector2.ZERO
 var player: Actor
-var _attack_wait := 0.0
 
 @onready var groan: AudioStreamPlayer2D = $Groan
+@onready var bite: MeleeWeapon = $Bite
 
 
 func _ready() -> void:
@@ -29,8 +27,7 @@ func _ready() -> void:
 	_update_frame()
 
 
-func _physics_process(delta: float) -> void:
-	_attack_wait -= delta
+func _physics_process(_delta: float) -> void:
 	if player and not player.is_dead() and sees(player.global_position):
 		if state != State.CHASE:
 			groan.play()
@@ -45,10 +42,7 @@ func _physics_process(delta: float) -> void:
 		var near_player := state == State.CHASE and player.global_position.distance_to(global_position) <= attack_range
 		if near_player:
 			facing = to.normalized()
-			if _attack_wait <= 0.0:
-				_attack_wait = attack_cooldown
-				if not play_action("attack", true):  # com a animação, dá para fugir no preparo
-					player.health.damage(attack_damage, self)
+			bite.attack()
 		elif to.length() < 4.0:
 			state = State.IDLE  # chegou ao ruído ou à última posição vista e não achou ninguém
 		else:
@@ -78,7 +72,7 @@ func hear(pos: Vector2, radius: float) -> void:
 
 func _on_damaged(amount: float, source: Node) -> void:
 	super(amount, source)
-	_contact_pending = false  # apanhar interrompe a mordida
+	cancel_contact()  # apanhar interrompe a mordida
 	if not is_dead():
 		state = State.CHASE  # quem apanha vira para quem bateu
 		target_pos = player.global_position
@@ -97,12 +91,6 @@ func _on_died() -> void:
 
 func _fade_out() -> void:
 	create_tween().tween_property(sprite, "modulate:a", 0.0, 0.4).finished.connect(queue_free)
-
-
-# Frame de contato da mordida: só acerta se o jogador ainda está perto; recuar no preparo esquiva.
-func _on_contact() -> void:
-	if player.global_position.distance_to(global_position) <= attack_range + 4.0:
-		player.health.damage(attack_damage, self)
 
 
 func _on_animation_finished() -> void:

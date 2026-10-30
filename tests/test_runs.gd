@@ -25,7 +25,7 @@ func _run() -> void:
 		print("--- run %d" % run)
 
 		# Estado inicial limpo.
-		check("vida, stamina e munição cheias", player.health.current == 100.0 and player.stamina.current == 100.0 and player.ammo == 12 and player.reserve == 24)
+		check("vida, stamina e munição cheias", player.health.current == 100.0 and player.stamina.current == 100.0 and player.firearm.ammo == 12 and player.firearm.reserve == 24)
 		check("inventário vazio e loot não sorteado", rs.items.is_empty() and [&"geladeira", &"armario", &"mesa", &"comoda"].all(func(id): return not rs.has_rolled(id)))
 		check("números da run zerados", rs.kills == 0 and rs.looted == 0 and rs.run_time < 0.5)
 		check("4 zumbis vivos, cheios", get_nodes_in_group("zombies").size() == 4 and get_nodes_in_group("zombies").all(func(z): return z.health.current == z.health.maximum))
