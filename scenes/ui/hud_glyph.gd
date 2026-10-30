@@ -1,9 +1,10 @@
 # Pictograma 7×7 da HUD, desenhado por código (elemento simples): vida, fôlego, fome, sede,
-# frio e calor. Os de temperatura vêm num selo 11×11 com fundo, para ficar por cima do retrato.
+# cansaço, frio e calor. Os de temperatura vêm num selo 11×11 com fundo, para ficar por cima do
+# retrato; com badge, o pictograma ganha um selo 9×9 (os moodles).
 @tool
 extends Control
 
-enum Kind { HEART, BOLT, FOOD, WATER, COLD, HOT }
+enum Kind { HEART, BOLT, FOOD, WATER, COLD, HOT, TIRED }
 
 const OUTLINE := Color8(20, 24, 32)
 const BG := Color8(30, 36, 46)
@@ -17,9 +18,18 @@ const FLAME_CORE := Color8(227, 168, 69)
 	set(value):
 		color = value
 		queue_redraw()
+@export var badge := false
+@export var bg := BG:  # fundo do selo do badge
+	set(value):
+		bg = value
+		queue_redraw()
 
 
 func _draw() -> void:
+	if badge:
+		draw_rect(Rect2(0, 0, 9, 9), OUTLINE)
+		draw_rect(Rect2(1, 1, 7, 7), bg)
+		draw_set_transform(Vector2.ONE)
 	match kind:
 		Kind.HEART:
 			_px([Rect2(0, 1, 3, 3), Rect2(4, 1, 3, 3), Rect2(1, 3, 5, 2), Rect2(2, 5, 3, 1), Rect2(3, 6, 1, 1)])
@@ -29,6 +39,8 @@ func _draw() -> void:
 			_px([Rect2(1, 0, 1, 3), Rect2(3, 0, 1, 3), Rect2(5, 0, 1, 3), Rect2(1, 3, 5, 1), Rect2(3, 4, 1, 3)])
 		Kind.WATER:
 			_px([Rect2(3, 0, 1, 1), Rect2(2, 1, 3, 2), Rect2(1, 3, 5, 3), Rect2(2, 6, 3, 1)])
+		Kind.TIRED:  # um Z
+			_px([Rect2(1, 1, 5, 1), Rect2(4, 2, 1, 1), Rect2(3, 3, 1, 1), Rect2(2, 4, 1, 1), Rect2(1, 5, 5, 1)])
 		Kind.COLD, Kind.HOT:
 			draw_rect(Rect2(0, 0, 11, 11), OUTLINE)
 			draw_rect(Rect2(1, 1, 9, 9), BG)

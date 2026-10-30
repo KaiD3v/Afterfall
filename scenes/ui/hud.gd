@@ -8,12 +8,18 @@ const TOAST_TIME := 2.5
 const AMBER := Color8(227, 168, 69)
 const DIM := Color8(95, 104, 115)
 const EMPTY := Color8(36, 42, 52)  # traço de bala gasta
+const LOW := 0.25  # fome ou sede abaixo disto: moodle âmbar; zerada: vermelho piscando
+const BLOOD := Color8(150, 33, 39)  # fundo do moodle crítico
+const BADGE_BG := Color8(30, 36, 46)  # fundo normal do moodle (o mesmo do hud_glyph)
+const PALE := Color8(168, 174, 179)  # pictograma sobre o fundo crítico
 
 @export var player: Player
 
 var _focus: Interactable
 var _toast_timer: Tween
 var _reload_fill: Tween
+var _moodle_level := {}  # moodle → nível mostrado (0 escondido, 1 âmbar, 2 crítico)
+var _blink := {}  # moodle crítico → tween do piscar
 
 @onready var health_fill: ColorRect = $Health/Fill
 @onready var stamina_fill: ColorRect = $Stamina/Fill
@@ -78,6 +84,35 @@ func _on_stamina() -> void:
 func _on_needs() -> void:
 	hunger_fill.size.x = roundf(_needs_w.x * player.needs.hunger / player.needs.maximum)
 	thirst_fill.size.x = roundf(_needs_w.y * player.needs.thirst / player.needs.maximum)
+	var n := player.needs
+	_moodle($Moodles/Hunger, _level(n.hunger / n.maximum))
+	_moodle($Moodles/Thirst, _level(n.thirst / n.maximum))
+	_moodle($Moodles/Tired, 0 if n.awake < n.tired_hours else (1 if n.awake < n.exhausted_hours else 2))
+
+
+# Fome ou sede: 0 acima de LOW, 1 abaixo, 2 zerada (já tira vida).
+static func _level(fraction: float) -> int:
+	return 2 if fraction <= 0.0 else (1 if fraction < LOW else 0)
+
+
+# Moodles na linha abaixo do painel: só os ativos aparecem (o HBox junta os visíveis à esquerda).
+# Nível 1: pictograma âmbar; nível 2: fundo de sangue e pisca. Só mexe quando o nível muda.
+func _moodle(badge: Control, level: int) -> void:
+	if _moodle_level.get(badge, 0) == level:
+		return
+	_moodle_level[badge] = level
+	badge.visible = level > 0
+	badge.color = PALE if level == 2 else AMBER
+	badge.bg = BLOOD if level == 2 else BADGE_BG
+	if _blink.has(badge):
+		_blink[badge].kill()
+		_blink.erase(badge)
+		badge.modulate.a = 1.0
+	if level == 2:
+		var t := create_tween().set_loops()
+		t.tween_property(badge, "modulate:a", 0.35, 0.4)
+		t.tween_property(badge, "modulate:a", 1.0, 0.4)
+		_blink[badge] = t
 
 
 # Ícones das duas armas do equipamento; slot vazio fica sem ícone.
