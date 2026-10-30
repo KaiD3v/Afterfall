@@ -1,10 +1,12 @@
-# Checagem da R1 a R5: Health e Stamina como componentes. Um objeto qualquer com um nó Health
+# Checagem da R1 a R6: Health e Stamina como componentes. Um objeto qualquer com um nó Health
 # (aqui, uma barricada sem script) leva tiro sem código novo; ação nova cancela o golpe pendente;
 # arma nova é só um Resource de dados num nó MeleeWeapon, o mesmo da mordida do zumbi;
 # tipo novo de zumbi é só um ZombieData; item novo é só um ItemData; porta nova leva a
 # qualquer local.
 # Rodar: godot --headless --path . --fixed-fps 60 --script res://tests/test_components.gd
 extends SceneTree
+
+const BANDAGE := preload("res://data/items/bandage.tres")
 
 var failed := false
 
@@ -136,7 +138,7 @@ func _run(main: Node) -> void:
 	crate.table = table
 	main.add_child(crate)
 	crate.interact(player)
-	check("kit médico entra no inventário", rs.inventory.count(&"medkit") == 1 and rs.looted == 1)
+	check("kit médico entra no inventário", rs.inventory.count(&"medkit") == 1 and rs.stats.looted == 1)
 	player.health.current = 20.0
 	var used: bool = player.use_item(medkit)
 	check("e cura 50 ao usar (vida %.0f)" % player.health.current, used and player.health.current == 70.0 and rs.inventory.is_empty())
@@ -173,6 +175,25 @@ func _run(main: Node) -> void:
 	main.leave()
 	await frames(0.7)
 	check("e ao sair volta na frente dela", not main.is_inside() and player.position == back.global_position and player.surface == &"street")
+
+	# 9. HUD por sinais (R6): com o processamento da HUD desligado, ela ainda acompanha vida,
+	# fôlego, munição e inventário; a mensagem some sozinha.
+	var hud: CanvasLayer = main.get_node("HUD")
+	hud.set_process(false)
+	player.health.current = 50.0
+	player.stamina.drain(30.0)
+	player.firearm.ammo = 3
+	player.firearm.reserve = 7
+	rs.inventory.add(BANDAGE)
+	check("barra de vida pela metade (%.0f px)" % hud.get_node("Health/Fill").size.x, hud.get_node("Health/Fill").size.x == 30.0)
+	check("barra de fôlego acompanha", hud.get_node("Stamina/Fill").size.x == roundf(60.0 * player.stamina.current / player.stamina.maximum))
+	check("munição \"%s\"" % hud.get_node("Ammo").text, hud.get_node("Ammo").text == "3 | 7")
+	check("inventário \"%s\"" % hud.get_node("Inventory").text, hud.get_node("Inventory").text == "Inventário: Bandagem ×1 (7 livres)")
+	rs.notify("teste")
+	check("mensagem aparece", hud.get_node("Toast").visible and hud.get_node("Toast").text == "teste")
+	await frames(2.6)
+	check("e some depois de 2,5 s", not hud.get_node("Toast").visible)
+	check("partes do RunState separadas", rs.inventory is Inventory and rs.loot is LootMemory and rs.stats is RunStats)
 
 	print("RESULT: ", "FAIL" if failed else "PASS")
 	quit(1 if failed else 0)

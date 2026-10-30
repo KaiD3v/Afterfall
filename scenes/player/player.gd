@@ -3,6 +3,8 @@
 class_name Player
 extends Actor
 
+signal focus_changed(target: Interactable)  # null = nada ao alcance
+
 @export var walk_speed := 80.0     # px/s = 2,5 tiles/s
 @export var aim_walk_speed := 50.0 # px/s andando enquanto mira
 @export var run_speed := 130.0
@@ -103,11 +105,12 @@ func _update_focus() -> void:
 	var best := _nearest_interactable()
 	if best == focus:
 		return
-	if is_instance_valid(focus):  # some na troca bairro ↔ interior
+	if is_instance_valid(focus):  # some na troca de local
 		focus.set_focus(false)
 	focus = best
 	if focus:
 		focus.set_focus(true)
+	focus_changed.emit(focus)
 
 
 func use_item(item: ItemData) -> bool:

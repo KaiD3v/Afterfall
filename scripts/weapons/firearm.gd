@@ -2,11 +2,22 @@
 class_name Firearm
 extends Weapon
 
-@export var reserve := 24           # munição fora do pente; o loot soma a ela
+signal changed  # pente, reserva ou recarga mudaram
+
+@export var reserve := 24:  # munição fora do pente; o loot soma a ela
+	set(value):
+		reserve = value
+		changed.emit()
 @export var muzzle_light: Texture2D  # textura da luz do clarão (opcional)
 
-var ammo := 0
-var reloading := false
+var ammo := 0:
+	set(value):
+		ammo = value
+		changed.emit()
+var reloading := false:
+	set(value):
+		reloading = value
+		changed.emit()
 var moving := false  # o dono avisa: andando, a dispersão abre
 
 var _reload_sound: AudioStreamPlayer2D

@@ -4,8 +4,12 @@ class_name Interactable
 extends Node2D
 
 signal interacted(by: Node)
+signal prompt_changed
 
-@export var prompt_text := ""
+@export var prompt_text := "":
+	set(value):
+		prompt_text = value
+		prompt_changed.emit()
 @export var focus_visual: CanvasItem  # contorno mostrado em foco; vazio = só o aviso
 
 

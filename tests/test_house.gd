@@ -75,7 +75,7 @@ func _run() -> void:
 	check("8 slots: não pega o 9º", rs.inventory.size() == 8)
 	rs.inventory.take(&"bandage")
 	full.interact(player)
-	check("liberou um slot: pega o que ficou", rs.inventory.size() == 8 and rs.loot_of(&"teste_cheio", full.table).is_empty())
+	check("liberou um slot: pega o que ficou", rs.inventory.size() == 8 and rs.loot.of(&"teste_cheio", full.table).is_empty())
 
 	# 4. Bandagem cura 30 e é consumida; com vida cheia não gasta.
 	player.health.current = 50.0
@@ -85,8 +85,8 @@ func _run() -> void:
 
 	# 5. Loot fixo na run: o mesmo container não sorteia de novo; nova run sorteia.
 	var real: LootTable = load("res://data/loot/armario.tres")
-	var first: Array = rs.loot_of(&"armario_run", real).duplicate()
-	check("mesma run, mesmo loot", rs.loot_of(&"armario_run", real) == first)
+	var first: Array = rs.loot.of(&"armario_run", real).duplicate()
+	check("mesma run, mesmo loot", rs.loot.of(&"armario_run", real) == first)
 	rs.new_run()
 	check("nova run zera inventário", rs.inventory.is_empty())
 

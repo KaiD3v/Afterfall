@@ -5,10 +5,14 @@ extends Node
 
 signal damaged(amount: float, source: Node)
 signal died
+signal changed  # qualquer mudança em current (dano, cura, ajuste direto)
 
 @export var maximum := 100.0
 
-var current := 0.0
+var current := 0.0:
+	set(value):
+		current = value
+		changed.emit()
 
 
 func _ready() -> void:

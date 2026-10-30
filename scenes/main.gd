@@ -26,7 +26,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if _dead_for < 0.0:
-		RunState.run_time += delta
+		RunState.stats.time += delta
 		return
 	_dead_for += delta
 	if _dead_for >= RESTART_DELAY and Input.is_action_just_pressed("interact"):

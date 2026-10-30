@@ -2,13 +2,23 @@
 class_name Stamina
 extends Node
 
+signal changed  # current ou exhausted mudaram
+
 @export var maximum := 100.0
 @export var regen := 15.0       # por segundo, sem gastar
 @export var regen_delay := 0.8  # segundos sem gastar antes de recuperar
 @export var recover_at := 25.0  # esgotado: só volta a aceitar gasto acima disso
 
-var current := 0.0
-var exhausted := false
+var current := 0.0:
+	set(value):
+		if current != value:
+			current = value
+			changed.emit()
+var exhausted := false:
+	set(value):
+		if exhausted != value:
+			exhausted = value
+			changed.emit()
 var _regen_wait := 0.0
 
 

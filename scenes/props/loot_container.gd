@@ -30,7 +30,7 @@ func _ready() -> void:
 
 
 func interact(player: Node) -> void:
-	var loot: Array = RunState.loot_of(id, table)
+	var loot: Array = RunState.loot.of(id, table)
 	if loot.is_empty():
 		RunState.notify("%s: vazio" % label)
 		_refresh()
@@ -42,14 +42,14 @@ func interact(player: Node) -> void:
 			continue
 		loot.erase(item)
 		got.append(item.display_name)
-		RunState.looted += 1
+		RunState.stats.looted += 1
 	RunState.notify("%s: %s" % [label, ", ".join(got)] if got else "%s: inventário cheio" % label)
 	_refresh()
 
 
 # Já aberto nesta run e sem nada dentro.
 func is_looted() -> bool:
-	return RunState.is_looted(id)
+	return RunState.loot.is_looted(id)
 
 
 func _refresh() -> void:

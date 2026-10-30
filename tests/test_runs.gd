@@ -28,8 +28,8 @@ func _run() -> void:
 
 		# Estado inicial limpo.
 		check("vida, stamina e munição cheias", player.health.current == 100.0 and player.stamina.current == 100.0 and player.firearm.ammo == 12 and player.firearm.reserve == 24)
-		check("inventário vazio e loot não sorteado", rs.inventory.is_empty() and [&"geladeira", &"armario", &"mesa", &"comoda"].all(func(id): return not rs.has_rolled(id)))
-		check("números da run zerados", rs.kills == 0 and rs.looted == 0 and rs.run_time < 0.5)
+		check("inventário vazio e loot não sorteado", rs.inventory.is_empty() and [&"geladeira", &"armario", &"mesa", &"comoda"].all(func(id): return not rs.loot.has_rolled(id)))
+		check("números da run zerados", rs.stats.kills == 0 and rs.stats.looted == 0 and rs.stats.time < 0.5)
 		check("4 zumbis vivos, cheios", get_nodes_in_group("zombies").size() == 4 and get_nodes_in_group("zombies").all(func(z): return z.health.current == z.health.maximum))
 		check("no bairro, no ponto de nascimento", not main.is_inside() and player.position == Vector2(336, 464))
 		check("resultado escondido", not main.get_node("HUD/Result").visible)
@@ -37,7 +37,7 @@ func _run() -> void:
 
 		# Joga: mata um zumbi, saqueia a casa, sai.
 		get_nodes_in_group("zombies")[0].health.damage(60.0)
-		check("zumbi morto conta", rs.kills == 1)
+		check("zumbi morto conta", rs.stats.kills == 1)
 		player.position = main.get_node("Neighborhood/HouseExit").position
 		player.interact()
 		await frames(0.7)
@@ -47,7 +47,7 @@ func _run() -> void:
 		box.table.weights = [1.0] as Array[float]
 		box.table.rolls = 2
 		box.interact(player)
-		check("saque entra no inventário", rs.inventory.size() == 2 and rs.looted == 2)
+		check("saque entra no inventário", rs.inventory.size() == 2 and rs.stats.looted == 2)
 		player.position = main.location.get_node("PlayerSpawn").position
 		player.interact()
 		await frames(0.7)
@@ -59,9 +59,9 @@ func _run() -> void:
 		var text: String = main.get_node("HUD/Result/Text").text
 		check("resultado visível", main.get_node("HUD/Result").visible)
 		check("resultado mostra zumbis, itens e mortes", "1 zumbis" in text and "2 itens" in text and ("Mortes: %d" % run) in text)
-		var t: float = rs.run_time
+		var t: float = rs.stats.time
 		await frames(0.3)
-		check("tempo para de contar morto", rs.run_time == t)
+		check("tempo para de contar morto", rs.stats.time == t)
 
 		# E antes do atraso não recomeça; depois recomeça.
 		await press("interact")

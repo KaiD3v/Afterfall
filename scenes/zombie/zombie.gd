@@ -127,7 +127,7 @@ func _on_damaged(amount: float, source: Node) -> void:
 
 func _on_died() -> void:
 	remove_from_group(Groups.ZOMBIES)
-	RunState.kills += 1
+	RunState.stats.kills += 1
 	set_physics_process(false)
 	$CollisionShape2D.set_deferred("disabled", true)
 	if not play_action("death"):
