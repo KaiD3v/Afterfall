@@ -1,4 +1,4 @@
-# Menu do inventário (Tab ou I abre e fecha, Esc fecha): equipamento em volta do protagonista e a
+# Menu do inventário (tecla da ação inventory, hoje E, abre e fecha; Esc fecha): equipamento em volta do protagonista e a
 # mochila em blocos. Arrastar e soltar move, troca, equipa e desequipa; botão direito usa ou
 # equipa (na mochila) e desequipa (no equipamento). O mundo não pausa: o jogador só fica parado.
 # Painel e textos são elementos simples feitos por código (Guia de estilo, seção 7); molduras dos
@@ -129,7 +129,7 @@ func _show_details(slot: ItemSlot) -> void:
 		_desc.text = "Vazio."
 	else:
 		_name.text = ""
-		_desc.text = "Arraste para mover, equipar ou trocar. Botão direito: usar ou equipar. Tab fecha."
+		_desc.text = "Arraste para mover, equipar ou trocar. Botão direito: usar ou equipar. %s fecha." % Keys.label(&"inventory")
 
 
 func _build() -> void:
@@ -143,7 +143,7 @@ func _build() -> void:
 	panel.draw.connect(_draw_panel.bind(panel))
 	root.add_child(panel)
 	_label(panel, "INVENTÁRIO", Vector2(8, 6), TITLE)
-	_label(panel, "TAB · fechar", Vector2(PANEL.size.x - 58, 6), DIM)
+	_label(panel, "%s · fechar" % Keys.label(&"inventory"), Vector2(PANEL.size.x - 58, 6), DIM)
 	_label(panel, "EQUIPAMENTO", GEAR_AT + Vector2(0, -10), TEXT)
 	_bag_title = _label(panel, "MOCHILA", BAG_AT + Vector2(0, -10), TEXT)
 

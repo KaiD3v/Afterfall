@@ -54,4 +54,4 @@ func is_looted() -> bool:
 
 func _refresh() -> void:
 	modulate = Color(0.55, 0.55, 0.55) if is_looted() else Color.WHITE
-	interactable.prompt_text = ("%s (vazio)" % label) if is_looted() else ("E · Abrir %s" % label)
+	interactable.prompt_text = ("%s (vazio)" % label) if is_looted() else ("%s · Abrir %s" % [Keys.label(&"interact"), label])

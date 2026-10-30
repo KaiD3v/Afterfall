@@ -9,7 +9,7 @@ extends Interactable
 
 func _ready() -> void:
 	super()
-	prompt_text = "E · Entrar" if target != "" else "E · Sair"
+	prompt_text = "%s · %s" % [Keys.label(&"interact"), "Entrar" if target != "" else "Sair"]
 
 
 func interact(by: Node) -> void:

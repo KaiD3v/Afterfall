@@ -58,10 +58,11 @@ func _run(main: Node) -> void:
 	ItemTransfer.swap(bag, _index(bag, PISTOL), gear, FIREARM)
 	check("reequipadas, voltam à mão (pente como estava)", player.melee() and player.firearm.data == PISTOL.weapon and player.firearm.ammo == ammo0)
 
-	# 4. Menu: Tab abre, jogador parado, mundo segue, slots ligados.
-	check("Tab e I são a tecla do inventário", InputMap.event_is_action(_key(KEY_TAB), "inventory") and InputMap.event_is_action(_key(KEY_I), "inventory"))
-	menu._unhandled_input(_key(KEY_TAB))
-	check("Tab abre o menu", menu.is_open() and player.input_locked)
+	# 4. Menu: E abre, jogador parado, mundo segue, slots ligados.
+	check("E é o inventário e F a interação", InputMap.event_is_action(_key(KEY_E), "inventory") and InputMap.event_is_action(_key(KEY_F), "interact") and not InputMap.event_is_action(_key(KEY_E), "interact"))
+	check("os avisos mostram a tecla do mapa", Keys.label(&"interact") == "F" and Keys.label(&"inventory") == "E")
+	menu._unhandled_input(_key(KEY_E))
+	check("E abre o menu", menu.is_open() and player.input_locked)
 	check("o mundo não pausa", not paused)
 	check("4 slots de equipamento e 9 blocos de mochila", menu.gear_slots.size() == 4 and menu.bag_slots.size() == 9)
 	var x0: float = player.position.x

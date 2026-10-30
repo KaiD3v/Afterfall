@@ -39,8 +39,8 @@ func _ready() -> void:
 # Chamado por main.gd quando o jogador morre.
 func show_result() -> void:
 	var t := int(RunState.stats.time)
-	result.get_node("Text").text = "VOCÊ MORREU\n\nSobreviveu %d:%02d · %d zumbis · %d itens\nMortes: %d\n\nE para uma nova run" % [
-		t / 60, t % 60, RunState.stats.kills, RunState.stats.looted, RunState.deaths]
+	result.get_node("Text").text = "VOCÊ MORREU\n\nSobreviveu %d:%02d · %d zumbis · %d itens\nMortes: %d\n\n%s para uma nova run" % [
+		t / 60, t % 60, RunState.stats.kills, RunState.stats.looted, RunState.deaths, Keys.label(&"interact")]
 	result.show()
 
 

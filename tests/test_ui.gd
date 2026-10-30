@@ -100,7 +100,7 @@ func _run() -> void:
 	player.position = main.get_node("Neighborhood/HouseExit").position
 	await physics_frame
 	await process_frame
-	check("porta em foco com aviso", player.focus != null and hud.get_node("Prompt").visible and hud.get_node("Prompt").text == "E · Entrar")
+	check("porta em foco com aviso", player.focus != null and hud.get_node("Prompt").visible and hud.get_node("Prompt").text == "F · Entrar")
 	player.position = Vector2(760, 592)
 	await settle()
 	check("longe de tudo: sem foco e sem aviso", player.focus == null and not hud.get_node("Prompt").visible)
@@ -117,7 +117,7 @@ func _run() -> void:
 	player.position = box.position + Vector2(0, 22)
 	await physics_frame
 	await process_frame
-	check("container em foco: contorno e aviso", box.get_node("Focus").visible and hud.get_node("Prompt").text == "E · Abrir Armário")
+	check("container em foco: contorno e aviso", box.get_node("Focus").visible and hud.get_node("Prompt").text == "F · Abrir Armário")
 	player.interact()
 	await process_frame
 	check("vazio: apagado e aviso muda", box.is_looted() and box.modulate.r < 1.0 and hud.get_node("Prompt").text == "Armário (vazio)")
