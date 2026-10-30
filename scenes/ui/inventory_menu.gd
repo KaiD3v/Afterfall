@@ -55,6 +55,7 @@ var _audio := AudioStreamPlayer.new()
 var sheet := ItemSheet.new()  # ficha do item sob o mouse, ao lado do slot
 var loot_slots: Array[ItemSlot] = []
 var looting: Node  # móvel aberto agora (null = só o inventário)
+var _loot_inv: Inventory  # conteúdo do móvel aberto; o menu escuta as mudanças dele
 var _panel: Control
 var _loot_box: Control
 var _loot_title: Label
@@ -121,9 +122,10 @@ func open_loot(container: Node) -> void:
 	if player.is_dead():
 		return
 	looting = container
-	var inv: Inventory = container.contents()
+	_loot_inv = container.contents()
+	_loot_inv.changed.connect(_refresh)  # pegar ou guardar redesenha os blocos do móvel na hora
 	for i in loot_slots.size():
-		loot_slots[i].bind(inv, i)
+		loot_slots[i].bind(_loot_inv, i)
 	_loot_title.text = String(container.label).to_upper()
 	_panel.position = PANEL_LOOTING
 	_loot_box.show()
@@ -148,6 +150,9 @@ func take_all() -> void:
 
 func close() -> void:
 	root.hide()
+	if _loot_inv and _loot_inv.changed.is_connected(_refresh):
+		_loot_inv.changed.disconnect(_refresh)
+	_loot_inv = null
 	looting = null
 	_loot_box.hide()
 	_panel.position = PANEL.position
@@ -266,7 +271,7 @@ func gear_slot(slot: int) -> ItemSlot:
 
 
 func _refresh() -> void:
-	for s in gear_slots + bag_slots:
+	for s in gear_slots + bag_slots + (loot_slots if looting else []):
 		s.refresh()
 	if _bag_title:
 		var bag := RunState.inventory

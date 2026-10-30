@@ -178,6 +178,7 @@ func _run(main: Node) -> void:
 	check("o painel do inventário vai para a esquerda", menu._panel.position == menu.PANEL_LOOTING)
 	menu.activate(menu.loot_slots[0])
 	check("botão direito pega a bandagem", bag.count(&"bandage") == 1 and stash.get_at(0) == null and rs.stats.looted == looted0 + 1)
+	check("o bloco do móvel se apaga na hora", menu.loot_slots[0]._icon.texture == null and menu.loot_slots[0]._shown == null)
 	var reserve0: int = player.firearm.reserve
 	menu._transfer(menu.loot_slots[1], menu.bag_slots[5])
 	check("munição vai direto para a reserva, sem ocupar bloco", player.firearm.reserve == reserve0 + 6 and bag.get_at(5) == null and stash.get_at(1) == null)
@@ -187,6 +188,7 @@ func _run(main: Node) -> void:
 	check("dá para guardar coisas no móvel", stash.get_at(4) == BANDAGE and bag.count(&"bandage") == 0)
 	menu._unhandled_input(_key(KEY_F))
 	check("F pega tudo o que sobrou", stash.is_empty() and bag.count(&"vest") == 1 and bag.count(&"bandage") == 1 and menu._name.text.begins_with("Pegou"))
+	check("e os blocos do móvel ficam vazios na tela", menu.loot_slots.all(func(sl): return sl._shown == null))
 	check("móvel vazio fica apagado", crate.is_looted() and crate.modulate.r < 1.0)
 	menu.close()
 	check("fechar volta o painel e esconde o móvel", not menu._loot_box.visible and menu._panel.position == menu.PANEL.position and menu.looting == null and not player.input_locked)
