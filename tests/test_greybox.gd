@@ -9,7 +9,7 @@ var failed := false
 
 func _initialize() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
-	for z in main.get_node("Zombies").get_children():  # aqui só interessa a colisão do mapa
+	for z in main.get_node("Neighborhood/Zombies").get_children():  # aqui só interessa a colisão do mapa
 		z.free()
 	root.add_child(main)
 	player = main.get_node("Player")
@@ -59,7 +59,7 @@ func _run() -> void:
 	var y0 := player.position.y
 	await hold("move_left", 0.3)
 	check("fileira do telhado é andável", absf(player.position.y - y0) < 1.0 and player.position.x < 336)
-	check("ordenação por altura ligada", main.y_sort_enabled and main.get_node("Neighborhood").y_sort_enabled and main.get_node("Zombies").y_sort_enabled)
+	check("ordenação por altura ligada", main.y_sort_enabled and main.get_node("Neighborhood").y_sort_enabled and main.get_node("Neighborhood/Zombies").y_sort_enabled)
 	check("chão por baixo de tudo", main.get_node("Neighborhood/Ground").z_index < 0)
 	check("casa desenhada na frente de quem está atrás dela", house.position.y > player.position.y)
 

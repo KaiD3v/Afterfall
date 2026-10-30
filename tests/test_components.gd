@@ -1,7 +1,8 @@
-# Checagem da R1 a R4: Health e Stamina como componentes. Um objeto qualquer com um nó Health
+# Checagem da R1 a R5: Health e Stamina como componentes. Um objeto qualquer com um nó Health
 # (aqui, uma barricada sem script) leva tiro sem código novo; ação nova cancela o golpe pendente;
 # arma nova é só um Resource de dados num nó MeleeWeapon, o mesmo da mordida do zumbi;
-# tipo novo de zumbi é só um ZombieData; item novo é só um ItemData.
+# tipo novo de zumbi é só um ZombieData; item novo é só um ItemData; porta nova leva a
+# qualquer local.
 # Rodar: godot --headless --path . --fixed-fps 60 --script res://tests/test_components.gd
 extends SceneTree
 
@@ -10,7 +11,7 @@ var failed := false
 
 func _initialize() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
-	for z in main.get_node("Zombies").get_children():
+	for z in main.get_node("Neighborhood/Zombies").get_children():
 		z.free()
 	root.add_child(main)
 	_run.call_deferred(main)
@@ -140,6 +141,38 @@ func _run(main: Node) -> void:
 	var used: bool = player.use_item(medkit)
 	check("e cura 50 ao usar (vida %.0f)" % player.health.current, used and player.health.current == 70.0 and rs.inventory.is_empty())
 	check("sem o item, não usa", not player.use_item(medkit))
+	crate.queue_free()
+
+	# 8. Interação e locais (R5): um Interactable qualquer responde ao E sem script próprio; uma
+	# porta nova, num prédio qualquer, leva a um local e traz de volta na frente dela.
+	await physics_frame
+	var lever := Interactable.new()
+	lever.prompt_text = "E · Puxar"
+	var pulled := []
+	lever.interacted.connect(func(by): pulled.append(by))
+	lever.position = player.position + Vector2(0, 10)
+	main.add_child(lever)
+	await physics_frame
+	await physics_frame
+	check("interativo novo entra em foco e mostra o aviso", player.focus == lever and main.get_node("HUD/Prompt").text == "E · Puxar")
+	check("E aciona o interativo novo", player.interact() and pulled == [player])
+	lever.queue_free()
+	await physics_frame
+	var back := Marker2D.new()
+	back.position = player.position + Vector2(0, 40)
+	main.location.add_child(back)
+	var door: Door = load("res://scenes/props/door.tscn").instantiate()
+	door.target = "res://scenes/world/house_interior.tscn"
+	door.exit_marker = back
+	door.position = player.position + Vector2(0, -10)
+	main.location.add_child(door)
+	await physics_frame
+	door.interact(player)
+	await frames(0.7)
+	check("porta nova leva ao local", main.is_inside() and main.location.name == "HouseInterior" and player.surface == &"wood")
+	main.leave()
+	await frames(0.7)
+	check("e ao sair volta na frente dela", not main.is_inside() and player.position == back.global_position and player.surface == &"street")
 
 	print("RESULT: ", "FAIL" if failed else "PASS")
 	quit(1 if failed else 0)

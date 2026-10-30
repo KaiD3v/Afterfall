@@ -16,7 +16,7 @@ var rs: Node  # autoload RunState; o script de teste compila antes dos autoloads
 func _initialize() -> void:
 	rs = root.get_node("RunState")
 	main = load("res://scenes/main.tscn").instantiate()
-	for z in main.get_node("Zombies").get_children():  # cada caso monta os próprios zumbis
+	for z in main.get_node("Neighborhood/Zombies").get_children():  # cada caso monta os próprios zumbis
 		z.free()
 	root.add_child(main)
 	player = main.get_node("Player")
@@ -109,7 +109,7 @@ func _run() -> void:
 	player.position = main.get_node("Neighborhood/HouseExit").position
 	player.interact()
 	await frames_for(0.7)
-	var box: Node = main.interior.get_node("Armario")
+	var box: Node = main.location.get_node("Armario")
 	box.table = LootTable.new()
 	box.table.items.assign([BANDAGE])
 	box.table.weights = [1.0] as Array[float]
@@ -121,13 +121,13 @@ func _run() -> void:
 	player.interact()
 	await process_frame
 	check("vazio: apagado e aviso muda", box.is_looted() and box.modulate.r < 1.0 and hud.get_node("Prompt").text == "Armário (vazio)")
-	player.position = main.interior.get_node("PlayerSpawn").position
+	player.position = main.location.get_node("PlayerSpawn").position
 	await settle()
 	check("saiu do alcance: contorno some", not box.get_node("Focus").visible)
 	player.interact()
 	await frames_for(0.7)
 	await process_frame
-	check("sem erro com o foco liberado na troca de cena", main.interior == null)
+	check("sem erro com o foco liberado na troca de cena", not main.is_inside())
 	check("de volta à rua: passos da rua", player.surface == &"street")
 
 	# 5. Mira: dispersão cresce com a distância e ao andar mirando; cor avisa pente vazio; cursor escondido.

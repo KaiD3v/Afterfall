@@ -29,10 +29,10 @@ func _process(delta: float) -> void:
 	var gun: Firearm = player.firearm
 	ammo.text = "RECARREGANDO" if gun.reloading else "%d | %d" % [gun.ammo, gun.reserve]
 	inventory.text = "Inventário: %s (%d livres)" % [_items_text(), RunState.inventory.free_slots()]
-	var f = player.focus  # sem tipo: o foco pode ter sido liberado na troca bairro ↔ interior
+	var f = player.focus  # sem tipo: o foco pode ter sido liberado na troca de local
 	$Prompt.visible = is_instance_valid(f) and not player.is_dead()
 	if $Prompt.visible:
-		$Prompt.text = f.prompt()
+		$Prompt.text = f.prompt_text
 	_toast_left -= delta
 	toast.visible = _toast_left > 0.0
 

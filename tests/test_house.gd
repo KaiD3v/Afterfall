@@ -38,19 +38,19 @@ func _run() -> void:
 	player.position = main.get_node("Neighborhood/HouseExit").position
 	check("E na porta interage", player.interact())
 	await frames(0.7)
-	check("interior carregado", main.interior != null and main.interior.is_inside_tree())
-	var amb_out: AudioStreamPlayer = main.get_node("AmbOutside")
-	var amb_in: AudioStreamPlayer = main.get_node("AmbInside")
+	check("interior carregado", main.is_inside() and main.location.is_inside_tree() and main.location.name == "HouseInterior")
+	var amb_out: AudioStreamPlayer = main.ambience_player(load("res://assets/audio/ambience/exterior.ogg"))
+	var amb_in: AudioStreamPlayer = main.ambience_player(main.location.ambience)
 	check("ambiente em loop no canal Ambience", amb_out.stream.loop and amb_in.stream.loop and amb_out.bus == &"Ambience" and amb_in.bus == &"Ambience")
 	check("dentro: ouve-se o interior (fora %.2f, dentro %.2f)" % [amb_out.volume_linear, amb_in.volume_linear], is_zero_approx(amb_out.volume_linear) and is_equal_approx(amb_in.volume_linear, 1.0))
-	check("jogador no spawn do interior", player.position == main.interior.get_node("PlayerSpawn").position)
+	check("jogador no spawn do interior", player.position == main.location.get_node("PlayerSpawn").position)
 	check("bairro fora da árvore", not main.get_node_or_null("Neighborhood"))
 	check("nenhum zumbi na casa (ponto seguro)", get_nodes_in_group("zombies").is_empty())
 	var cam: Camera2D = player.get_node("Camera2D")
 	check("câmera presa ao interior (%d×%d)" % [cam.limit_right, cam.limit_bottom], cam.limit_right == 480 and cam.limit_bottom == 288)
 
 	# 2. Loot entra no inventário; container esvazia; munição vai para a reserva.
-	var box: Node = main.interior.get_node("Armario")
+	var box: Node = main.location.get_node("Armario")
 	box.table = table([BANDAGE], 2)
 	box.id = &"teste_bandagens"
 	player.position = box.position + Vector2(0, 22)
@@ -58,7 +58,7 @@ func _run() -> void:
 	check("2 bandagens no inventário", rs.inventory.count(&"bandage") == 2)
 	player.interact()
 	check("container vazio na segunda vez", rs.inventory.size() == 2)
-	var ammo_box: Node = main.interior.get_node("Mesa")
+	var ammo_box: Node = main.location.get_node("Mesa")
 	ammo_box.table = table([AMMO], 1)
 	ammo_box.id = &"teste_municao"
 	var reserve0: int = player.firearm.reserve
@@ -68,7 +68,7 @@ func _run() -> void:
 	# 3. Inventário cheio: o item fica no container e sai depois.
 	for i in 6:
 		rs.inventory.add(BANDAGE)
-	var full: Node = main.interior.get_node("Comoda")
+	var full: Node = main.location.get_node("Comoda")
 	full.table = table([BANDAGE], 1)
 	full.id = &"teste_cheio"
 	full.interact(player)
@@ -100,10 +100,10 @@ func _run() -> void:
 		check("tabela %s válida" % t, ok)
 
 	# 7. Sair: porta do interior devolve ao bairro, na frente da casa; zumbis voltam.
-	player.position = main.interior.get_node("PlayerSpawn").position
+	player.position = main.location.get_node("PlayerSpawn").position
 	check("E na porta de saída interage", player.interact())
 	await frames(0.7)
-	check("interior descartado", main.interior == null)
+	check("interior descartado", not main.is_inside())
 	check("fora: volta o ambiente da rua", is_equal_approx(amb_out.volume_linear, 1.0) and is_zero_approx(amb_in.volume_linear))
 	check("bairro de volta", main.get_node_or_null("Neighborhood") != null)
 	check("jogador na frente da casa", player.position == main.get_node("Neighborhood/HouseExit").position)

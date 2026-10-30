@@ -15,8 +15,8 @@ const STEPS := {&"street": preload("res://assets/audio/steps_street.tres"), &"wo
 
 var aiming := false
 var _moving := false
-var focus: Node2D        # interagível mais próximo ao alcance; a HUD mostra o aviso de E
-var surface := &"street"  # piso dos passos; main.gd troca para wood dentro da casa
+var focus: Interactable  # interagível mais próximo ao alcance; a HUD mostra o aviso de E
+var surface := &"street"  # piso dos passos; main.gd põe o do local (Location.surface)
 var _running := false
 var steps_taken := 0  # para teste e, depois, para o ruído dos passos
 
@@ -88,8 +88,8 @@ func interact() -> bool:
 	return best != null
 
 
-func _nearest_interactable() -> Node2D:
-	var best: Node2D = null
+func _nearest_interactable() -> Interactable:
+	var best: Interactable = null
 	var best_dist := interact_range
 	for n in get_tree().get_nodes_in_group(Groups.INTERACTABLES):
 		var d := global_position.distance_to(n.global_position)

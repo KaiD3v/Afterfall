@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scenes/main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/neighborhood_greybox.tscn" id="2"]
@@ -6,8 +6,6 @@
 [ext_resource type="PackedScene" path="res://scenes/zombie/zombie.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/door.mp3" id="6"]
-[ext_resource type="AudioStream" path="res://assets/audio/ambience/exterior.ogg" id="7"]
-[ext_resource type="AudioStream" path="res://assets/audio/ambience/interior.ogg" id="8"]
 
 [node name="Main" type="Node2D"]
 y_sort_enabled = true
@@ -15,20 +13,20 @@ script = ExtResource("1")
 
 [node name="Neighborhood" parent="." instance=ExtResource("2")]
 
-[node name="Zombies" type="Node2D" parent="."]
+[node name="Zombies" type="Node2D" parent="Neighborhood"]
 y_sort_enabled = true
 
-[node name="ZombiePosto" parent="Zombies" instance=ExtResource("4")]
+[node name="ZombiePosto" parent="Neighborhood/Zombies" instance=ExtResource("4")]
 position = Vector2(1500, 330)
 
-[node name="ZombieTransversal" parent="Zombies" instance=ExtResource("4")]
+[node name="ZombieTransversal" parent="Neighborhood/Zombies" instance=ExtResource("4")]
 position = Vector2(960, 200)
 
-[node name="ZombieSudeste" parent="Zombies" instance=ExtResource("4")]
+[node name="ZombieSudeste" parent="Neighborhood/Zombies" instance=ExtResource("4")]
 position = Vector2(1500, 800)
 facing = Vector2(-1, 0)
 
-[node name="ZombieOficina" parent="Zombies" instance=ExtResource("4")]
+[node name="ZombieOficina" parent="Neighborhood/Zombies" instance=ExtResource("4")]
 position = Vector2(420, 900)
 
 [node name="Player" parent="." instance=ExtResource("3")]
@@ -53,12 +51,4 @@ color = Color(0.0509804, 0.0627451, 0.0901961, 0)
 bus = &"SFX"
 stream = ExtResource("6")
 
-[node name="AmbOutside" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("7")
-autoplay = true
-bus = &"Ambience"
-
-[node name="AmbInside" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("8")
-autoplay = true
-bus = &"Ambience"
+[node name="Ambience" type="Node" parent="."]

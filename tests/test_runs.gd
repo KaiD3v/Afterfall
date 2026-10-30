@@ -31,7 +31,7 @@ func _run() -> void:
 		check("inventário vazio e loot não sorteado", rs.inventory.is_empty() and [&"geladeira", &"armario", &"mesa", &"comoda"].all(func(id): return not rs.has_rolled(id)))
 		check("números da run zerados", rs.kills == 0 and rs.looted == 0 and rs.run_time < 0.5)
 		check("4 zumbis vivos, cheios", get_nodes_in_group("zombies").size() == 4 and get_nodes_in_group("zombies").all(func(z): return z.health.current == z.health.maximum))
-		check("no bairro, no ponto de nascimento", main.interior == null and player.position == Vector2(336, 464))
+		check("no bairro, no ponto de nascimento", not main.is_inside() and player.position == Vector2(336, 464))
 		check("resultado escondido", not main.get_node("HUD/Result").visible)
 		check("mortes acumuladas = %d" % (run - 1), rs.deaths == run - 1)
 
@@ -41,17 +41,17 @@ func _run() -> void:
 		player.position = main.get_node("Neighborhood/HouseExit").position
 		player.interact()
 		await frames(0.7)
-		var box: Node = main.interior.get_node("Armario")
+		var box: Node = main.location.get_node("Armario")
 		box.table = LootTable.new()
 		box.table.items.assign([BANDAGE])
 		box.table.weights = [1.0] as Array[float]
 		box.table.rolls = 2
 		box.interact(player)
 		check("saque entra no inventário", rs.inventory.size() == 2 and rs.looted == 2)
-		player.position = main.interior.get_node("PlayerSpawn").position
+		player.position = main.location.get_node("PlayerSpawn").position
 		player.interact()
 		await frames(0.7)
-		check("saiu da casa", main.interior == null)
+		check("saiu da casa", not main.is_inside())
 
 		# Morre: resultado na tela com os números da run.
 		player.health.damage(150.0)

@@ -1,4 +1,5 @@
 # Container de loot (armário, geladeira...): interagir (E) pega o que couber no inventário.
+# O E chega pelo nó Interactable; o aviso diz "Abrir" ou "(vazio)".
 extends StaticBody2D
 
 @export var id: StringName
@@ -8,8 +9,11 @@ extends StaticBody2D
 @export var sprite: Texture2D  # o móvel (quadro de 64×64, base na linha 62); substitui o greybox
 
 
+@onready var interactable: Interactable = $Interactable
+
+
 func _ready() -> void:
-	add_to_group(Groups.INTERACTABLES)
+	interactable.interacted.connect(interact)
 	$Body.color = color
 	if sprite:
 		$Body.hide()
@@ -43,14 +47,6 @@ func interact(player: Node) -> void:
 	_refresh()
 
 
-func set_focus(on: bool) -> void:
-	$Focus.visible = on
-
-
-func prompt() -> String:
-	return ("%s (vazio)" % label) if is_looted() else ("E · Abrir %s" % label)
-
-
 # Já aberto nesta run e sem nada dentro.
 func is_looted() -> bool:
 	return RunState.is_looted(id)
@@ -58,3 +54,4 @@ func is_looted() -> bool:
 
 func _refresh() -> void:
 	modulate = Color(0.55, 0.55, 0.55) if is_looted() else Color.WHITE
+	interactable.prompt_text = ("%s (vazio)" % label) if is_looted() else ("E · Abrir %s" % label)

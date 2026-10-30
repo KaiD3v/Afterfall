@@ -75,6 +75,9 @@ const GRASS_CHANCE := 5    # % dos tiles de terreno com grama alta (decoração,
 
 var DOOR: PackedScene  # carregados em _initialize, depois dos autoloads (RunState)
 var CONTAINER: PackedScene
+var LOCATION: GDScript
+const INTERIOR_SCENE := "res://scenes/world/house_interior.tscn"
+const AMBIENCE := {false: "res://assets/audio/ambience/exterior.ogg", true: "res://assets/audio/ambience/interior.ogg"}
 const T := World.TILE
 const H := T / 2.0
 const SOLID := 1  # source do tile invisível com colisão (camada Walls)
@@ -88,6 +91,7 @@ var sheets := {}  # json -> {texture, rects: nome -> Rect2i, meta, source}
 func _initialize() -> void:
 	DOOR = load("res://scenes/props/door.tscn")
 	CONTAINER = load("res://scenes/props/loot_container.tscn")
+	LOCATION = load("res://scripts/world/location.gd")
 	keys = TILES.keys()
 	for path in [STREET_TILES, STREET_TILES_HD, STREET_PROPS, INTERIOR_TILES, INTERIOR_TILES_HD, FURNITURE]:
 		if FileAccess.file_exists(path):
@@ -136,8 +140,8 @@ func _initialize() -> void:
 		_props(hood, map)
 	_atmosphere(hood, false)
 	var door_tile := _find(hood_map, "D")
-	_door(hood, "HouseDoor", "enter_house", _center(door_tile) + Vector2(0, 28))
-	_marker(hood, "HouseExit", _center(door_tile) + Vector2(0, 32))
+	var house_door := _door(hood, "HouseDoor", INTERIOR_SCENE, _center(door_tile) + Vector2(0, 28))
+	house_door.exit_marker = _marker(hood, "HouseExit", _center(door_tile) + Vector2(0, 32))
 	_marker(hood, "PlayerSpawn", _center(Vector2i(10, 14)))  # calçada em frente ao portão
 	_save(hood, "res://scenes/world/neighborhood_greybox.tscn")
 
@@ -145,7 +149,7 @@ func _initialize() -> void:
 	var house := _scene("HouseInterior", inner_map, true)
 	_atmosphere(house, true)
 	door_tile = _find(inner_map, "D")
-	_door(house, "ExitDoor", "exit_house", _center(door_tile) + Vector2(0, -28))
+	_door(house, "ExitDoor", "", _center(door_tile) + Vector2(0, -28))
 	_marker(house, "PlayerSpawn", _center(door_tile) + Vector2(0, -32))
 	for c in CONTAINERS:
 		var box: StaticBody2D = CONTAINER.instantiate()
@@ -252,8 +256,11 @@ func _tileset_hd() -> TileSet:
 
 
 func _scene(scene_name: String, map: Array, interior: bool) -> Node2D:
-	var scene := Node2D.new()
+	var scene: Node2D = LOCATION.new()
 	scene.name = scene_name
+	scene.surface = &"wood" if interior else &"street"
+	if ResourceLoader.exists(AMBIENCE[interior]):
+		scene.ambience = load(AMBIENCE[interior])
 	scene.y_sort_enabled = true  # prédios e props ordenam pela base junto com jogador e zumbis
 	var layer := TileMapLayer.new()
 	layer.name = "Ground"
@@ -469,19 +476,22 @@ func _add(scene: Node, child: Node) -> void:
 	child.owner = scene if scene.owner == null else scene.owner  # dono é a raiz, para salvar
 
 
-func _door(scene: Node, door_name: String, action: String, pos: Vector2) -> void:
+# target vazio = porta de saída do local.
+func _door(scene: Node, door_name: String, target: String, pos: Vector2) -> Node2D:
 	var d: Node2D = DOOR.instantiate()
 	d.name = door_name
-	d.action = action
+	d.target = target
 	d.position = pos
 	_add(scene, d)
+	return d
 
 
-func _marker(scene: Node, marker_name: String, pos: Vector2) -> void:
+func _marker(scene: Node, marker_name: String, pos: Vector2) -> Marker2D:
 	var m := Marker2D.new()
 	m.name = marker_name
 	m.position = pos
 	_add(scene, m)
+	return m
 
 
 func _find(map: Array, ch: String) -> Vector2i:

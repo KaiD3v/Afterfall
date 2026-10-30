@@ -1,20 +1,20 @@
-# Porta da casa: interagir (E) entra ou sai. A troca de cena fica em main.gd.
-extends Node2D
+# Porta: interagir (E) leva ao local de target, ou sai do local atual se target estiver vazio.
+# A troca de local fica em main.gd; ao sair, o jogador volta em exit_marker, na frente da porta.
+class_name Door
+extends Interactable
 
-@export_enum("enter_house", "exit_house") var action := "enter_house"
+@export_file("*.tscn") var target := ""
+@export var exit_marker: Marker2D  # onde o jogador reaparece ao sair do target
 
 
 func _ready() -> void:
-	add_to_group(Groups.INTERACTABLES)
+	super()
+	prompt_text = "E · Entrar" if target != "" else "E · Sair"
 
 
-func set_focus(_on: bool) -> void:
-	pass  # a porta faz parte da arte da casa: só o aviso de E aparece
-
-
-func prompt() -> String:
-	return "E · Entrar" if action == "enter_house" else "E · Sair"
-
-
-func interact(_player: Node) -> void:
-	get_tree().call_group(Groups.MAIN, action)
+func interact(by: Node) -> void:
+	super(by)
+	if target != "":
+		get_tree().call_group(Groups.MAIN, "enter", target, exit_marker.global_position)
+	else:
+		get_tree().call_group(Groups.MAIN, "leave")

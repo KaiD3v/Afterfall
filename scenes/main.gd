@@ -1,28 +1,27 @@
-# Cena principal: bairro, jogador, zumbis e HUD. Entrar na casa tira o bairro e os zumbis
-# da árvore (ficam congelados, sem ouvir nada) e põe o interior; sair faz o inverso.
+# Cena principal: o local atual (bairro com seus zumbis), jogador e HUD. Uma porta com destino
+# empilha o local atual fora da árvore (congelado, sem ouvir nada) e põe o novo; sair desempilha.
 # Morte: tela de resultado; E começa uma nova run recarregando a cena do zero.
-# Ambiente: os dois loops tocam o tempo todo; a porta troca qual se ouve.
+# Ambiente: cada local tem o seu loop; todos tocam o tempo todo e a troca só mexe no volume.
 extends Node2D
 
-const INTERIOR := preload("res://scenes/world/house_interior.tscn")
 const FADE_TIME := 0.25
 const RESTART_DELAY := 1.0  # evita pular o resultado com um E apertado no susto
 const AMBIENCE_FADE := FADE_TIME * 2  # a troca dura o escurecer e o clarear da porta
 
-var interior: Node2D
+var _stack: Array[Dictionary] = []  # locais de onde se entrou: {location, back}
 var _busy := false
 var _dead_for := -1.0  # segundos desde a morte; -1 = vivo
 
-@onready var player: CharacterBody2D = $Player
-@onready var outside: Array[Node] = [$Neighborhood, $Zombies]
+@onready var player: Player = $Player
+@onready var location: Location = $Neighborhood
 @onready var fade: ColorRect = $Fade/Rect
 
 
 func _ready() -> void:
 	add_to_group(Groups.MAIN)
 	player.died.connect(_on_player_died)
-	_fit_camera($Neighborhood)
-	$AmbInside.volume_linear = 0.0
+	_arrive(location)
+	_ambience(location.ambience, 0.0)
 
 
 func _process(delta: float) -> void:
@@ -47,34 +46,51 @@ func _on_player_died() -> void:
 	$HUD.show_result()
 
 
-func enter_house() -> void:
-	if interior or _busy:
-		return
-	_ambience(true)
-	await _transition(func():
-		for n in outside:
-			remove_child(n)
-		interior = INTERIOR.instantiate()
-		add_child(interior)
-		move_child(interior, 0)
-		player.position = interior.get_node("PlayerSpawn").position
-		player.surface = &"wood"
-		_fit_camera(interior))
+# Dentro de algum local que não é o primeiro (a casa).
+func is_inside() -> bool:
+	return not _stack.is_empty()
 
 
-func exit_house() -> void:
-	if not interior or _busy:
+# Entra no local da cena scene_path; ao sair, o jogador volta em back.
+func enter(scene_path: String, back: Vector2) -> void:
+	if _busy:
 		return
-	_ambience(false)
+	var next: Location = load(scene_path).instantiate()
+	_ambience(next.ambience)
 	await _transition(func():
-		interior.free()
-		interior = null
-		for i in outside.size():
-			add_child(outside[i])
-			move_child(outside[i], i)
-		player.position = $Neighborhood/HouseExit.position
-		player.surface = &"street"
-		_fit_camera($Neighborhood))
+		_stack.push_back({location = location, back = back})
+		remove_child(location)
+		_show(next)
+		player.position = next.get_node("PlayerSpawn").position)
+
+
+func leave() -> void:
+	if _busy or _stack.is_empty():
+		return
+	var prev: Dictionary = _stack.pop_back()
+	_ambience(prev.location.ambience)
+	await _transition(func():
+		location.free()
+		_show(prev.location)
+		player.position = prev.back)
+
+
+func _show(next: Location) -> void:
+	add_child(next)
+	move_child(next, 0)
+	_arrive(next)
+
+
+func _arrive(next: Location) -> void:
+	location = next
+	player.surface = next.surface
+	var cam: Camera2D = player.get_node("Camera2D")
+	var rect := next.bounds()
+	cam.limit_left = rect.position.x
+	cam.limit_top = rect.position.y
+	cam.limit_right = rect.end.x
+	cam.limit_bottom = rect.end.y
+	cam.reset_smoothing()
 
 
 func _transition(swap: Callable) -> void:
@@ -88,18 +104,26 @@ func _transition(swap: Callable) -> void:
 	_busy = false
 
 
-# Crossfade em volume linear (em dB a troca soaria com um buraco no meio).
-func _ambience(inside: bool) -> void:
+# Crossfade em volume linear (em dB a troca soaria com um buraco no meio). Cada stream ganha um
+# player na primeira vez e segue tocando em silêncio quando o local muda.
+func _ambience(stream: AudioStream, time := AMBIENCE_FADE) -> void:
 	var t := create_tween().set_parallel()
-	t.tween_property($AmbOutside, "volume_linear", 0.0 if inside else 1.0, AMBIENCE_FADE)
-	t.tween_property($AmbInside, "volume_linear", 1.0 if inside else 0.0, AMBIENCE_FADE)
+	t.tween_interval(0.0)  # tween vazio dá erro quando não há ambiente
+	for p: AudioStreamPlayer in $Ambience.get_children():
+		t.tween_property(p, "volume_linear", 1.0 if p.stream == stream else 0.0, time)
+	if stream and not $Ambience.get_children().any(func(p): return p.stream == stream):
+		var p := AudioStreamPlayer.new()
+		p.stream = stream
+		p.bus = &"Ambience"
+		p.volume_linear = 0.0
+		$Ambience.add_child(p)
+		p.play()
+		t.tween_property(p, "volume_linear", 1.0, time)
 
 
-func _fit_camera(world: Node) -> void:
-	var cam: Camera2D = player.get_node("Camera2D")
-	var used: Rect2i = world.get_node("Ground").get_used_rect()
-	cam.limit_left = 0
-	cam.limit_top = 0
-	cam.limit_right = used.end.x * World.TILE
-	cam.limit_bottom = used.end.y * World.TILE
-	cam.reset_smoothing()
+# Player de ambiente que toca stream (para teste e depuração).
+func ambience_player(stream: AudioStream) -> AudioStreamPlayer:
+	for p: AudioStreamPlayer in $Ambience.get_children():
+		if p.stream == stream:
+			return p
+	return null

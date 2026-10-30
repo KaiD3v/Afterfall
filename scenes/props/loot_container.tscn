@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scenes/props/loot_container.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/components/interactable.gd" id="interactable"]
 
 [sub_resource type="RectangleShape2D" id="box"]
 size = Vector2(28, 28)
@@ -39,6 +40,10 @@ offset_bottom = 16.0
 mouse_filter = 2
 border_color = Color(0.890196, 0.603922, 0.231373, 1)
 editor_only = false
+
+[node name="Interactable" type="Node2D" parent="." node_paths=PackedStringArray("focus_visual")]
+script = ExtResource("interactable")
+focus_visual = NodePath("../Focus")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("box")
