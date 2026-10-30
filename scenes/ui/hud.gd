@@ -28,7 +28,7 @@ func _process(delta: float) -> void:
 	stamina_fill.color = Color8(66, 40, 29) if player.stamina.exhausted else Color8(99, 117, 80)
 	var gun: Firearm = player.firearm
 	ammo.text = "RECARREGANDO" if gun.reloading else "%d | %d" % [gun.ammo, gun.reserve]
-	inventory.text = "Inventário: %s (%d livres)" % [_items_text(), RunState.SLOTS - RunState.items.size()]
+	inventory.text = "Inventário: %s (%d livres)" % [_items_text(), RunState.inventory.free_slots()]
 	var f = player.focus  # sem tipo: o foco pode ter sido liberado na troca bairro ↔ interior
 	$Prompt.visible = is_instance_valid(f) and not player.is_dead()
 	if $Prompt.visible:
@@ -51,12 +51,12 @@ func _show_toast(text: String) -> void:
 
 
 func _items_text() -> String:
-	if RunState.items.is_empty():
+	if RunState.inventory.is_empty():
 		return "vazio"
-	var counts := {}
-	for id in RunState.items:
-		counts[id] = counts.get(id, 0) + 1
+	var counts := {}  # nome -> quantidade, na ordem em que entraram
+	for item in RunState.inventory.items:
+		counts[item.display_name] = counts.get(item.display_name, 0) + 1
 	var parts: Array[String] = []
-	for id in counts:
-		parts.append("%s ×%d" % [RunState.NAMES[id], counts[id]])
+	for item_name in counts:
+		parts.append("%s ×%d" % [item_name, counts[item_name]])
 	return ", ".join(parts)

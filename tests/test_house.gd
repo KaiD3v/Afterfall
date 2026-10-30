@@ -2,6 +2,9 @@
 # Rodar: godot --headless --path . --fixed-fps 60 --script res://tests/test_house.gd
 extends SceneTree
 
+const BANDAGE := preload("res://data/items/bandage.tres")
+const AMMO := preload("res://data/items/ammo_9mm.tres")
+
 const HZ := 60.0
 var main: Node2D
 var player: CharacterBody2D
@@ -48,44 +51,44 @@ func _run() -> void:
 
 	# 2. Loot entra no inventário; container esvazia; munição vai para a reserva.
 	var box: Node = main.interior.get_node("Armario")
-	box.table = table([&"bandage"], 2)
+	box.table = table([BANDAGE], 2)
 	box.id = &"teste_bandagens"
 	player.position = box.position + Vector2(0, 22)
 	check("E no container interage", player.interact())
-	check("2 bandagens no inventário", rs.items.count(&"bandage") == 2)
+	check("2 bandagens no inventário", rs.inventory.count(&"bandage") == 2)
 	player.interact()
-	check("container vazio na segunda vez", rs.items.size() == 2)
+	check("container vazio na segunda vez", rs.inventory.size() == 2)
 	var ammo_box: Node = main.interior.get_node("Mesa")
-	ammo_box.table = table([&"ammo_9mm"], 1)
+	ammo_box.table = table([AMMO], 1)
 	ammo_box.id = &"teste_municao"
 	var reserve0: int = player.firearm.reserve
 	ammo_box.interact(player)
-	check("munição soma 6 na reserva", player.firearm.reserve == reserve0 + 6 and rs.items.size() == 2)
+	check("munição soma 6 na reserva", player.firearm.reserve == reserve0 + 6 and rs.inventory.size() == 2)
 
 	# 3. Inventário cheio: o item fica no container e sai depois.
 	for i in 6:
-		rs.add_item(&"bandage")
+		rs.inventory.add(BANDAGE)
 	var full: Node = main.interior.get_node("Comoda")
-	full.table = table([&"bandage"], 1)
+	full.table = table([BANDAGE], 1)
 	full.id = &"teste_cheio"
 	full.interact(player)
-	check("8 slots: não pega o 9º", rs.items.size() == 8)
-	rs.take_item(&"bandage")
+	check("8 slots: não pega o 9º", rs.inventory.size() == 8)
+	rs.inventory.take(&"bandage")
 	full.interact(player)
-	check("liberou um slot: pega o que ficou", rs.items.size() == 8 and rs.loot_of(&"teste_cheio", full.table).is_empty())
+	check("liberou um slot: pega o que ficou", rs.inventory.size() == 8 and rs.loot_of(&"teste_cheio", full.table).is_empty())
 
 	# 4. Bandagem cura 30 e é consumida; com vida cheia não gasta.
 	player.health.current = 50.0
-	check("bandagem cura", player.use_bandage() and player.health.current == 80.0 and rs.items.size() == 7)
+	check("bandagem cura", player.use_item(BANDAGE) and player.health.current == 80.0 and rs.inventory.size() == 7)
 	player.health.current = player.health.maximum
-	check("vida cheia não gasta bandagem", not player.use_bandage() and rs.items.size() == 7)
+	check("vida cheia não gasta bandagem", not player.use_item(BANDAGE) and rs.inventory.size() == 7)
 
 	# 5. Loot fixo na run: o mesmo container não sorteia de novo; nova run sorteia.
 	var real: LootTable = load("res://data/loot/armario.tres")
 	var first: Array = rs.loot_of(&"armario_run", real).duplicate()
 	check("mesma run, mesmo loot", rs.loot_of(&"armario_run", real) == first)
 	rs.new_run()
-	check("nova run zera inventário", rs.items.is_empty())
+	check("nova run zera inventário", rs.inventory.is_empty())
 
 	# 6. Tabelas reais só têm itens conhecidos.
 	for t in ["armario", "geladeira", "mesa", "comoda"]:
@@ -93,7 +96,7 @@ func _run() -> void:
 		var ok := lt.items.size() == lt.weights.size()
 		for i in 50:
 			for item in lt.roll():
-				ok = ok and rs.NAMES.has(item)
+				ok = ok and item is ItemData and item.display_name != ""
 		check("tabela %s válida" % t, ok)
 
 	# 7. Sair: porta do interior devolve ao bairro, na frente da casa; zumbis voltam.
@@ -115,9 +118,9 @@ func _run() -> void:
 	quit(1 if failed else 0)
 
 
-func table(items: Array[StringName], rolls: int) -> LootTable:
+func table(items: Array, rolls: int) -> LootTable:
 	var t := LootTable.new()
-	t.items = items
+	t.items.assign(items)
 	var w: Array[float] = []
 	for i in items:
 		w.append(1.0)

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AmmoItem" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/ammo_item.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+amount = 6
+id = &"ammo_9mm"
+display_name = "Munição 9 mm"

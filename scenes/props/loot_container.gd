@@ -32,13 +32,12 @@ func interact(player: Node) -> void:
 		_refresh()
 		return
 	var got: Array[String] = []
-	for item in loot.duplicate():
-		if item == &"ammo_9mm":
-			player.firearm.reserve += RunState.AMMO_PER_BOX
-		elif not RunState.add_item(item):
-			continue  # inventário cheio: o item fica no container
+	for item: ItemData in loot.duplicate():
+		# ocupa slot e não coube: fica no container; efeito na hora (munição) sempre sai
+		if item.on_pickup(player) and not RunState.inventory.add(item):
+			continue
 		loot.erase(item)
-		got.append(RunState.NAMES[item])
+		got.append(item.display_name)
 		RunState.looted += 1
 	RunState.notify("%s: %s" % [label, ", ".join(got)] if got else "%s: inventário cheio" % label)
 	_refresh()

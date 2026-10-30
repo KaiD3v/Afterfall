@@ -3,6 +3,8 @@
 # Rodar: godot --headless --path . --fixed-fps 60 --script res://tests/test_ui.gd
 extends SceneTree
 
+const BANDAGE := preload("res://data/items/bandage.tres")
+
 const HZ := 60.0
 var main: Node2D
 var player: CharacterBody2D
@@ -109,7 +111,7 @@ func _run() -> void:
 	await frames_for(0.7)
 	var box: Node = main.interior.get_node("Armario")
 	box.table = LootTable.new()
-	box.table.items = [&"bandage"] as Array[StringName]
+	box.table.items.assign([BANDAGE])
 	box.table.weights = [1.0] as Array[float]
 	check("dentro da casa: passos de madeira", player.surface == &"wood")
 	player.position = box.position + Vector2(0, 22)

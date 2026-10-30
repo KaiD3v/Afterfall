@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="LootTable" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="LootTable" format=3]
 
-[ext_resource type="Script" path="res://scripts/loot_table.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_btiyl"]
+[ext_resource type="Resource" path="res://data/items/bandage.tres" id="2_twb7b"]
+[ext_resource type="Script" path="res://scripts/loot_table.gd" id="3_0egvi"]
 
 [resource]
-script = ExtResource("1")
-items = Array[StringName]([&"bandage", &""])
+script = ExtResource("3_0egvi")
+items = Array[ExtResource("1_btiyl")]([ExtResource("2_twb7b"), null])
 weights = Array[float]([1.0, 4.0])
-rolls = 1

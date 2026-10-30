@@ -1,14 +1,14 @@
-# Tabela de loot de um container: itens e pesos (&"" = nada). Sorteada uma vez por run, via RunState.
+# Tabela de loot de um container: itens e pesos (vazio = nada). Sorteada uma vez por run, via RunState.
 class_name LootTable
 extends Resource
 
-@export var items: Array[StringName] = []
+@export var items: Array[ItemData] = []
 @export var weights: Array[float] = []
 @export var rolls := 1
 
 
-func roll() -> Array[StringName]:
-	var out: Array[StringName] = []
+func roll() -> Array[ItemData]:
+	var out: Array[ItemData] = []
 	var total := 0.0
 	for w in weights:
 		total += w
@@ -17,7 +17,7 @@ func roll() -> Array[StringName]:
 		for j in items.size():
 			r -= weights[j]
 			if r < 0.0:
-				if items[j] != &"":
+				if items[j] != null:
 					out.append(items[j])
 				break
 	return out

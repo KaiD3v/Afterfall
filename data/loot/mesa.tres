@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="LootTable" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="LootTable" format=3]
 
-[ext_resource type="Script" path="res://scripts/loot_table.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_th8do"]
+[ext_resource type="Resource" path="res://data/items/ammo_9mm.tres" id="2_q87b3"]
+[ext_resource type="Script" path="res://scripts/loot_table.gd" id="3_qp068"]
 
 [resource]
-script = ExtResource("1")
-items = Array[StringName]([&"ammo_9mm", &""])
+script = ExtResource("3_qp068")
+items = Array[ExtResource("1_th8do")]([ExtResource("2_q87b3"), null])
 weights = Array[float]([2.0, 2.0])
-rolls = 1

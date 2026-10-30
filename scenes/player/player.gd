@@ -8,7 +8,7 @@ extends Actor
 @export var run_speed := 130.0
 @export var run_cost := 25.0       # stamina por segundo correndo (4 s de fôlego cheio); o resto no nó Stamina
 @export var interact_range := 32.0
-@export var bandage_heal := 30.0
+@export var heal_item: ItemData = preload("res://data/items/bandage.tres")  # tecla Q
 
 const STEP_FRAMES := [0, 2]     # walk_*: frames de contato do pé com o chão
 const STEPS := {&"street": preload("res://assets/audio/steps_street.tres"), &"wood": preload("res://assets/audio/steps_wood.tres")}
@@ -60,7 +60,7 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("interact"):
 		interact()
 	if Input.is_action_just_pressed("heal"):
-		use_bandage()
+		use_item(heal_item)
 	if Input.is_action_just_pressed("flashlight"):
 		flashlight.toggle()
 	_update_anim()
@@ -110,11 +110,8 @@ func _update_focus() -> void:
 		focus.set_focus(true)
 
 
-func use_bandage() -> bool:
-	if is_dead() or health.is_full() or not RunState.take_item(&"bandage"):
-		return false
-	health.heal(bandage_heal)
-	return true
+func use_item(item: ItemData) -> bool:
+	return not is_dead() and RunState.inventory.use(item, self)
 
 
 func _on_frame_changed() -> void:

@@ -1,7 +1,7 @@
-# Checagem da R1 a R3: Health e Stamina como componentes. Um objeto qualquer com um nó Health
+# Checagem da R1 a R4: Health e Stamina como componentes. Um objeto qualquer com um nó Health
 # (aqui, uma barricada sem script) leva tiro sem código novo; ação nova cancela o golpe pendente;
 # arma nova é só um Resource de dados num nó MeleeWeapon, o mesmo da mordida do zumbi;
-# tipo novo de zumbi é só um ZombieData.
+# tipo novo de zumbi é só um ZombieData; item novo é só um ItemData.
 # Rodar: godot --headless --path . --fixed-fps 60 --script res://tests/test_components.gd
 extends SceneTree
 
@@ -116,6 +116,30 @@ func _run(main: Node) -> void:
 	await frames(0.6)  # o tranco termina e ele corre para quem bateu
 	check("persegue quem bateu na velocidade do tipo (%.0f px/s)" % zb.velocity.length(), zb.state == zb.State.CHASE and zb.target == player and is_equal_approx(zb.velocity.length(), 90.0))
 	check("o andarilho segue com os números de antes", load("res://data/zombies/walker.tres").chase_speed == 60.0)
+	zb.queue_free()
+
+	# 7. Item novo só por dado (R4): um kit médico (HealItem criado aqui) sai de um container,
+	# entra no inventário e cura pelo mesmo caminho da bandagem, sem código novo.
+	var rs: Node = root.get_node("RunState")
+	rs.new_run()
+	var medkit := HealItem.new()
+	medkit.id = &"medkit"
+	medkit.display_name = "Kit médico"
+	medkit.heal = 50.0
+	var table := LootTable.new()
+	table.items.assign([medkit])
+	table.weights.assign([1.0])
+	var crate: Node = load("res://scenes/props/loot_container.tscn").instantiate()
+	crate.id = &"teste_kit"
+	crate.label = "Caixa"
+	crate.table = table
+	main.add_child(crate)
+	crate.interact(player)
+	check("kit médico entra no inventário", rs.inventory.count(&"medkit") == 1 and rs.looted == 1)
+	player.health.current = 20.0
+	var used: bool = player.use_item(medkit)
+	check("e cura 50 ao usar (vida %.0f)" % player.health.current, used and player.health.current == 70.0 and rs.inventory.is_empty())
+	check("sem o item, não usa", not player.use_item(medkit))
 
 	print("RESULT: ", "FAIL" if failed else "PASS")
 	quit(1 if failed else 0)

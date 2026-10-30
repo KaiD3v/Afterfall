@@ -4,11 +4,7 @@ extends Node
 
 signal message(text: String)
 
-const SLOTS := 8
-const AMMO_PER_BOX := 6  # munição vai direto para a reserva da pistola, sem ocupar slot
-const NAMES := {&"bandage": "Bandagem", &"ammo_9mm": "Munição 9 mm"}
-
-var items: Array[StringName] = []  # um item por slot, sem peso
+var inventory := Inventory.new()  # 8 slots, um item por slot, sem peso
 var deaths := 0
 var run_time := 0.0  # segundos vivo nesta run
 var kills := 0
@@ -17,7 +13,7 @@ var _loot := {}  # id do container -> itens que ainda estão nele
 
 
 func new_run() -> void:
-	items.clear()
+	inventory.clear()
 	_loot.clear()
 	run_time = 0.0
 	kills = 0
@@ -37,21 +33,6 @@ func has_rolled(container_id: StringName) -> bool:
 
 func is_looted(container_id: StringName) -> bool:
 	return _loot.has(container_id) and _loot[container_id].is_empty()
-
-
-func add_item(id: StringName) -> bool:
-	if items.size() >= SLOTS:
-		return false
-	items.append(id)
-	return true
-
-
-func take_item(id: StringName) -> bool:
-	var i := items.find(id)
-	if i < 0:
-		return false
-	items.remove_at(i)
-	return true
 
 
 func notify(text: String) -> void:
