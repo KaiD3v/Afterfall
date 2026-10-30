@@ -10,9 +10,9 @@
 # ícones dos itens vêm do gerador de imagem (assets/sprites/ui).
 extends CanvasLayer
 
-const PANEL := Rect2(152, 146, 176, 118)  # embaixo e no centro da tela (480×270)
-const PANEL_LOOTING := Vector2(112, 146)    # com um móvel aberto, o painel abre espaço à direita
-const LOOT_PANEL := Rect2(292, 146, 76, 96)  # conteúdo do móvel
+const PANEL := Rect2(152, 76, 176, 118)  # centralizado na tela (480×270)
+const PANEL_LOOTING := Vector2(112, 76)    # com um móvel aberto, o painel abre espaço à direita
+const LOOT_PANEL := Rect2(292, 76, 76, 96)  # conteúdo do móvel
 const LOOT_AT := Vector2(6, 24)             # grade do móvel dentro do painel dele, 3 colunas
 const BG := Color8(30, 36, 46)          # shadow_deep
 const BORDER_OUT := Color8(20, 24, 32)  # shadow_outline
@@ -311,7 +311,7 @@ func _show_details(slot: ItemSlot) -> void:
 	elif TABS[tab][0] != &"bag":
 		_footer("", TABS[tab][2], DIM)
 	else:
-		_footer("", "Arraste para mover · botão direito: usar", DIM)
+		_footer("", "Arraste ou botão direito para usar", DIM)
 
 
 # Rodapé de uma linha: nome em destaque e, logo depois, a dica.
