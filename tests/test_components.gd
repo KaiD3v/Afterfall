@@ -137,7 +137,7 @@ func _run(main: Node) -> void:
 	crate.label = "Caixa"
 	crate.table = table
 	main.add_child(crate)
-	crate.interact(player)
+	crate.take_all(player)
 	check("kit médico entra no inventário", rs.inventory.count(&"medkit") == 1 and rs.stats.looted == 1)
 	player.health.current = 20.0
 	var used: bool = player.use_item(medkit)

@@ -151,7 +151,7 @@ func _notification(what: int) -> void:
 
 
 func accepts(from: ItemSlot) -> bool:
-	return not locked and not from.locked and ItemTransfer.can_swap(from.container, from.key, container, key)
+	return container != null and not locked and not from.locked and ItemTransfer.can_swap(from.container, from.key, container, key)
 
 
 func _gui_input(event: InputEvent) -> void:

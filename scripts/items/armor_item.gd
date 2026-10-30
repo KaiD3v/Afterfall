@@ -7,5 +7,5 @@ extends EquipmentItem
 
 
 func stats() -> Array[Dictionary]:
-	var text := "%d%% (ainda sem efeito)" % roundi(protection * 100)  # a proteção ainda não reduz dano
+	var text := "%d%% (sem efeito)" % roundi(protection * 100)  # a proteção ainda não reduz dano
 	return [stat("Proteção", protection, text)]

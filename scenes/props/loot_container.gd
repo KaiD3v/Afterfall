@@ -1,5 +1,6 @@
-# Container de loot (armário, geladeira...): interagir (E) pega o que couber no inventário.
-# O E chega pelo nó Interactable; o aviso diz "Abrir" ou "(vazio)".
+# Container de loot (armário, geladeira...): interagir abre o menu do inventário com o conteúdo
+# do móvel ao lado da mochila, para o jogador escolher o que levar (e deixar coisas lá).
+# A interação chega pelo nó Interactable; o aviso diz "Abrir" ou "(vazio)".
 extends StaticBody2D
 
 @export var id: StringName
@@ -29,22 +30,36 @@ func _ready() -> void:
 	_refresh()
 
 
-func interact(player: Node) -> void:
-	var loot: Array = RunState.loot.of(id, table)
-	if loot.is_empty():
-		RunState.notify("%s: vazio" % label)
-		_refresh()
-		return
+func interact(_player: Node) -> void:
+	contents()
+	get_tree().call_group(Groups.INVENTORY_MENU, "open_loot", self)
+
+
+# O que está no móvel (sorteado na primeira vez da run). O móvel se atualiza quando muda.
+func contents() -> Inventory:
+	var inv := RunState.loot.of(id, table)
+	if not inv.changed.is_connected(_refresh):
+		inv.changed.connect(_refresh)
+	return inv
+
+
+# Pega tudo o que couber: munição vai direto para a reserva, o resto para a mochila.
+# Devolve os nomes pegos e se sobrou algo por falta de espaço.
+func take_all(player: Node) -> Dictionary:
+	var inv := contents()
 	var got: Array[String] = []
-	for item: ItemData in loot.duplicate():
-		# ocupa slot e não coube: fica no container; efeito na hora (munição) sempre sai
-		if item.on_pickup(player) and not RunState.inventory.add(item):
+	var full := false
+	for i in inv.capacity:
+		var item := inv.get_at(i)
+		if item == null:
 			continue
-		loot.erase(item)
+		if item.on_pickup(player) and not RunState.inventory.add(item):
+			full = true  # ocupa bloco e não coube: fica no móvel
+			continue
+		inv.put(i, null)
 		got.append(item.display_name)
 		RunState.stats.looted += 1
-	RunState.notify("%s: %s" % [label, ", ".join(got)] if got else "%s: inventário cheio" % label)
-	_refresh()
+	return {"got": got, "full": full}
 
 
 # Já aberto nesta run e sem nada dentro.

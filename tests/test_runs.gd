@@ -46,7 +46,7 @@ func _run() -> void:
 		box.table.items.assign([BANDAGE])
 		box.table.weights = [1.0] as Array[float]
 		box.table.rolls = 2
-		box.interact(player)
+		box.take_all(player)
 		check("saque entra no inventário", rs.inventory.size() == 2 and rs.stats.looted == 2)
 		player.position = main.location.get_node("PlayerSpawn").position
 		player.interact()

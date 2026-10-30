@@ -3,11 +3,16 @@
 # botão direito ou duplo clique usa ou equipa (na mochila) e desequipa (no equipamento). Toda troca
 # passa por _transfer: som, pulso no slot, e recusa com motivo no rodapé. O mundo não pausa: o
 # jogador só fica parado.
+# Saque: abrir um móvel (open_loot) mostra o conteúdo dele num painel ao lado; dá para pegar item
+# por item (arrastar, botão direito), pegar tudo (botão ou a tecla de interação) e deixar coisas lá.
 # Painel e textos são elementos simples feitos por código (Guia de estilo, seção 7); molduras dos
 # slots e ícones dos itens vêm do gerador de imagem (assets/sprites/ui).
 extends CanvasLayer
 
 const PANEL := Rect2(84, 17, 312, 236)  # na resolução do jogo (480×270); grade de 4 px
+const PANEL_LOOTING := Vector2(8, 17)   # com um móvel aberto, o painel vai para a esquerda
+const LOOT_PANEL := Rect2(324, 17, 148, 140)  # conteúdo do móvel, à direita
+const LOOT_AT := Vector2(22, 26)        # grade do móvel dentro do painel dele, 3 colunas
 const BG := Color8(30, 36, 46)          # shadow_deep
 const BORDER_OUT := Color8(20, 24, 32)  # shadow_outline
 const BORDER_IN := Color8(68, 76, 87)   # concrete_dark
@@ -48,6 +53,11 @@ var _frames := {}  # tamanho do slot -> moldura gerada
 var _hovered: ItemSlot
 var _audio := AudioStreamPlayer.new()
 var sheet := ItemSheet.new()  # ficha do item sob o mouse, ao lado do slot
+var loot_slots: Array[ItemSlot] = []
+var looting: Node  # móvel aberto agora (null = só o inventário)
+var _panel: Control
+var _loot_box: Control
+var _loot_title: Label
 var _message_id := 0  # um aviso novo cancela a volta do anterior
 
 @onready var root: Control = $Root
@@ -55,6 +65,7 @@ var _message_id := 0  # um aviso novo cancela a volta do anterior
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS  # abre e fecha mesmo com o jogo pausado
+	add_to_group(Groups.INVENTORY_MENU)
 	_audio.bus = &"SFX"
 	add_child(_audio)
 	_build()
@@ -73,6 +84,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_cancel") and is_open():
 		close()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("interact") and is_open() and looting:
+		take_all()  # a mesma tecla que abriu o móvel pega tudo
 		get_viewport().set_input_as_handled()
 
 
@@ -102,8 +116,41 @@ func open() -> void:
 	_refresh()
 
 
+# Abre o menu com o conteúdo do móvel ao lado da mochila.
+func open_loot(container: Node) -> void:
+	if player.is_dead():
+		return
+	looting = container
+	var inv: Inventory = container.contents()
+	for i in loot_slots.size():
+		loot_slots[i].bind(inv, i)
+	_loot_title.text = String(container.label).to_upper()
+	_panel.position = PANEL_LOOTING
+	_loot_box.show()
+	open()
+
+
+# Pega do móvel tudo o que couber na mochila (munição direto para a reserva).
+func take_all() -> void:
+	if looting == null:
+		return
+	var result: Dictionary = looting.take_all(player)
+	if result.got:
+		_play(stow_sound)
+		_show_details(null)
+		_name.text = "Pegou: " + ", ".join(result.got)
+	if result.full:
+		var left := loot_slots.filter(func(s): return s.item() != null)
+		_warn(left[0] if left else loot_slots[0], "Mochila cheia: o resto ficou no móvel")
+	elif not result.got:
+		_warn(loot_slots[0], "O móvel está vazio")
+
+
 func close() -> void:
 	root.hide()
+	looting = null
+	_loot_box.hide()
+	_panel.position = PANEL.position
 	player.input_locked = false
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN  # volta a mira desenhada
 	if pauses_game:
@@ -116,12 +163,12 @@ func activate(slot: ItemSlot) -> void:
 	var item := slot.item()
 	if item == null:
 		return
-	if slot.container == RunState.equipment:
+	if slot.container == RunState.equipment or _is_loot(slot):
 		var free := RunState.inventory.first_free()
-		if free < 0:
+		if free < 0 and not (_is_loot(slot) and not _takes_slot(item)):
 			_warn(slot, "Mochila cheia")
 		else:
-			_transfer(slot, bag_slots[free])
+			_transfer(slot, bag_slots[maxi(free, 0)])
 	elif item is EquipmentItem:
 		_transfer(slot, gear_slot(item.slot))
 	elif player.use_item(item):  # o som de uso toca no jogador
@@ -136,12 +183,30 @@ func _transfer(from: ItemSlot, to: ItemSlot) -> bool:
 		_reject(from, to)
 		return false
 	var moving := from.item()
+	var taking := _is_loot(from) and not _is_loot(to)
+	if taking and not moving.on_pickup(player):  # munição: vai direto para a reserva
+		from.container.put(from.key, null)
+		RunState.stats.looted += 1
+		_play(stow_sound)
+		_show_details(to)
+		return true
 	ItemTransfer.swap(from.container, from.key, to.container, to.key)
+	if taking:
+		RunState.stats.looted += 1
 	var gear := moving as EquipmentItem
 	var equipped := to.container == RunState.equipment and gear != null and gear.equip_sound != null
 	_play(gear.equip_sound if equipped else stow_sound)
 	_show_details(to)
 	return true
+
+
+func _is_loot(slot: ItemSlot) -> bool:
+	return looting != null and slot in loot_slots
+
+
+# O item ocupa um bloco ao ser pego? (munição não: vai para a reserva)
+func _takes_slot(item: ItemData) -> bool:
+	return not item is AmmoItem
 
 
 func _reject(from: ItemSlot, to: ItemSlot) -> void:
@@ -240,6 +305,8 @@ func _show_details(slot: ItemSlot) -> void:
 
 # O que o botão direito faz com este item, para o rodapé.
 func _action_hint(slot: ItemSlot, item: ItemData) -> String:
+	if _is_loot(slot):
+		return "Botão direito: pegar · %s pega tudo" % Keys.label(&"interact")
 	if slot.container == RunState.equipment:
 		return "Botão direito: desequipar · arraste para a mochila"
 	if item is EquipmentItem:
@@ -250,7 +317,7 @@ func _action_hint(slot: ItemSlot, item: ItemData) -> String:
 	return "Arraste para mover"
 
 
-# O item equipado no mesmo slot que este, para a ficha comparar (só para itens da mochila).
+# O item equipado no mesmo slot que este, para a ficha comparar (itens da mochila e do móvel).
 func _equipped_like(slot: ItemSlot, item: ItemData) -> ItemData:
 	if slot.container == RunState.equipment or not item is EquipmentItem:
 		return null
@@ -274,6 +341,8 @@ func _build() -> void:
 	panel.size = PANEL.size
 	panel.draw.connect(_draw_panel.bind(panel))
 	root.add_child(panel)
+	_panel = panel
+	_build_loot_box()
 	_label(panel, "INVENTÁRIO", Vector2(8, 6), TITLE)
 	_label(panel, "%s · fechar" % Keys.label(&"inventory"), Vector2(PANEL.size.x - 58, 6), DIM)
 	_label(panel, "EQUIPAMENTO", Vector2(8, 24), TEXT)
@@ -315,6 +384,44 @@ func _portrait(panel: Control) -> void:
 	portrait.position = (GEAR_AT + Vector2(72 - portrait.size.x / 2, PORTRAIT_TOP)).round()
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_child(portrait)
+
+
+# Painel do móvel aberto: título, 2 fileiras de 3 blocos e o botão de pegar tudo.
+func _build_loot_box() -> void:
+	_loot_box = Control.new()
+	_loot_box.position = LOOT_PANEL.position
+	_loot_box.size = LOOT_PANEL.size
+	_loot_box.draw.connect(_draw_loot_box)
+	_loot_box.hide()
+	root.add_child(_loot_box)
+	_loot_title = _label(_loot_box, "", Vector2(8, 6), TITLE)
+	for i in LootMemory.CAPACITY:
+		var at := Vector2(i % BAG_COLUMNS, i / BAG_COLUMNS) * (ItemSlot.SMALL + Vector2(GAP, GAP))
+		loot_slots.append(_slot(_loot_box, LOOT_AT + at, ItemSlot.SMALL))
+	var take := Button.new()
+	take.text = "PEGAR TUDO · %s" % Keys.label(&"interact")
+	take.position = Vector2(8, 106)
+	take.size = Vector2(LOOT_PANEL.size.x - 16, 24)
+	take.focus_mode = Control.FOCUS_NONE
+	for state in [["normal", BORDER_IN], ["hover", TITLE], ["pressed", TITLE]]:  # metal do painel
+		var box := StyleBoxFlat.new()
+		box.bg_color = BORDER_OUT
+		box.border_color = state[1]
+		box.set_border_width_all(1)
+		take.add_theme_stylebox_override(state[0], box)
+	take.add_theme_color_override("font_color", TEXT)
+	take.add_theme_color_override("font_hover_color", TITLE)
+	take.pressed.connect(take_all)
+	_loot_box.add_child(take)
+
+
+func _draw_loot_box() -> void:
+	var r := Rect2(Vector2.ZERO, _loot_box.size)
+	_loot_box.draw_rect(r, BORDER_OUT)
+	_loot_box.draw_rect(r.grow(-1), BORDER_IN)
+	_loot_box.draw_rect(r.grow(-2), BORDER_OUT)
+	_loot_box.draw_rect(r.grow(-3), BG)
+	_loot_box.draw_rect(Rect2(4, 18, _loot_box.size.x - 8, 1), BORDER_IN)
 
 
 func _slot(parent: Control, at: Vector2, at_size: Vector2) -> ItemSlot:

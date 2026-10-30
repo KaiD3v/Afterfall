@@ -7,6 +7,7 @@ extends SceneTree
 const BANDAGE := preload("res://data/items/bandage.tres")
 const HELMET := preload("res://data/items/helmet.tres")
 const VEST := preload("res://data/items/vest.tres")
+const AMMO := preload("res://data/items/ammo_9mm.tres")
 const MACHETE := preload("res://data/items/machete.tres")
 const PISTOL := preload("res://data/items/pistol_9mm.tres")
 const MELEE := EquipmentItem.Slot.MELEE
@@ -159,6 +160,38 @@ func _run(main: Node) -> void:
 	menu._unhandled_input(_key(KEY_ESCAPE))
 	check("Esc fecha e devolve o controle", not menu.is_open() and not player.input_locked)
 
+	# 4d. I5: saque pela tela. O móvel abre ao lado da mochila; pega um a um, guarda, pega tudo.
+	var crate: Node = load("res://scenes/props/loot_container.tscn").instantiate()
+	crate.id = &"teste_saque"
+	crate.label = "Armário"
+	crate.table = LootTable.new()
+	main.add_child(crate)
+	var stash: Inventory = rs.loot.of(&"teste_saque", crate.table)
+	stash.add(BANDAGE)
+	stash.add(AMMO)
+	stash.add(VEST)
+	gear.put(BODY, null)
+	bag.clear()
+	var looted0: int = rs.stats.looted
+	crate.interact(player)
+	check("F no móvel abre o menu com o conteúdo ao lado", menu.is_open() and menu.looting == crate and menu._loot_box.visible and menu.loot_slots[0].item() == BANDAGE and menu._loot_title.text == "ARMÁRIO")
+	check("o painel do inventário vai para a esquerda", menu._panel.position == menu.PANEL_LOOTING)
+	menu.activate(menu.loot_slots[0])
+	check("botão direito pega a bandagem", bag.count(&"bandage") == 1 and stash.get_at(0) == null and rs.stats.looted == looted0 + 1)
+	var reserve0: int = player.firearm.reserve
+	menu._transfer(menu.loot_slots[1], menu.bag_slots[5])
+	check("munição vai direto para a reserva, sem ocupar bloco", player.firearm.reserve == reserve0 + 6 and bag.get_at(5) == null and stash.get_at(1) == null)
+	menu.loot_slots[2].hovered.emit(menu.loot_slots[2])
+	check("ficha do colete no móvel e rodapé com pegar", menu.sheet.item == VEST and menu._desc.text.begins_with("Botão direito: pegar"))
+	menu._transfer(menu.bag_slots[_index(bag, BANDAGE)], menu.loot_slots[4])
+	check("dá para guardar coisas no móvel", stash.get_at(4) == BANDAGE and bag.count(&"bandage") == 0)
+	menu._unhandled_input(_key(KEY_F))
+	check("F pega tudo o que sobrou", stash.is_empty() and bag.count(&"vest") == 1 and bag.count(&"bandage") == 1 and menu._name.text.begins_with("Pegou"))
+	check("móvel vazio fica apagado", crate.is_looted() and crate.modulate.r < 1.0)
+	menu.close()
+	check("fechar volta o painel e esconde o móvel", not menu._loot_box.visible and menu._panel.position == menu.PANEL.position and menu.looting == null and not player.input_locked)
+	crate.queue_free()
+
 	# 5. Nova run: mochila vazia e só o equipamento inicial, já na mão.
 	rs.new_run()
 	check("nova run: só machete e pistola, mochila vazia", gear.get_at(MELEE) == MACHETE and gear.get_at(FIREARM) == PISTOL and gear.get_at(HEAD) == null and gear.get_at(BODY) == null and bag.is_empty())
@@ -183,7 +216,7 @@ func _labels(stats: Array[Dictionary]) -> Array:
 func _diff_labels(sheet: Control) -> Dictionary:
 	var out := {}
 	for c in sheet.get_children():
-		if c is Label and not c.is_queued_for_deletion() and (c.text.begins_with("+") or c.text.begins_with("-")) and c.position.x > 60:
+		if c is Label and not c.is_queued_for_deletion() and (c.text.begins_with("+") or c.text.begins_with("-")) and c.position.x > 80:
 			out[c.text] = c.get_theme_color("font_color")
 	return out
 

@@ -4,7 +4,8 @@
 class_name ItemSheet
 extends Control
 
-const WIDTH := 132
+const WIDTH := 150
+const VALUE_X := 56  # coluna dos valores (cabe "Proteção")
 const PAD := 5
 const LINE := 10
 const GAP := 4  # distância do slot
@@ -74,7 +75,7 @@ func _line(text: String, y: int, color: Color) -> int:
 # "Dano 25", com "+15" ou "-15" ao lado na cor de melhor ou pior.
 func _stat(s: Dictionary, other, y: int) -> int:
 	_label(s.label, Vector2(PAD, y), DIM)
-	_label(s.text, Vector2(PAD + 44, y), TEXT)
+	_label(s.text, Vector2(VALUE_X, y), TEXT)
 	if other != null and s.value != other.value:
 		var diff: float = s.value - other.value
 		var better: bool = (diff > 0) == s.higher_is_better

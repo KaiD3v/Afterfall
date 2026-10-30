@@ -119,6 +119,9 @@ func _run() -> void:
 	await process_frame
 	check("container em foco: contorno e aviso", box.get_node("Focus").visible and hud.get_node("Prompt").text == "F · Abrir Armário")
 	player.interact()
+	main.get_node("InventoryMenu").take_all()
+	main.get_node("InventoryMenu").close()
+	await physics_frame
 	await process_frame
 	check("vazio: apagado e aviso muda", box.is_looted() and box.modulate.r < 1.0 and hud.get_node("Prompt").text == "Armário (vazio)")
 	player.position = main.location.get_node("PlayerSpawn").position
