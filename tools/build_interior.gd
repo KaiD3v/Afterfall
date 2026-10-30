@@ -26,7 +26,6 @@ const LIGHTS := [
 	["RoomLight", Vector2(10.0, 4.5), Color(0.95, 0.72, 0.42, 1.0), 0.70, 1.2],
 ]
 
-const TILES := "res://assets/sprites/d/interior-tiles.json"
 const TILES_HD := "res://assets/sprites/d/interior-tiles-hd.json"
 const FURNITURE := "res://assets/sprites/d/furniture.json"
 const AMBIENCE := "res://assets/audio/ambience/interior.ogg"
@@ -48,7 +47,6 @@ static func read_map(path: String) -> Array:
 
 func _initialize() -> void:
 	var map := read_map(INTERIOR_MAP)
-	var tiles := _sheet(TILES)
 	var tiles_hd := _sheet(TILES_HD)
 	var furniture := _sheet(FURNITURE)
 
@@ -58,18 +56,15 @@ func _initialize() -> void:
 	house.ambience = load(AMBIENCE)
 	house.y_sort_enabled = true  # móveis ordenam pela base junto com o jogador
 
-	var ground := _layer(house, "Ground", _tileset(tiles, T, true), -2)  # chão lógico por baixo
-	var ground_hd := _layer(house, "GroundHD", _tileset(tiles_hd, HD, false), -1)  # arte HD por cima
+	var ground_hd := _layer(house, "GroundHD", _art_tileset(tiles_hd), -1)  # chão por baixo de tudo
 	ground_hd.scale = Vector2.ONE * World.ART_SCALE
-	var walls := _layer(house, "Walls", ground.tile_set, 0)
+	var walls := _layer(house, "Walls", _solid_tileset(), 0)
 	for y in map.size():
 		for x in map[y].length():
 			var cell := Vector2i(x, y)
 			if map[y][x] in SOLIDS:
 				walls.set_cell(cell, SOLID, Vector2i.ZERO)
-			var tile := _tile_of(map, cell)
-			ground.set_cell(cell, tiles.source, Vector2i(tiles.rects[tile].position) / T)
-			ground_hd.set_cell(cell, tiles_hd.source, Vector2i(tiles_hd.rects[tile].position) / HD)
+			ground_hd.set_cell(cell, tiles_hd.source, Vector2i(tiles_hd.rects[_tile_of(map, cell)].position) / HD)
 
 	var mod := CanvasModulate.new()
 	mod.name = "AtmosphereModulate"
@@ -154,27 +149,31 @@ func _atlas(sheet: Dictionary, frame: String) -> AtlasTexture:
 	return a
 
 
-# TileSet com a sheet; with_solid também põe o source 1, tile invisível com colisão para a
-# camada Walls (a colisão vem do mapa, não da arte).
-func _tileset(sheet: Dictionary, size: int, with_solid: bool) -> TileSet:
+# Camada Walls: source 1, tile invisível com colisão (a colisão vem do mapa, não da arte).
+func _solid_tileset() -> TileSet:
 	var ts := TileSet.new()
-	ts.tile_size = Vector2i(size, size)
-	if with_solid:
-		ts.add_physics_layer()
-		var solid := TileSetAtlasSource.new()
-		solid.texture = ImageTexture.create_from_image(Image.create(T, T, false, Image.FORMAT_RGBA8))
-		solid.texture_region_size = Vector2i(T, T)
-		ts.add_source(solid, SOLID)
-		solid.create_tile(Vector2i.ZERO)
-		var td := solid.get_tile_data(Vector2i.ZERO, 0)
-		td.add_collision_polygon(0)
-		td.set_collision_polygon_points(0, 0, PackedVector2Array([Vector2(-H, -H), Vector2(H, -H), Vector2(H, H), Vector2(-H, H)]))
+	ts.tile_size = Vector2i(T, T)
+	ts.add_physics_layer()
+	var solid := TileSetAtlasSource.new()
+	solid.texture = ImageTexture.create_from_image(Image.create(T, T, false, Image.FORMAT_RGBA8))
+	solid.texture_region_size = Vector2i(T, T)
+	ts.add_source(solid, SOLID)
+	solid.create_tile(Vector2i.ZERO)
+	var td := solid.get_tile_data(Vector2i.ZERO, 0)
+	td.add_collision_polygon(0)
+	td.set_collision_polygon_points(0, 0, PackedVector2Array([Vector2(-H, -H), Vector2(H, -H), Vector2(H, H), Vector2(-H, H)]))
+	return ts
+
+
+func _art_tileset(sheet: Dictionary) -> TileSet:
+	var ts := TileSet.new()
+	ts.tile_size = Vector2i(HD, HD)
 	var art := TileSetAtlasSource.new()
 	art.texture = sheet.texture
-	art.texture_region_size = Vector2i(size, size)
+	art.texture_region_size = Vector2i(HD, HD)
 	sheet.source = ts.add_source(art)
 	for r in sheet.rects.values():
-		art.create_tile(Vector2i(r.position) / size)
+		art.create_tile(Vector2i(r.position) / HD)
 	return ts
 
 

@@ -60,7 +60,7 @@ func _run() -> void:
 	await hold("move_left", 0.3)
 	check("fileira do telhado é andável", absf(player.position.y - y0) < 1.0 and player.position.x < 336)
 	check("ordenação por altura ligada", main.y_sort_enabled and main.get_node("Neighborhood").y_sort_enabled and main.get_node("Neighborhood/Zombies").y_sort_enabled)
-	check("chão por baixo de tudo", main.get_node("Neighborhood/Ground").z_index < 0)
+	check("chão por baixo de tudo", main.get_node("Neighborhood/GroundHD").z_index < 0)
 	check("casa desenhada na frente de quem está atrás dela", house.position.y > player.position.y)
 
 	print("RESULT: ", "FAIL" if failed else "PASS")

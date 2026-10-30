@@ -1,7 +1,7 @@
 # Checagem do cenário. Interior (gerado por tools/build_interior.gd): colisão vinda do mapa
 # (camada Walls), parede com face, pisos e móveis como containers. Bairro (editado à mão no
-# editor desde a R7): só regras que valem para qualquer edição: borda fechada, chão sem buraco,
-# props na ordem de profundidade e portas com destino válido.
+# editor desde a R7): só regras que valem para qualquer edição: borda fechada, chão sem buraco
+# numa camada só (GroundHD), props na ordem de profundidade e portas com destino válido.
 # Rodar: godot --headless --path . --fixed-fps 60 --script res://tests/test_scenery.gd
 extends SceneTree
 
@@ -31,8 +31,8 @@ func _run(hood: Node2D, house: Node2D) -> void:
 	check("casa: colisão igual ao mapa (%d células erradas)" % bad, bad == 0)
 
 	# 2. Casa: tiles de arte pelos vizinhos.
-	var names := _names("res://assets/sprites/d/interior-tiles.json")
-	var g: TileMapLayer = house.get_node("Ground")
+	var names := _names("res://assets/sprites/d/interior-tiles-hd.json")
+	var g: TileMapLayer = house.get_node("GroundHD")
 	check("parede de cima com face", _tile(g, names, Vector2i(1, 0)) == "wall_face")
 	check("janela na parede de cima", _tile(g, names, Vector2i(3, 0)) == "window")
 	check("parede lateral só com topo", _tile(g, names, Vector2i(0, 4)) == "wall_cap")
@@ -41,8 +41,7 @@ func _run(hood: Node2D, house: Node2D) -> void:
 	check("casa: piso de madeira e ambiente próprio", house.surface == &"wood" and house.ambience != null)
 
 	# 3. Bairro, regras que valem para qualquer edição no editor.
-	var ground: TileMapLayer = hood.get_node("Ground")
-	var ground_hd: TileMapLayer = hood.get_node("GroundHD")
+	var ground: TileMapLayer = hood.get_node("GroundHD")
 	var hood_walls: TileMapLayer = hood.get_node("Walls")
 	var rect := ground.get_used_rect()
 	var open_edge := []
@@ -53,10 +52,11 @@ func _run(hood: Node2D, house: Node2D) -> void:
 			var edge := x == rect.position.x or y == rect.position.y or x == rect.end.x - 1 or y == rect.end.y - 1
 			if edge and hood_walls.get_cell_source_id(cell) != 1:
 				open_edge.append(cell)
-			if ground.get_cell_source_id(cell) == -1 or ground_hd.get_cell_source_id(cell) == -1:
+			if ground.get_cell_source_id(cell) == -1:
 				holes.append(cell)
 	check("bairro: borda fechada (abertas: %s)" % [open_edge.slice(0, 5)], open_edge.is_empty())
-	check("bairro: chão sem buraco, nas duas camadas (buracos: %s)" % [holes.slice(0, 5)], holes.is_empty())
+	check("bairro: chão sem buraco (buracos: %s)" % [holes.slice(0, 5)], holes.is_empty())
+	check("bairro: uma camada de chão só", hood.get_node_or_null("Ground") == null)
 	check("bairro: piso da rua e ambiente próprio", hood.surface == &"street" and hood.ambience != null)
 	check("bairro: ponto de nascimento", hood.get_node_or_null("PlayerSpawn") is Marker2D)
 	var props: Node2D = hood.get_node("Props")
@@ -80,7 +80,7 @@ func _names(json_path: String) -> Dictionary:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(json_path))
 	var names := {}
 	for f in data.frames:
-		names[Vector2i(int(f.frame.x), int(f.frame.y)) / 32] = f.filename
+		names[Vector2i(int(f.frame.x), int(f.frame.y)) / 128] = f.filename
 	return names
 
 
