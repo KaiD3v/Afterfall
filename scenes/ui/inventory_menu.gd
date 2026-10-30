@@ -1,11 +1,11 @@
-# Menu do inventário (tecla da ação inventory, hoje E, abre e fecha; Esc fecha): equipamento em volta do protagonista e a
-# mochila em blocos. Arrastar e soltar move, troca, equipa e desequipa; botão direito usa ou
+# Menu do inventário (tecla da ação inventory, hoje E, abre e fecha; Esc fecha): equipamento em
+# volta do protagonista e a mochila em blocos. Arrastar e soltar move, troca, equipa e desequipa; botão direito usa ou
 # equipa (na mochila) e desequipa (no equipamento). O mundo não pausa: o jogador só fica parado.
 # Painel e textos são elementos simples feitos por código (Guia de estilo, seção 7); molduras dos
 # slots e ícones dos itens vêm do gerador de imagem (assets/sprites/ui).
 extends CanvasLayer
 
-const PANEL := Rect2(84, 32, 312, 206)  # na resolução do jogo (480×270)
+const PANEL := Rect2(84, 17, 312, 236)  # na resolução do jogo (480×270); grade de 4 px
 const BG := Color8(30, 36, 46)          # shadow_deep
 const BORDER_OUT := Color8(20, 24, 32)  # shadow_outline
 const BORDER_IN := Color8(68, 76, 87)   # concrete_dark
@@ -13,18 +13,22 @@ const RIVET := Color8(132, 140, 148)    # concrete_light
 const TEXT := Color8(168, 174, 179)     # concrete_highlight
 const DIM := Color8(95, 104, 115)       # concrete_mid
 const TITLE := Color8(227, 168, 69)     # amber_light_glow
+const DIM_WORLD := Color(0, 0, 0, 0.4)  # véu sobre o mundo, que continua rodando atrás
 const GAP := 4
-# Slots de equipamento em volta do retrato: [slot, posição na área do equipamento, nome, ícone vazio]
+# Slots de equipamento encostados no retrato: [slot, posição na área do equipamento, tamanho,
+# nome, rótulo curto, ícone da silhueta]. Armas em 48 px: o item mais importante.
 const GEAR := [
-	[EquipmentItem.Slot.HEAD, Vector2(48, 0), "Capacete", "res://data/items/helmet.tres"],
-	[EquipmentItem.Slot.MELEE, Vector2(4, 48), "Arma branca", "res://data/items/machete.tres"],
-	[EquipmentItem.Slot.FIREARM, Vector2(92, 48), "Arma de fogo", "res://data/items/pistol_9mm.tres"],
-	[EquipmentItem.Slot.BODY, Vector2(48, 96), "Colete", "res://data/items/vest.tres"],
+	[EquipmentItem.Slot.HEAD, Vector2(56, 0), ItemSlot.SMALL, "Capacete", "CABEÇA", "res://data/items/helmet.tres"],
+	[EquipmentItem.Slot.MELEE, Vector2(4, 52), ItemSlot.LARGE, "Arma branca", "BRANCA", "res://data/items/machete.tres"],
+	[EquipmentItem.Slot.FIREARM, Vector2(92, 52), ItemSlot.LARGE, "Arma de fogo", "FOGO", "res://data/items/pistol_9mm.tres"],
+	[EquipmentItem.Slot.BODY, Vector2(56, 116), ItemSlot.SMALL, "Colete", "CORPO", "res://data/items/vest.tres"],
 ]
-const GEAR_AT := Vector2(8, 34)  # área do equipamento dentro do painel (128×128)
-const BAG_AT := Vector2(168, 34)  # mochila dentro do painel, em 3 colunas
+const GEAR_AT := Vector2(8, 40)   # área do equipamento dentro do painel (144×148)
+const PORTRAIT_SCALE := 0.5       # retrato 2× o tamanho do jogo (arte em 4×)
+const PORTRAIT_TOP := 36          # topo do retrato, logo abaixo do slot da cabeça
+const BAG_AT := Vector2(176, 60)  # mochila 3×3, centrada na metade direita
 const BAG_COLUMNS := 3
-const SLOT_FRAME := "res://assets/sprites/ui/slots.png"  # moldura slot_32 (gerador de imagem), 128×128 em 4×
+const SLOT_FRAMES := "res://assets/sprites/ui/slots.png"  # slot_32 e slot_48 (gerador de imagem), em 4×
 
 @export var player: Player
 @export var pauses_game := false  # false: o mundo segue (tensão do gênero); true: pausa ao abrir
@@ -34,7 +38,8 @@ var bag_slots: Array[ItemSlot] = []
 var _bag_title: Label
 var _name: Label
 var _desc: Label
-var _frame: AtlasTexture
+var _frames := {}  # tamanho do slot -> moldura gerada
+var _hovered: ItemSlot
 
 @onready var root: Control = $Root
 
@@ -119,6 +124,17 @@ func _refresh() -> void:
 		_bag_title.text = "MOCHILA  %d/%d" % [bag.size(), bag.capacity]
 
 
+func _on_hovered(slot: ItemSlot) -> void:
+	_hovered = slot
+	_show_details(slot)
+
+
+func _on_unhovered(slot: ItemSlot) -> void:
+	if _hovered == slot:  # o rodapé volta à dica quando o mouse sai do item
+		_hovered = null
+		_show_details(null)
+
+
 func _show_details(slot: ItemSlot) -> void:
 	var item := slot.item() if slot else null
 	if item:
@@ -126,17 +142,24 @@ func _show_details(slot: ItemSlot) -> void:
 		_desc.text = item.description
 	elif slot:
 		_name.text = slot.caption if slot.caption else "Bloco vazio"
-		_desc.text = "Vazio."
+		_desc.text = "Vazio. Arraste um item para cá."
 	else:
 		_name.text = ""
-		_desc.text = "Arraste para mover, equipar ou trocar. Botão direito: usar ou equipar. %s fecha." % Keys.label(&"inventory")
+		_desc.text = "Arraste: mover ou equipar · Botão direito: usar · %s fecha" % Keys.label(&"inventory")
 
 
 func _build() -> void:
-	if ResourceLoader.exists(SLOT_FRAME):
-		_frame = AtlasTexture.new()
-		_frame.atlas = load(SLOT_FRAME)
-		_frame.region = Rect2(0, 0, 128, 128)
+	if ResourceLoader.exists(SLOT_FRAMES):
+		for spec in [[ItemSlot.SMALL, Rect2(0, 0, 128, 128)], [ItemSlot.LARGE, Rect2(128, 0, 192, 192)]]:
+			var frame := AtlasTexture.new()
+			frame.atlas = load(SLOT_FRAMES)
+			frame.region = spec[1]
+			_frames[spec[0]] = frame
+	var veil := ColorRect.new()
+	veil.color = DIM_WORLD
+	veil.set_anchors_preset(Control.PRESET_FULL_RECT)
+	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(veil)
 	var panel := Control.new()
 	panel.position = PANEL.position
 	panel.size = PANEL.size
@@ -144,44 +167,53 @@ func _build() -> void:
 	root.add_child(panel)
 	_label(panel, "INVENTÁRIO", Vector2(8, 6), TITLE)
 	_label(panel, "%s · fechar" % Keys.label(&"inventory"), Vector2(PANEL.size.x - 58, 6), DIM)
-	_label(panel, "EQUIPAMENTO", GEAR_AT + Vector2(0, -10), TEXT)
-	_bag_title = _label(panel, "MOCHILA", BAG_AT + Vector2(0, -10), TEXT)
-
-	# Retrato: o protagonista parado, de frente, no meio do equipamento.
-	var portrait := TextureRect.new()
-	portrait.texture = player.sprite.sprite_frames.get_frame_texture(&"idle_down", 0)
-	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	portrait.size = Vector2(40, 64)
-	portrait.position = GEAR_AT + Vector2(44, 30)
-	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_child(portrait)
+	_label(panel, "EQUIPAMENTO", Vector2(8, 24), TEXT)
+	_bag_title = _label(panel, "MOCHILA", Vector2(BAG_AT.x, 24), TEXT)
+	_portrait(panel)
 
 	for g in GEAR:
-		var s := _slot(panel, GEAR_AT + g[1])
-		s.caption = g[2]
-		var sample: ItemData = load(g[3])
+		var s := _slot(panel, GEAR_AT + g[1], g[2])
+		s.caption = g[3]
+		s.short_caption = g[4]
+		var sample: ItemData = load(g[5])
 		s.placeholder = sample.icon
 		s.bind(RunState.equipment, g[0])
 		gear_slots.append(s)
 	for i in RunState.inventory.capacity:
-		var at := Vector2(i % BAG_COLUMNS, i / BAG_COLUMNS) * (ItemSlot.SIZE + Vector2(GAP, GAP))
-		var s := _slot(panel, BAG_AT + at)
+		var at := Vector2(i % BAG_COLUMNS, i / BAG_COLUMNS) * (ItemSlot.SMALL + Vector2(GAP, GAP))
+		var s := _slot(panel, BAG_AT + at, ItemSlot.SMALL)
 		s.bind(RunState.inventory, i)
 		bag_slots.append(s)
 
-	_name = _label(panel, "", Vector2(8, 168), TITLE)
-	_desc = _label(panel, "", Vector2(8, 180), TEXT)
+	_name = _label(panel, "", Vector2(8, 198), TITLE)
+	_desc = _label(panel, "", Vector2(8, 209), TEXT)
 	_desc.size = Vector2(PANEL.size.x - 16, 22)
 	_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 
-func _slot(parent: Control, at: Vector2) -> ItemSlot:
-	var s := ItemSlot.new()
+# O protagonista parado, de frente, recortado no corpo (sem a margem do quadro) e 2× maior.
+func _portrait(panel: Control) -> void:
+	var frame := player.sprite.sprite_frames.get_frame_texture(&"idle_down", 0) as AtlasTexture
+	var used := Rect2(frame.get_image().get_used_rect())
+	var body := AtlasTexture.new()
+	body.atlas = frame.atlas
+	body.region = Rect2(frame.region.position + used.position, used.size)
+	var portrait := TextureRect.new()
+	portrait.texture = body
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.size = (used.size * PORTRAIT_SCALE).round()
+	portrait.position = (GEAR_AT + Vector2(72 - portrait.size.x / 2, PORTRAIT_TOP)).round()
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(portrait)
+
+
+func _slot(parent: Control, at: Vector2, at_size: Vector2) -> ItemSlot:
+	var s := ItemSlot.new(at_size)
 	s.position = at
-	s.frame_texture = _frame
+	s.frame_texture = _frames.get(at_size)
 	s.activated.connect(activate)
-	s.hovered.connect(_show_details)
+	s.hovered.connect(_on_hovered)
+	s.unhovered.connect(_on_unhovered)
 	parent.add_child(s)
 	return s
 
@@ -205,7 +237,7 @@ func _draw_panel(panel: Control) -> void:
 	panel.draw_rect(r.grow(-2), BORDER_OUT)
 	panel.draw_rect(r.grow(-3), BG)
 	panel.draw_rect(Rect2(4, 18, panel.size.x - 8, 1), BORDER_IN)  # separa o título
-	panel.draw_rect(Rect2(4, 164, panel.size.x - 8, 1), BORDER_IN)  # separa os detalhes
-	panel.draw_rect(Rect2(152, 22, 1, 138), BORDER_IN)              # equipamento | mochila
+	panel.draw_rect(Rect2(4, 194, panel.size.x - 8, 1), BORDER_IN)  # separa os detalhes
+	panel.draw_rect(Rect2(156, 22, 1, 168), BORDER_IN)              # equipamento | mochila
 	for c in [Vector2(4, 4), Vector2(panel.size.x - 6, 4), Vector2(4, panel.size.y - 6), Vector2(panel.size.x - 6, panel.size.y - 6)]:
 		panel.draw_rect(Rect2(c, Vector2(2, 2)), RIVET)
