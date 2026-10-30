@@ -54,6 +54,15 @@ func _run() -> void:
 		await process_frame
 	check("despausado, volta a andar", rs.stats.time > t and clock.text != shown)
 
+	# Inventário aberto: o mundo não pausa, e o relógio anda junto (resposta do autor, 2026-10-30).
+	var menu: Node = main.get_node("InventoryMenu")
+	menu.open()
+	t = rs.stats.time
+	for i in 2 * HZ:
+		await process_frame
+	check("com o inventário aberto, o relógio segue", menu.is_open() and rs.stats.time > t)
+	menu.close()
+
 	# Morte: o resultado mostra os dias sobrevividos.
 	player.health.damage(150.0)
 	for i in 2 * HZ:
