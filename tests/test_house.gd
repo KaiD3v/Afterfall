@@ -66,22 +66,22 @@ func _run() -> void:
 	check("munição soma 6 na reserva", player.firearm.reserve == reserve0 + 6 and rs.inventory.size() == 2)
 
 	# 3. Inventário cheio: o item fica no container e sai depois.
-	for i in 6:
+	for i in 7:
 		rs.inventory.add(BANDAGE)
 	var full: Node = main.location.get_node("Comoda")
 	full.table = table([BANDAGE], 1)
 	full.id = &"teste_cheio"
 	full.interact(player)
-	check("8 slots: não pega o 9º", rs.inventory.size() == 8)
+	check("9 blocos: não pega o 10º", rs.inventory.size() == 9)
 	rs.inventory.take(&"bandage")
 	full.interact(player)
-	check("liberou um slot: pega o que ficou", rs.inventory.size() == 8 and rs.loot.of(&"teste_cheio", full.table).is_empty())
+	check("liberou um slot: pega o que ficou", rs.inventory.size() == 9 and rs.loot.of(&"teste_cheio", full.table).is_empty())
 
 	# 4. Bandagem cura 30 e é consumida; com vida cheia não gasta.
 	player.health.current = 50.0
-	check("bandagem cura", player.use_item(BANDAGE) and player.health.current == 80.0 and rs.inventory.size() == 7)
+	check("bandagem cura", player.use_item(BANDAGE) and player.health.current == 80.0 and rs.inventory.size() == 8)
 	player.health.current = player.health.maximum
-	check("vida cheia não gasta bandagem", not player.use_item(BANDAGE) and rs.inventory.size() == 7)
+	check("vida cheia não gasta bandagem", not player.use_item(BANDAGE) and rs.inventory.size() == 8)
 
 	# 5. Loot fixo na run: o mesmo container não sorteia de novo; nova run sorteia.
 	var real: LootTable = load("res://data/loot/armario.tres")

@@ -56,7 +56,10 @@ func _on_stamina() -> void:
 
 func _on_ammo() -> void:
 	var gun := player.firearm
-	ammo.text = "RECARREGANDO" if gun.reloading else "%d | %d" % [gun.ammo, gun.reserve]
+	if not gun.is_equipped():
+		ammo.text = "SEM ARMA"
+	else:
+		ammo.text = "RECARREGANDO" if gun.reloading else "%d | %d" % [gun.ammo, gun.reserve]
 
 
 func _on_inventory() -> void:

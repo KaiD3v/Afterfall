@@ -21,15 +21,26 @@ var reloading := false:
 var moving := false  # o dono avisa: andando, a dispersão abre
 
 var _reload_sound: AudioStreamPlayer2D
+var _loaded := false  # o pente vem cheio na primeira vez que uma arma é equipada
 
 @onready var tracer: Line2D = $Tracer
 
 
 func _ready() -> void:
 	super()
-	ammo = gun().mag_size
-	_reload_sound = _audio(gun().reload_sound)
 	ShotFx.style_tracer(tracer)
+
+
+# ponytail: o pente fica no nó (uma pistola só); com várias armas de fogo, o pente vai para o item.
+func _equip() -> void:
+	super()
+	if _reload_sound:
+		_reload_sound.queue_free()
+	_reload_sound = _audio(gun().reload_sound) if gun() else null
+	if gun():
+		ammo = mini(ammo, gun().mag_size) if _loaded else gun().mag_size
+		_loaded = true
+	changed.emit()
 
 
 func gun() -> FirearmData:
@@ -39,13 +50,15 @@ func gun() -> FirearmData:
 # Dispersão atual em graus: aumenta ao andar mirando.
 func spread_now() -> float:
 	var g := gun()
+	if g == null:
+		return 0.0
 	if not moving or g.spread == 0.0:
 		return g.spread
 	return maxf(g.spread, g.move_spread)
 
 
 func fire(dir: Vector2) -> bool:
-	if is_waiting() or reloading or ammo == 0:
+	if not is_equipped() or is_waiting() or reloading or ammo == 0:
 		return false
 	ammo -= 1
 	var muzzle := user.muzzle_position()
@@ -77,7 +90,7 @@ func fire(dir: Vector2) -> bool:
 
 # Recarga num tween do próprio nó: se a cena sair (nova run), nada volta num nó liberado.
 func reload() -> bool:
-	if reloading or ammo == gun().mag_size or reserve == 0:
+	if not is_equipped() or reloading or ammo == gun().mag_size or reserve == 0:
 		return false
 	reloading = true
 	if _reload_sound:
@@ -92,7 +105,7 @@ func _reloaded() -> void:
 	reloading = false
 	if user.action == "reload":
 		user.action = ""
-	if user.is_dead():
+	if user.is_dead() or not is_equipped():  # desequipada no meio da recarga: nada entra
 		return
 	var n := mini(gun().mag_size - ammo, reserve)
 	ammo += n

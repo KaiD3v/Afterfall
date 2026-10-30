@@ -98,7 +98,7 @@ func _run(main: Node) -> void:
 	var swung: bool = weapon.attack()
 	check("pé de cabra acerta sem código novo (vida %.0f)" % z.health.current, swung and z.health.current == z.health.maximum - 50.0)
 	check("e respeita a própria espera", not weapon.attack())
-	check("mordida do zumbi é o mesmo MeleeWeapon do machete", z.get_node("Attack") is MeleeWeapon and player.get_node("Machete") is MeleeWeapon)
+	check("mordida do zumbi é o mesmo MeleeWeapon do machete", z.get_node("Attack") is MeleeWeapon and player.get_node("Melee") is MeleeWeapon)
 	z.queue_free()
 
 	# 6. Variante só por dado (R3): ZombieData de teste com outra vida, velocidade e audição.
@@ -188,7 +188,7 @@ func _run(main: Node) -> void:
 	check("barra de vida pela metade (%.0f px)" % hud.get_node("Health/Fill").size.x, hud.get_node("Health/Fill").size.x == 30.0)
 	check("barra de fôlego acompanha", hud.get_node("Stamina/Fill").size.x == roundf(60.0 * player.stamina.current / player.stamina.maximum))
 	check("munição \"%s\"" % hud.get_node("Ammo").text, hud.get_node("Ammo").text == "3 | 7")
-	check("inventário \"%s\"" % hud.get_node("Inventory").text, hud.get_node("Inventory").text == "Inventário: Bandagem ×1 (7 livres)")
+	check("inventário \"%s\"" % hud.get_node("Inventory").text, hud.get_node("Inventory").text == "Inventário: Bandagem ×1 (8 livres)")
 	rs.notify("teste")
 	check("mensagem aparece", hud.get_node("Toast").visible and hud.get_node("Toast").text == "teste")
 	await frames(2.6)

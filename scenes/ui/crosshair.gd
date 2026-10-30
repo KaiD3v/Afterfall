@@ -33,7 +33,7 @@ func _aim_origin() -> Vector2:
 
 func color_now() -> Color:
 	var gun: Firearm = player.firearm
-	if gun.reloading or gun.ammo == 0:
+	if not gun.is_equipped() or gun.reloading or gun.ammo == 0:
 		return EMPTY
 	if _aim_origin().distance_to(player.get_global_mouse_position()) > gun.gun().max_range:
 		return FAR
@@ -41,7 +41,7 @@ func color_now() -> Color:
 
 
 func _draw() -> void:
-	if player.is_dead():
+	if player.is_dead() or player.input_locked:  # morto ou com o menu aberto (cursor do sistema)
 		return
 	if not player.aiming:
 		_pixel_rect(Rect2i(0, 0, 1, 1), NORMAL)

@@ -1,0 +1,49 @@
+{
+  "frames": [
+    {
+      "filename": "slot_32",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 128
+      },
+      "duration": 100
+    },
+    {
+      "filename": "slot_48",
+      "frame": {
+        "x": 128,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "duration": 100
+    }
+  ],
+  "meta": {
+    "app": "Afterfall",
+    "version": "1",
+    "image": "slots.png",
+    "format": "I8",
+    "size": {
+      "w": 320,
+      "h": 192
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "slot_32",
+        "from": 0,
+        "to": 0,
+        "direction": "forward"
+      },
+      {
+        "name": "slot_48",
+        "from": 1,
+        "to": 1,
+        "direction": "forward"
+      }
+    ]
+  }
+}

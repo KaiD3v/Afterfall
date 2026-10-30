@@ -1,5 +1,5 @@
-# Protagonista: lê o input e move; as armas (nós Machete e Pistol), a vida e o fôlego ficam nos
-# componentes. Valores iniciais; ajustar no playtest.
+# Protagonista: lê o input e move; as armas (nós Melee e Firearm), a vida e o fôlego ficam nos
+# componentes. As armas vêm do equipamento (RunState.equipment). Valores iniciais; ajustar no playtest.
 class_name Player
 extends Actor
 
@@ -21,18 +21,32 @@ var focus: Interactable  # interagível mais próximo ao alcance; a HUD mostra o
 var surface := &"street"  # piso dos passos; main.gd põe o do local (Location.surface)
 var _running := false
 var steps_taken := 0  # para teste e, depois, para o ruído dos passos
+var input_locked := false  # menu aberto: parado, sem atacar nem interagir
 
-@onready var melee_weapon: MeleeWeapon = $Machete
-@onready var firearm: Firearm = $Pistol
+@onready var melee_weapon: MeleeWeapon = $Melee
+@onready var firearm: Firearm = $Firearm
 @onready var flashlight: Flashlight = $Flashlight
+
+
+func _ready() -> void:
+	super()
+	RunState.equipment.changed.connect(_apply_equipment)
+	_apply_equipment()
+
+
+# As armas na mão são as do equipamento; slot vazio = mão vazia.
+func _apply_equipment() -> void:
+	melee_weapon.data = RunState.equipment.weapon(EquipmentItem.Slot.MELEE)
+	firearm.data = RunState.equipment.weapon(EquipmentItem.Slot.FIREARM)
 
 
 func _physics_process(delta: float) -> void:
 	if is_dead():
 		return
 	# Mirando (botão direito), o clique atira; sem mirar, o clique golpeia com o machete.
-	aiming = Input.is_action_pressed("aim")
-	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var free := not input_locked
+	aiming = free and Input.is_action_pressed("aim")
+	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down") if free else Vector2.ZERO
 	var running := dir != Vector2.ZERO and not aiming and Input.is_action_pressed("sprint") and not stamina.exhausted
 	_running = running
 	if running:
@@ -51,6 +65,13 @@ func _physics_process(delta: float) -> void:
 			facing = aim_origin.direction_to(get_global_mouse_position())
 	elif dir != Vector2.ZERO:
 		facing = dir.normalized()
+	if free:
+		_read_actions()
+	_update_anim()
+	_update_focus()
+
+
+func _read_actions() -> void:
 	if aiming and Input.is_action_just_pressed("shoot"):
 		var m := muzzle_position()
 		var shot_dir := m.direction_to(get_global_mouse_position()) if m.distance_squared_to(get_global_mouse_position()) > 4.0 else facing
@@ -65,8 +86,6 @@ func _physics_process(delta: float) -> void:
 		use_item(heal_item)
 	if Input.is_action_just_pressed("flashlight"):
 		flashlight.toggle()
-	_update_anim()
-	_update_focus()
 
 
 func melee() -> bool:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/player.gd" id="1"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/character_frames.tres" id="2"]
@@ -9,9 +9,7 @@
 [ext_resource type="Script" path="res://scripts/components/stamina.gd" id="stamina"]
 [ext_resource type="Script" path="res://scenes/player/flashlight.gd" id="flashlight"]
 [ext_resource type="Script" path="res://scripts/weapons/melee_weapon.gd" id="melee"]
-[ext_resource type="Resource" path="res://data/weapons/machete.tres" id="machete"]
 [ext_resource type="Script" path="res://scripts/weapons/firearm.gd" id="firearm"]
-[ext_resource type="Resource" path="res://data/weapons/pistol_9mm.tres" id="pistol"]
 
 [sub_resource type="RectangleShape2D" id="feet"]
 size = Vector2(12, 6)
@@ -69,16 +67,14 @@ shape = SubResource("feet")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 
-[node name="Machete" type="Node2D" parent="."]
+[node name="Melee" type="Node2D" parent="."]
 script = ExtResource("melee")
-data = ExtResource("machete")
 
-[node name="Pistol" type="Node2D" parent="."]
+[node name="Firearm" type="Node2D" parent="."]
 script = ExtResource("firearm")
-data = ExtResource("pistol")
 muzzle_light = ExtResource("8")
 
-[node name="Tracer" type="Line2D" parent="Pistol"]
+[node name="Tracer" type="Line2D" parent="Firearm"]
 visible = false
 top_level = true
 width = 1.0

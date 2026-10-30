@@ -4,9 +4,10 @@
 [ext_resource type="Resource" path="res://data/items/bandage.tres" id="2_k7en0"]
 [ext_resource type="Resource" path="res://data/items/ammo_9mm.tres" id="3_w6xgf"]
 [ext_resource type="Script" path="res://scripts/loot_table.gd" id="4_23qge"]
+[ext_resource type="Resource" path="res://data/items/helmet.tres" id="5_helmet"]
 
 [resource]
 script = ExtResource("4_23qge")
-items = Array[ExtResource("1_8man6")]([ExtResource("2_k7en0"), ExtResource("3_w6xgf"), null])
-weights = Array[float]([1.0, 1.0, 1.0])
+items = Array[ExtResource("1_8man6")]([ExtResource("2_k7en0"), ExtResource("3_w6xgf"), null, ExtResource("5_helmet")])
+weights = Array[float]([1.0, 1.0, 1.0, 1.0])
 rolls = 2

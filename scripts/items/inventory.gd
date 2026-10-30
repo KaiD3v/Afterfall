@@ -1,27 +1,58 @@
-# Inventário em slots, um item por slot, sem peso. Serve ao jogador e, depois, a baús e carros.
+# Inventário em blocos fixos (a mochila): um item por bloco, sem peso; bloco vazio = null.
+# Mesmo contrato de recipiente do Equipment (get_at, can_put, put), para o menu e o ItemTransfer.
+# Serve ao jogador e, depois, a baús e carros.
 class_name Inventory
 extends RefCounted
 
 signal changed
 
-var slots := 8
-var items: Array[ItemData] = []
+var capacity := 9:
+	set(value):
+		capacity = value
+		_cells.resize(value)
+var items: Array[ItemData]:  # os itens, sem os blocos vazios, na ordem dos blocos
+	get:
+		return _cells.filter(func(it): return it != null)
+
+var _cells: Array[ItemData] = []
 
 
-func add(item: ItemData) -> bool:
-	if is_full():
-		return false
-	items.append(item)
+func _init() -> void:
+	_cells.resize(capacity)
+
+
+func get_at(i: int) -> ItemData:
+	return _cells[i]
+
+
+func can_put(_i: int, _item: ItemData) -> bool:
+	return true  # mochila aceita qualquer item
+
+
+func put(i: int, item: ItemData) -> void:
+	_cells[i] = item
 	changed.emit()
+
+
+# Índice do primeiro bloco vazio; -1 com a mochila cheia.
+func first_free() -> int:
+	return _cells.find(null)
+
+
+# Põe no primeiro bloco vazio; false se a mochila estiver cheia.
+func add(item: ItemData) -> bool:
+	var i := first_free()
+	if i < 0:
+		return false
+	put(i, item)
 	return true
 
 
 # Tira um item com esse id; false se não houver.
 func take(id: StringName) -> bool:
-	for i in items.size():
-		if items[i].id == id:
-			items.remove_at(i)
-			changed.emit()
+	for i in _cells.size():
+		if _cells[i] and _cells[i].id == id:
+			put(i, null)
 			return true
 	return false
 
@@ -44,13 +75,13 @@ func is_empty() -> bool:
 
 
 func is_full() -> bool:
-	return items.size() >= slots
+	return not _cells.has(null)
 
 
 func free_slots() -> int:
-	return slots - items.size()
+	return _cells.count(null)
 
 
 func clear() -> void:
-	items.clear()
+	_cells.fill(null)
 	changed.emit()

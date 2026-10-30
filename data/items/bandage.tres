@@ -1,9 +1,16 @@
-[gd_resource type="Resource" script_class="HealItem" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="HealItem" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/items/heal_item.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/items.png" id="icons"]
+
+[sub_resource type="AtlasTexture" id="icon"]
+atlas = ExtResource("icons")
+region = Rect2(384, 0, 128, 128)
 
 [resource]
 script = ExtResource("1")
 heal = 30.0
 id = &"bandage"
 display_name = "Bandagem"
+description = "Rolo de pano sujo. Estanca o sangramento: cura 30 (tecla Q ou botão direito)."
+icon = SubResource("icon")

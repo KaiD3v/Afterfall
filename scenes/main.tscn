@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scenes/main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/neighborhood.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/door.mp3" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/ui/inventory_menu.tscn" id="7"]
 
 [node name="Main" type="Node2D"]
 y_sort_enabled = true
@@ -16,6 +17,9 @@ script = ExtResource("1")
 position = Vector2(336, 464)
 
 [node name="HUD" parent="." node_paths=PackedStringArray("player") instance=ExtResource("5")]
+player = NodePath("../Player")
+
+[node name="InventoryMenu" parent="." node_paths=PackedStringArray("player") instance=ExtResource("7")]
 player = NodePath("../Player")
 
 [node name="Fade" type="CanvasLayer" parent="."]

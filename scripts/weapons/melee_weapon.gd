@@ -5,6 +5,8 @@ extends Weapon
 
 
 func attack() -> bool:
+	if not is_equipped():
+		return false
 	var cost: float = data.stamina_cost
 	if is_waiting() or (cost > 0.0 and not (user.stamina and user.stamina.spend(cost))):
 		return false
