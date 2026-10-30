@@ -1,6 +1,7 @@
-# Checagem da R1 e R2: Health e Stamina como componentes. Um objeto qualquer com um nó Health
+# Checagem da R1 a R3: Health e Stamina como componentes. Um objeto qualquer com um nó Health
 # (aqui, uma barricada sem script) leva tiro sem código novo; ação nova cancela o golpe pendente;
-# arma nova é só um Resource de dados num nó MeleeWeapon, o mesmo da mordida do zumbi.
+# arma nova é só um Resource de dados num nó MeleeWeapon, o mesmo da mordida do zumbi;
+# tipo novo de zumbi é só um ZombieData.
 # Rodar: godot --headless --path . --fixed-fps 60 --script res://tests/test_components.gd
 extends SceneTree
 
@@ -94,7 +95,27 @@ func _run(main: Node) -> void:
 	var swung: bool = weapon.attack()
 	check("pé de cabra acerta sem código novo (vida %.0f)" % z.health.current, swung and z.health.current == z.health.maximum - 50.0)
 	check("e respeita a própria espera", not weapon.attack())
-	check("mordida do zumbi é o mesmo MeleeWeapon do machete", z.get_node("Bite") is MeleeWeapon and player.get_node("Machete") is MeleeWeapon)
+	check("mordida do zumbi é o mesmo MeleeWeapon do machete", z.get_node("Attack") is MeleeWeapon and player.get_node("Machete") is MeleeWeapon)
+	z.queue_free()
+
+	# 6. Variante só por dado (R3): ZombieData de teste com outra vida, velocidade e audição.
+	var brute: ZombieData = load("res://data/zombies/walker.tres").duplicate()
+	brute.max_health = 200.0
+	brute.chase_speed = 90.0
+	brute.hearing = 3.0
+	var zb: Actor = load("res://scenes/zombie/zombie.tscn").instantiate()
+	zb.data = brute
+	zb.position = player.position + Vector2(100, 0)
+	zb.facing = Vector2.RIGHT  # de costas para o jogador
+	main.add_child(zb)
+	await physics_frame
+	check("vida do tipo (%.0f/%.0f)" % [zb.health.current, zb.health.maximum], zb.health.maximum == 200.0 and zb.health.current == 200.0)
+	zb.hear(zb.position + Vector2(150, 0), 64.0)  # o andarilho não ouve: 64 < 150; com audição 3, 192
+	check("audição do tipo ouve mais longe", zb.state == zb.State.INVESTIGATE)
+	zb.health.damage(10.0, player)
+	await frames(0.6)  # o tranco termina e ele corre para quem bateu
+	check("persegue quem bateu na velocidade do tipo (%.0f px/s)" % zb.velocity.length(), zb.state == zb.State.CHASE and zb.target == player and is_equal_approx(zb.velocity.length(), 90.0))
+	check("o andarilho segue com os números de antes", load("res://data/zombies/walker.tres").chase_speed == 60.0)
 
 	print("RESULT: ", "FAIL" if failed else "PASS")
 	quit(1 if failed else 0)

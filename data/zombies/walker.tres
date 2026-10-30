@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ZombieData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/zombie_data.gd" id="1"]
+[ext_resource type="Resource" path="res://data/weapons/bite.tres" id="2"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/zombie_frames.tres" id="3"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/groan.mp3" id="4"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Andarilho"
+max_health = 60.0
+walk_speed = 35.0
+chase_speed = 60.0
+sight_range = 140.0
+sight_half_angle = 45.0
+feel_range = 24.0
+hearing = 1.0
+attack_range = 20.0
+attack = ExtResource("2")
+frames = ExtResource("3")
+groan = ExtResource("4")

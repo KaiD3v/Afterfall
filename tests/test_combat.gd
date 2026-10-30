@@ -111,7 +111,7 @@ func _run() -> void:
 	z = await spawn(player.position + Vector2(40, 0), Vector2.LEFT)
 	await frames(2.6)
 	check("zumbi causou 45 de dano em ~2,6 s (vida %.0f)" % player.health.current, player.health.current == 55.0)
-	check("zumbi persegue mais devagar que o jogador anda", z.chase_speed < player.walk_speed)
+	check("zumbi persegue mais devagar que o jogador anda", z.data.chase_speed < player.walk_speed)
 	z.queue_free()
 
 	print("RESULT: ", "FAIL" if failed else "PASS")
