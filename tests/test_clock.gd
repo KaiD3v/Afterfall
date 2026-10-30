@@ -24,6 +24,7 @@ func _run() -> void:
 	var clock: Label = main.get_node("HUD/Clock")
 	for z in get_nodes_in_group("zombies"):
 		z.queue_free()  # um dia inteiro parado: sem zumbi para matar o jogador
+	player.needs.set_process(false)  # nem fome e sede (S2): o teste é só do relógio
 	check("começa no dia 1, 08:00 (HUD: %s)" % clock.text, rs.stats.days() == 0 and clock.text == "Dia 1 · 08:00")
 
 	# Quadro a quadro pelo laço real: da largada à primeira meia-noite, e dela à seguinte.

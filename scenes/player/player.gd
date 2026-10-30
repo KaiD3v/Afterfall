@@ -12,6 +12,8 @@ signal aim_changed  # a HUD sublinha a arma que o clique vai usar
 @export var run_cost := 25.0       # stamina por segundo correndo (4 s de fôlego cheio); o resto no nó Stamina
 @export var interact_range := 32.0
 @export var heal_item: ItemData = preload("res://data/items/bandage.tres")  # tecla Q
+@export var food_item: ItemData = preload("res://data/items/food_can.tres")  # tecla 1
+@export var water_item: ItemData = preload("res://data/items/water_bottle.tres")  # tecla 2
 
 const STEP_FRAMES := [0, 2]     # walk_*: frames de contato do pé com o chão
 const STEPS := {&"street": preload("res://assets/audio/steps_street.tres"), &"wood": preload("res://assets/audio/steps_wood.tres")}
@@ -27,6 +29,7 @@ var input_locked := false  # menu aberto: parado, sem atacar nem interagir
 @onready var melee_weapon: MeleeWeapon = $Melee
 @onready var firearm: Firearm = $Firearm
 @onready var flashlight: Flashlight = $Flashlight
+@onready var needs: Needs = $Needs
 
 
 func _ready() -> void:
@@ -88,6 +91,10 @@ func _read_actions() -> void:
 		interact()
 	if Input.is_action_just_pressed("heal"):
 		use_item(heal_item)
+	if Input.is_action_just_pressed("eat"):
+		use_item(food_item)
+	if Input.is_action_just_pressed("drink"):
+		use_item(water_item)
 	if Input.is_action_just_pressed("flashlight"):
 		flashlight.toggle()
 
@@ -136,7 +143,7 @@ func _update_focus() -> void:
 	focus_changed.emit(focus)
 
 
-# Usa um item da mochila (bandagem pela tecla Q ou pelo menu), com o som do item.
+# Usa um item da mochila (bandagem Q, comida 1, água 2, ou pelo menu), com o som do item.
 func use_item(item: ItemData) -> bool:
 	if is_dead() or not RunState.inventory.use(item, self):
 		return false
@@ -144,6 +151,21 @@ func use_item(item: ItemData) -> bool:
 		$SfxItem.stream = item.use_sound
 		$SfxItem.play()
 	return true
+
+
+# O golpe que mata grava a causa da morte para a tela de resultado.
+func _on_damaged(amount: float, source: Node) -> void:
+	super(amount, source)
+	if health.is_dead():
+		RunState.stats.cause = _cause_of(source)
+
+
+static func _cause_of(source: Node) -> String:
+	if source is Needs:
+		return source.death_cause
+	if source and source.is_in_group(Groups.ZOMBIES):
+		return "zumbi"
+	return "desconhecida"
 
 
 func _on_frame_changed() -> void:

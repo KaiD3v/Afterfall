@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FoodItem" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/food_item.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/items.png" id="icons"]
+
+[sub_resource type="AtlasTexture" id="icon"]
+atlas = ExtResource("icons")
+region = Rect2(768, 0, 128, 128)
+
+[resource]
+script = ExtResource("1")
+hunger = 50.0
+id = &"food_can"
+display_name = "Lata de comida"
+description = "Feijão em lata, amassada mas fechada. Mata a fome: +50 (tecla 1 ou botão direito)."
+icon = SubResource("icon")

@@ -192,7 +192,7 @@ func _run(main: Node) -> void:
 	check("pente em traços: %d de %d acesos" % [lit, pips.size()], pips.size() == 12 and lit == 3)
 	check("reserva \"%s\"" % hud.get_node("WeaponCard/Reserve").text, hud.get_node("WeaponCard/Reserve").text == "+7")
 	check("retrato com o rosto do personagem", hud.get_node("PortraitFrame/Portrait").texture != null)
-	check("fome, sede e temperatura escondidas (fora da v0.1)", not hud.get_node("Needs").visible and not hud.get_node("Temperature").visible)
+	check("fome e sede visíveis (S2); temperatura escondida", hud.get_node("Needs").visible and not hud.get_node("Temperature").visible)
 	check("sem mirar, o cartão sublinha a arma branca", hud.get_node("WeaponCard/Mark").position.x == hud.get_node("WeaponCard/MeleeIcon").position.x)
 	rs.notify("teste")
 	check("mensagem aparece", hud.get_node("Toast").visible and hud.get_node("Toast").text == "teste")

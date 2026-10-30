@@ -240,6 +240,8 @@ func _why_not(from: ItemSlot, to: ItemSlot) -> String:
 func _why_not_use(item: ItemData) -> String:
 	if item is HealItem and player.health.is_full():
 		return "Vida cheia"
+	if item is FoodItem and not item.wants(Needs.of(player)):
+		return "Sem fome" if item.hunger > 0.0 else "Sem sede"
 	return "Não dá para usar agora"
 
 

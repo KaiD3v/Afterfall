@@ -17,6 +17,7 @@ var time := 0.0:  # segundos vivo
 			minute_changed.emit()
 var kills := 0
 var looted := 0  # itens tirados de containers, munição incluída
+var cause := ""  # causa da morte (zumbi, fome, sede, fome e sede)
 
 
 # Segundos de jogo desde 00:00 do primeiro dia.

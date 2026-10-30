@@ -5,9 +5,11 @@
 [ext_resource type="Resource" path="res://data/items/ammo_9mm.tres" id="3_2tboj"]
 [ext_resource type="Script" path="res://scripts/loot_table.gd" id="4_x00vp"]
 [ext_resource type="Resource" path="res://data/items/vest.tres" id="5_vest"]
+[ext_resource type="Resource" path="res://data/items/food_can.tres" id="6_food"]
+[ext_resource type="Resource" path="res://data/items/water_bottle.tres" id="7_water"]
 
 [resource]
 script = ExtResource("4_x00vp")
-items = Array[ExtResource("1_n7k6m")]([ExtResource("2_iurkx"), ExtResource("3_2tboj"), null, ExtResource("5_vest")])
-weights = Array[float]([2.0, 1.0, 2.0, 1.0])
+items = Array[ExtResource("1_n7k6m")]([ExtResource("2_iurkx"), ExtResource("3_2tboj"), null, ExtResource("5_vest"), ExtResource("6_food"), ExtResource("7_water")])
+weights = Array[float]([2.0, 1.0, 2.0, 1.0, 2.0, 2.0])
 rolls = 2

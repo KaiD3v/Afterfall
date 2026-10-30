@@ -3,8 +3,11 @@
 [ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_btiyl"]
 [ext_resource type="Resource" path="res://data/items/bandage.tres" id="2_twb7b"]
 [ext_resource type="Script" path="res://scripts/loot_table.gd" id="3_0egvi"]
+[ext_resource type="Resource" path="res://data/items/food_can.tres" id="4_food"]
+[ext_resource type="Resource" path="res://data/items/water_bottle.tres" id="5_water"]
 
 [resource]
 script = ExtResource("3_0egvi")
-items = Array[ExtResource("1_btiyl")]([ExtResource("2_twb7b"), null])
-weights = Array[float]([1.0, 4.0])
+items = Array[ExtResource("1_btiyl")]([ExtResource("2_twb7b"), ExtResource("4_food"), ExtResource("5_water"), null])
+weights = Array[float]([1.0, 4.0, 4.0, 1.0])
+rolls = 3

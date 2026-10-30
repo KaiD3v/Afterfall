@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/player.gd" id="1"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/character_frames.tres" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/fx/point_light.png" id="8"]
 [ext_resource type="Script" path="res://scripts/components/health.gd" id="health"]
 [ext_resource type="Script" path="res://scripts/components/stamina.gd" id="stamina"]
+[ext_resource type="Script" path="res://scripts/components/needs.gd" id="needs"]
 [ext_resource type="Script" path="res://scenes/player/flashlight.gd" id="flashlight"]
 [ext_resource type="Script" path="res://scripts/weapons/melee_weapon.gd" id="melee"]
 [ext_resource type="Script" path="res://scripts/weapons/firearm.gd" id="firearm"]
@@ -61,6 +62,9 @@ maximum = 100.0
 
 [node name="Stamina" type="Node" parent="."]
 script = ExtResource("stamina")
+
+[node name="Needs" type="Node" parent="."]
+script = ExtResource("needs")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("feet")

@@ -1,6 +1,5 @@
 # HUD mínimo: retrato, vida, stamina, cartão da arma (pente em traços + reserva), relógio (dia e hora),
-# mensagens e tela de resultado. Fome, sede e temperatura (Needs, Temperature) ficam escondidas até
-# os sistemas existirem (fora da v0.1).
+# fome e sede (Needs), mensagens e tela de resultado. A temperatura fica escondida até o sistema existir.
 # Tudo por sinais dos componentes do jogador e do RunState; nada é lido a cada frame.
 extends CanvasLayer
 
@@ -18,6 +17,9 @@ var _reload_fill: Tween
 
 @onready var health_fill: ColorRect = $Health/Fill
 @onready var stamina_fill: ColorRect = $Stamina/Fill
+@onready var hunger_fill: ColorRect = $Needs/Hunger/Fill
+@onready var thirst_fill: ColorRect = $Needs/Thirst/Fill
+@onready var _needs_w := Vector2(hunger_fill.size.x, thirst_fill.size.x)  # larguras cheias, do hud.tscn
 @onready var result: ColorRect = $Result
 @onready var mag: Control = $WeaponCard/Mag
 @onready var reserve: Label = $WeaponCard/Reserve
@@ -33,6 +35,7 @@ func _ready() -> void:
 	RunState.message.connect(_show_toast)
 	player.health.changed.connect(_on_health)
 	player.stamina.changed.connect(_on_stamina)
+	player.needs.changed.connect(_on_needs)
 	player.firearm.changed.connect(_on_ammo)
 	player.aim_changed.connect(_on_aim)
 	RunState.equipment.changed.connect(_on_weapons)
@@ -42,6 +45,7 @@ func _ready() -> void:
 	toast.hide()
 	_on_health()
 	_on_stamina()
+	_on_needs()
 	_on_weapons()
 	_on_clock()
 	_on_focus(player.focus)
@@ -50,8 +54,8 @@ func _ready() -> void:
 # Chamado por main.gd quando o jogador morre.
 func show_result() -> void:
 	var t := int(RunState.stats.time)
-	result.get_node("Text").text = "VOCÊ MORREU\n\nDias sobrevividos: %d\nSobreviveu %d:%02d · %d zumbis · %d itens\nMortes: %d\n\n%s para uma nova run" % [
-		RunState.stats.days(), t / 60, t % 60, RunState.stats.kills, RunState.stats.looted, RunState.deaths, Keys.label(&"interact")]
+	result.get_node("Text").text = "VOCÊ MORREU\n\nCausa: %s · Dias sobrevividos: %d\nSobreviveu %d:%02d · %d zumbis · %d itens\nMortes: %d\n\n%s para uma nova run" % [
+		RunState.stats.cause, RunState.stats.days(), t / 60, t % 60, RunState.stats.kills, RunState.stats.looted, RunState.deaths, Keys.label(&"interact")]
 	result.show()
 
 
@@ -69,6 +73,11 @@ func _on_stamina() -> void:
 	stamina_fill.size.x = roundf(BAR_W * player.stamina.current / player.stamina.maximum)
 	# sem fôlego: barra escurece até recuperar (paleta Scavland: ferrugem escura vs verde-oliva tático)
 	stamina_fill.color = Color8(66, 40, 29) if player.stamina.exhausted else Color8(99, 117, 80)
+
+
+func _on_needs() -> void:
+	hunger_fill.size.x = roundf(_needs_w.x * player.needs.hunger / player.needs.maximum)
+	thirst_fill.size.x = roundf(_needs_w.y * player.needs.thirst / player.needs.maximum)
 
 
 # Ícones das duas armas do equipamento; slot vazio fica sem ícone.
