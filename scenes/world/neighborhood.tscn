@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/fx/point_light.png" id="11_cig2k"]
 [ext_resource type="PackedScene" path="res://scenes/props/door.tscn" id="12_hbvxc"]
 [ext_resource type="Script" path="res://scenes/props/door.gd" id="13_8wljo"]
+[ext_resource type="PackedScene" path="res://scenes/zombie/zombie.tscn" id="14_zombie"]
 
 [sub_resource type="Image" id="Image_ow1p5"]
 data = {
@@ -1959,3 +1960,19 @@ position = Vector2(336, 400)
 
 [node name="PlayerSpawn" type="Marker2D" parent="." unique_id=653541897]
 position = Vector2(336, 464)
+
+[node name="Zombies" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="ZombiePosto" parent="Zombies" instance=ExtResource("14_zombie")]
+position = Vector2(1500, 330)
+
+[node name="ZombieTransversal" parent="Zombies" instance=ExtResource("14_zombie")]
+position = Vector2(960, 200)
+
+[node name="ZombieSudeste" parent="Zombies" instance=ExtResource("14_zombie")]
+position = Vector2(1500, 800)
+facing = Vector2(-1, 0)
+
+[node name="ZombieOficina" parent="Zombies" instance=ExtResource("14_zombie")]
+position = Vector2(420, 900)
