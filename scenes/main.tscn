@@ -47,7 +47,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.101961, 0.101961, 0.180392, 0)
+color = Color(0.0509804, 0.0627451, 0.0901961, 0)
 
 [node name="SfxDoor" type="AudioStreamPlayer" parent="."]
 bus = &"SFX"

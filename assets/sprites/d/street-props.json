@@ -5,100 +5,100 @@
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "car_v",
       "frame": {
-        "x": 64,
+        "x": 256,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "barricade",
       "frame": {
-        "x": 128,
+        "x": 512,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "fallen_pole",
       "frame": {
-        "x": 192,
+        "x": 768,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "bush",
       "frame": {
-        "x": 256,
+        "x": 1024,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "tall_grass",
       "frame": {
-        "x": 320,
+        "x": 1280,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "fence_h",
       "frame": {
-        "x": 384,
+        "x": 1536,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "fence_v",
       "frame": {
-        "x": 448,
+        "x": 1792,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "fence_post",
       "frame": {
-        "x": 512,
+        "x": 2048,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     }
   ],
   "meta": {
-    "app": "Afterfall D",
-    "version": "1",
+    "app": "Afterfall Scavland HD",
+    "version": "2",
     "image": "street-props.png",
     "format": "I8",
     "size": {
-      "w": 576,
-      "h": 64
+      "w": 2304,
+      "h": 256
     },
     "scale": "1",
     "frameTags": [

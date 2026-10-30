@@ -5,38 +5,38 @@
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "zombie_idle_down_1",
       "frame": {
-        "x": 32,
+        "x": 160,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "zombie_idle_down_2",
       "frame": {
-        "x": 64,
+        "x": 320,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "zombie_idle_down_3",
       "frame": {
-        "x": 96,
+        "x": 480,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
@@ -44,39 +44,39 @@
       "filename": "zombie_walk_down_0",
       "frame": {
         "x": 0,
-        "y": 32,
-        "w": 32,
-        "h": 32
+        "y": 256,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_walk_down_1",
       "frame": {
-        "x": 32,
-        "y": 32,
-        "w": 32,
-        "h": 32
+        "x": 160,
+        "y": 256,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_walk_down_2",
       "frame": {
-        "x": 64,
-        "y": 32,
-        "w": 32,
-        "h": 32
+        "x": 320,
+        "y": 256,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_walk_down_3",
       "frame": {
-        "x": 96,
-        "y": 32,
-        "w": 32,
-        "h": 32
+        "x": 480,
+        "y": 256,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     },
@@ -84,39 +84,39 @@
       "filename": "zombie_idle_right_0",
       "frame": {
         "x": 0,
-        "y": 64,
-        "w": 32,
-        "h": 32
+        "y": 512,
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "zombie_idle_right_1",
       "frame": {
-        "x": 32,
-        "y": 64,
-        "w": 32,
-        "h": 32
+        "x": 160,
+        "y": 512,
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "zombie_idle_right_2",
       "frame": {
-        "x": 64,
-        "y": 64,
-        "w": 32,
-        "h": 32
+        "x": 320,
+        "y": 512,
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "zombie_idle_right_3",
       "frame": {
-        "x": 96,
-        "y": 64,
-        "w": 32,
-        "h": 32
+        "x": 480,
+        "y": 512,
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
@@ -124,39 +124,39 @@
       "filename": "zombie_walk_right_0",
       "frame": {
         "x": 0,
-        "y": 96,
-        "w": 32,
-        "h": 32
+        "y": 768,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_walk_right_1",
       "frame": {
-        "x": 32,
-        "y": 96,
-        "w": 32,
-        "h": 32
+        "x": 160,
+        "y": 768,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_walk_right_2",
       "frame": {
-        "x": 64,
-        "y": 96,
-        "w": 32,
-        "h": 32
+        "x": 320,
+        "y": 768,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_walk_right_3",
       "frame": {
-        "x": 96,
-        "y": 96,
-        "w": 32,
-        "h": 32
+        "x": 480,
+        "y": 768,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     },
@@ -164,39 +164,39 @@
       "filename": "zombie_idle_up_0",
       "frame": {
         "x": 0,
-        "y": 128,
-        "w": 32,
-        "h": 32
+        "y": 1024,
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "zombie_idle_up_1",
       "frame": {
-        "x": 32,
-        "y": 128,
-        "w": 32,
-        "h": 32
+        "x": 160,
+        "y": 1024,
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "zombie_idle_up_2",
       "frame": {
-        "x": 64,
-        "y": 128,
-        "w": 32,
-        "h": 32
+        "x": 320,
+        "y": 1024,
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "zombie_idle_up_3",
       "frame": {
-        "x": 96,
-        "y": 128,
-        "w": 32,
-        "h": 32
+        "x": 480,
+        "y": 1024,
+        "w": 160,
+        "h": 256
       },
       "duration": 250
     },
@@ -204,51 +204,51 @@
       "filename": "zombie_walk_up_0",
       "frame": {
         "x": 0,
-        "y": 160,
-        "w": 32,
-        "h": 32
+        "y": 1280,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_walk_up_1",
       "frame": {
-        "x": 32,
-        "y": 160,
-        "w": 32,
-        "h": 32
+        "x": 160,
+        "y": 1280,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_walk_up_2",
       "frame": {
-        "x": 64,
-        "y": 160,
-        "w": 32,
-        "h": 32
+        "x": 320,
+        "y": 1280,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_walk_up_3",
       "frame": {
-        "x": 96,
-        "y": 160,
-        "w": 32,
-        "h": 32
+        "x": 480,
+        "y": 1280,
+        "w": 160,
+        "h": 256
       },
       "duration": 120
     }
   ],
   "meta": {
-    "app": "Afterfall B",
-    "version": "1",
+    "app": "Afterfall Scavland HD",
+    "version": "2",
     "image": "zombie-move.png",
     "format": "I8",
     "size": {
-      "w": 128,
-      "h": 192
+      "w": 640,
+      "h": 1536
     },
     "scale": "1",
     "frameTags": [

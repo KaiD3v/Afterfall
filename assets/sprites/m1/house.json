@@ -5,29 +5,28 @@
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 96,
-        "h": 96
+        "w": 640,
+        "h": 544
       },
       "duration": 250
     }
   ],
   "meta": {
-    "app": "Afterfall M1",
-    "version": "1",
+    "app": "Afterfall Scavland HD",
+    "version": "2",
     "image": "house.png",
     "format": "I8",
     "size": {
-      "w": 96,
-      "h": 96
+      "w": 640,
+      "h": 544
     },
     "scale": "1",
     "frameTags": [
       {
-        "name": "static",
+        "name": "house",
         "from": 0,
         "to": 0,
-        "direction": "forward",
-        "loop": true
+        "direction": "forward"
       }
     ]
   }

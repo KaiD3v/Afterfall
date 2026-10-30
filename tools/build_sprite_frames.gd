@@ -11,7 +11,7 @@ const SHEETS := {
 	"res://assets/sprites/zombie_frames.tres": ["res://assets/sprites/b/zombie-move.json", "res://assets/sprites/c/zombie-combat.json"],
 }
 # Ações tocam uma vez e destravam o movimento ao terminar, mesmo que o JSON diga loop.
-const ONE_SHOT := ["melee", "shoot", "attack", "hurt", "death"]
+const ONE_SHOT := ["melee", "shoot", "reload", "attack", "hurt", "death"]
 
 
 func _initialize() -> void:

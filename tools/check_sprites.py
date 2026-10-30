@@ -17,7 +17,7 @@ from pathlib import Path
 from PIL import Image
 
 PALETTE = Path(__file__).resolve().parent.parent / "assets" / "palette" / "paleta_afterfall.gpl"
-OUTLINE = (26, 26, 46)
+OUTLINE = (20, 24, 32)
 # Desenho por código no exportador: proibido pela regra de arte (só redução e quantização).
 DRAWING = re.compile(r"ImageDraw|\.polygon\(|\.rectangle\(|\.ellipse\(|\.line\(|\.arc\(|\.pieslice\(")
 
@@ -133,7 +133,7 @@ def main():
     sys.stdout.reconfigure(encoding="utf-8")  # console do Windows usa cp1252
     ap = argparse.ArgumentParser()
     ap.add_argument("pngs", nargs="+", type=Path)
-    ap.add_argument("--max-colors", type=int, default=12)
+    ap.add_argument("--max-colors", type=int, default=28)
     ap.add_argument("--min-outline", type=float, default=0.95)
     ap.add_argument("--export", type=Path, action="append", default=[])
     ap.add_argument("--tiles", action="store_true")

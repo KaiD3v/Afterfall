@@ -5,38 +5,38 @@
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 48,
-        "h": 48
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "zombie_attack_down_1",
       "frame": {
-        "x": 48,
+        "x": 256,
         "y": 0,
-        "w": 48,
-        "h": 48
+        "w": 256,
+        "h": 256
       },
       "duration": 100
     },
     {
       "filename": "zombie_attack_down_2",
       "frame": {
-        "x": 96,
+        "x": 512,
         "y": 0,
-        "w": 48,
-        "h": 48
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "zombie_attack_down_3",
       "frame": {
-        "x": 144,
+        "x": 768,
         "y": 0,
-        "w": 48,
-        "h": 48
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
@@ -44,39 +44,39 @@
       "filename": "zombie_attack_right_0",
       "frame": {
         "x": 0,
-        "y": 48,
-        "w": 48,
-        "h": 48
+        "y": 256,
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "zombie_attack_right_1",
       "frame": {
-        "x": 48,
-        "y": 48,
-        "w": 48,
-        "h": 48
+        "x": 256,
+        "y": 256,
+        "w": 256,
+        "h": 256
       },
       "duration": 100
     },
     {
       "filename": "zombie_attack_right_2",
       "frame": {
-        "x": 96,
-        "y": 48,
-        "w": 48,
-        "h": 48
+        "x": 512,
+        "y": 256,
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "zombie_attack_right_3",
       "frame": {
-        "x": 144,
-        "y": 48,
-        "w": 48,
-        "h": 48
+        "x": 768,
+        "y": 256,
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
@@ -84,39 +84,39 @@
       "filename": "zombie_attack_up_0",
       "frame": {
         "x": 0,
-        "y": 96,
-        "w": 48,
-        "h": 48
+        "y": 512,
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "zombie_attack_up_1",
       "frame": {
-        "x": 48,
-        "y": 96,
-        "w": 48,
-        "h": 48
+        "x": 256,
+        "y": 512,
+        "w": 256,
+        "h": 256
       },
       "duration": 100
     },
     {
       "filename": "zombie_attack_up_2",
       "frame": {
-        "x": 96,
-        "y": 96,
-        "w": 48,
-        "h": 48
+        "x": 512,
+        "y": 512,
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "zombie_attack_up_3",
       "frame": {
-        "x": 144,
-        "y": 96,
-        "w": 48,
-        "h": 48
+        "x": 768,
+        "y": 512,
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
@@ -124,19 +124,19 @@
       "filename": "zombie_hurt_down_0",
       "frame": {
         "x": 0,
-        "y": 144,
-        "w": 48,
-        "h": 48
+        "y": 768,
+        "w": 256,
+        "h": 256
       },
       "duration": 80
     },
     {
       "filename": "zombie_hurt_down_1",
       "frame": {
-        "x": 48,
-        "y": 144,
-        "w": 48,
-        "h": 48
+        "x": 256,
+        "y": 768,
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
@@ -144,19 +144,19 @@
       "filename": "zombie_hurt_right_0",
       "frame": {
         "x": 0,
-        "y": 192,
-        "w": 48,
-        "h": 48
+        "y": 1024,
+        "w": 256,
+        "h": 256
       },
       "duration": 80
     },
     {
       "filename": "zombie_hurt_right_1",
       "frame": {
-        "x": 48,
-        "y": 192,
-        "w": 48,
-        "h": 48
+        "x": 256,
+        "y": 1024,
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
@@ -164,19 +164,19 @@
       "filename": "zombie_hurt_up_0",
       "frame": {
         "x": 0,
-        "y": 240,
-        "w": 48,
-        "h": 48
+        "y": 1280,
+        "w": 256,
+        "h": 256
       },
       "duration": 80
     },
     {
       "filename": "zombie_hurt_up_1",
       "frame": {
-        "x": 48,
-        "y": 240,
-        "w": 48,
-        "h": 48
+        "x": 256,
+        "y": 1280,
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
@@ -184,49 +184,49 @@
       "filename": "zombie_death_down_0",
       "frame": {
         "x": 0,
-        "y": 288,
-        "w": 48,
-        "h": 48
+        "y": 1536,
+        "w": 256,
+        "h": 256
       },
       "duration": 100
     },
     {
       "filename": "zombie_death_down_1",
       "frame": {
-        "x": 48,
-        "y": 288,
-        "w": 48,
-        "h": 48
+        "x": 256,
+        "y": 1536,
+        "w": 256,
+        "h": 256
       },
       "duration": 100
     },
     {
       "filename": "zombie_death_down_2",
       "frame": {
-        "x": 96,
-        "y": 288,
-        "w": 48,
-        "h": 48
+        "x": 512,
+        "y": 1536,
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_death_down_3",
       "frame": {
-        "x": 144,
-        "y": 288,
-        "w": 48,
-        "h": 48
+        "x": 768,
+        "y": 1536,
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "zombie_death_down_4",
       "frame": {
-        "x": 192,
-        "y": 288,
-        "w": 48,
-        "h": 48
+        "x": 1024,
+        "y": 1536,
+        "w": 256,
+        "h": 256
       },
       "duration": 400
     },
@@ -234,49 +234,49 @@
       "filename": "zombie_death_right_0",
       "frame": {
         "x": 0,
-        "y": 336,
-        "w": 48,
-        "h": 48
+        "y": 1792,
+        "w": 256,
+        "h": 256
       },
       "duration": 100
     },
     {
       "filename": "zombie_death_right_1",
       "frame": {
-        "x": 48,
-        "y": 336,
-        "w": 48,
-        "h": 48
+        "x": 256,
+        "y": 1792,
+        "w": 256,
+        "h": 256
       },
       "duration": 100
     },
     {
       "filename": "zombie_death_right_2",
       "frame": {
-        "x": 96,
-        "y": 336,
-        "w": 48,
-        "h": 48
+        "x": 512,
+        "y": 1792,
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_death_right_3",
       "frame": {
-        "x": 144,
-        "y": 336,
-        "w": 48,
-        "h": 48
+        "x": 768,
+        "y": 1792,
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "zombie_death_right_4",
       "frame": {
-        "x": 192,
-        "y": 336,
-        "w": 48,
-        "h": 48
+        "x": 1024,
+        "y": 1792,
+        "w": 256,
+        "h": 256
       },
       "duration": 400
     },
@@ -284,61 +284,61 @@
       "filename": "zombie_death_up_0",
       "frame": {
         "x": 0,
-        "y": 384,
-        "w": 48,
-        "h": 48
+        "y": 2048,
+        "w": 256,
+        "h": 256
       },
       "duration": 100
     },
     {
       "filename": "zombie_death_up_1",
       "frame": {
-        "x": 48,
-        "y": 384,
-        "w": 48,
-        "h": 48
+        "x": 256,
+        "y": 2048,
+        "w": 256,
+        "h": 256
       },
       "duration": 100
     },
     {
       "filename": "zombie_death_up_2",
       "frame": {
-        "x": 96,
-        "y": 384,
-        "w": 48,
-        "h": 48
+        "x": 512,
+        "y": 2048,
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "zombie_death_up_3",
       "frame": {
-        "x": 144,
-        "y": 384,
-        "w": 48,
-        "h": 48
+        "x": 768,
+        "y": 2048,
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "zombie_death_up_4",
       "frame": {
-        "x": 192,
-        "y": 384,
-        "w": 48,
-        "h": 48
+        "x": 1024,
+        "y": 2048,
+        "w": 256,
+        "h": 256
       },
       "duration": 400
     }
   ],
   "meta": {
-    "app": "Afterfall C",
-    "version": "1",
+    "app": "Afterfall Scavland HD",
+    "version": "2",
     "image": "zombie-combat.png",
     "format": "I8",
     "size": {
-      "w": 240,
-      "h": 432
+      "w": 1280,
+      "h": 2304
     },
     "scale": "1",
     "frameTags": [

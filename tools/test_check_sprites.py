@@ -12,7 +12,7 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_sprites as cs
 
-OUT, BODY = (26, 26, 46), (52, 73, 94)
+OUT, BODY = (20, 24, 32), (54, 69, 84)
 
 
 def sheet(folder, name, foot_offsets):
@@ -43,12 +43,12 @@ with tempfile.TemporaryDirectory() as d:
 
 def tiles(folder, band):
     """Dois tiles 8x8 de ruído leve; com band, o segundo ganha uma coluna escura na borda direita."""
-    a, b = (74, 74, 82), (110, 110, 118)
+    a, b = (68, 76, 87), (95, 104, 115)
     img = Image.new("RGBA", (16, 8), (0, 0, 0, 255))
     for t in (0, 1):
         for y in range(8):
             for x in range(8):
-                c = b if band and t == 1 and x == 7 else (a if (x + y) % 3 else (43, 43, 51))
+                c = b if band and t == 1 and x == 7 else (a if (x + y) % 3 else (47, 54, 64))
                 img.putpixel((8 * t + x, y), (*c, 255))
     png = Path(folder) / f"tiles{int(band)}.png"
     img.save(png)

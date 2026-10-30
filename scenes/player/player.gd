@@ -5,6 +5,7 @@ extends CharacterBody2D
 signal died
 
 @export var walk_speed := 80.0     # px/s = 2,5 tiles/s
+@export var aim_walk_speed := 50.0 # px/s andando enquanto mira
 @export var run_speed := 130.0
 @export var max_health := 100.0
 @export var max_stamina := 100.0
@@ -27,6 +28,7 @@ signal died
 @export var pistol_damage := 40.0       # 2 tiros por zumbi
 @export var pistol_range := 320.0
 @export var pistol_spread := 4.0        # graus para cada lado; o erro lateral cresce com a distância
+@export var pistol_move_spread := 9.0   # graus para cada lado andando enquanto mira
 @export var pistol_cooldown := 0.25
 @export var shot_noise := 320.0         # raio de ruído do tiro (10 tiles)
 @export var mag_size := 12
@@ -44,6 +46,7 @@ var ammo := mag_size
 var reloading := false
 var facing := Vector2.DOWN
 var aiming := false
+var flashlight_on := true
 var _moving := false
 var _action := ""         # animação de ação tocando (melee, shoot); trava a de movimento
 var _hit_pending := false # golpe esperando o frame de contato
@@ -65,14 +68,17 @@ func _ready() -> void:
 	ammo = mag_size
 	sprite.animation_finished.connect(func(): _action = "")
 	sprite.frame_changed.connect(_on_frame_changed)
+	_setup_tracer_style()
 
 
 func _physics_process(delta: float) -> void:
 	if is_dead():
 		return
 	_weapon_wait -= delta
+	# Mirando (botão direito), o clique atira; sem mirar, o clique golpeia com o machete.
+	aiming = Input.is_action_pressed("aim")
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	var running := dir != Vector2.ZERO and Input.is_action_pressed("sprint") and not exhausted
+	var running := dir != Vector2.ZERO and not aiming and Input.is_action_pressed("sprint") and not exhausted
 	_running = running
 	if running:
 		_drain(run_cost * delta)
@@ -83,17 +89,20 @@ func _physics_process(delta: float) -> void:
 		if exhausted and stamina >= recover_at:
 			exhausted = false
 	_moving = dir != Vector2.ZERO
-	velocity = dir * (run_speed if running else walk_speed)
+	var speed := aim_walk_speed if aiming else (run_speed if running else walk_speed)
+	velocity = dir * speed
 	move_and_slide()
 
-	# Mirando (botão direito), o clique atira; sem mirar, o clique golpeia com o machete.
-	aiming = Input.is_action_pressed("aim")
 	if aiming:
-		facing = global_position.direction_to(get_global_mouse_position())
+		var aim_origin := global_position + Vector2(0.0, -24.0)
+		if aim_origin.distance_squared_to(get_global_mouse_position()) > 1.0:
+			facing = aim_origin.direction_to(get_global_mouse_position())
 	elif dir != Vector2.ZERO:
 		facing = dir.normalized()
 	if aiming and Input.is_action_just_pressed("shoot"):
-		shoot(facing)
+		var m := muzzle_position()
+		var shot_dir := m.direction_to(get_global_mouse_position()) if m.distance_squared_to(get_global_mouse_position()) > 4.0 else facing
+		shoot(shot_dir)
 	elif not aiming and Input.is_action_just_pressed("attack"):
 		melee()
 	if Input.is_action_just_pressed("reload"):
@@ -102,7 +111,10 @@ func _physics_process(delta: float) -> void:
 		interact()
 	if Input.is_action_just_pressed("heal"):
 		use_bandage()
+	if Input.is_action_just_pressed("flashlight"):
+		toggle_flashlight()
 	_update_anim()
+	_update_flashlight(delta)
 	_update_focus()
 
 
@@ -145,7 +157,7 @@ func use_bandage() -> bool:
 
 # Com animação melee_* na sheet, o dano sai no frame de contato; sem ela, na hora.
 func melee() -> bool:
-	if is_dead() or _weapon_wait > 0.0 or not spend_stamina(machete_cost):
+	if is_dead() or _weapon_wait > 0.0 or reloading or not spend_stamina(machete_cost):
 		return false
 	_weapon_wait = machete_cooldown
 	$SfxMachete.play()
@@ -166,7 +178,8 @@ func _melee_hit() -> void:
 
 
 func _on_frame_changed() -> void:
-	if String(sprite.animation).begins_with("walk") and sprite.frame in STEP_FRAMES:
+	var anim := String(sprite.animation)
+	if (anim.begins_with("walk") or anim.begins_with("aim_walk")) and sprite.frame in STEP_FRAMES:
 		$SfxSteps.stream = STEPS[surface]
 		$SfxSteps.play()
 		steps_taken += 1
@@ -175,23 +188,39 @@ func _on_frame_changed() -> void:
 		_melee_hit()
 
 
+# Dispersão atual da pistola em graus: aumenta ao andar mirando.
+func current_spread() -> float:
+	if not _moving or pistol_spread == 0.0:
+		return pistol_spread
+	return maxf(pistol_spread, pistol_move_spread)
+
+
 func shoot(dir: Vector2) -> bool:
 	if is_dead() or _weapon_wait > 0.0 or reloading or ammo == 0:
 		return false
 	ammo -= 1
 	_weapon_wait = pistol_cooldown
-	var aim := dir.normalized().rotated(deg_to_rad(randf_range(-pistol_spread, pistol_spread)))
-	var end := global_position + aim * pistol_range
-	var ray := PhysicsRayQueryParameters2D.create(global_position, end, 1 | 4)  # paredes e zumbis
-	ray.exclude = [get_rid()]
-	var hit := get_world_2d().direct_space_state.intersect_ray(ray)
-	if hit:
-		end = hit.position
-		if hit.collider.has_method("take_damage"):
-			hit.collider.take_damage(pistol_damage)
-	tracer.points = PackedVector2Array([muzzle_position(), end])
+	var muzzle := muzzle_position()
+	var spread := current_spread()
+	var aim := dir.normalized().rotated(deg_to_rad(randf_range(-spread, spread)))
+	var travel_dist := pistol_range
+	var hit_collider: Object = null
+	# Testa colisão tanto no plano dos pés quanto na projeção do cano da arma (paredes e zumbis)
+	for ray_origin: Vector2 in [global_position, muzzle + Vector2(0.0, 24.0), muzzle]:
+		var ray := PhysicsRayQueryParameters2D.create(ray_origin, ray_origin + aim * pistol_range, 1 | 4)
+		ray.exclude = [get_rid()]
+		var hit := get_world_2d().direct_space_state.intersect_ray(ray)
+		if hit:
+			var d: float = ray_origin.distance_to(hit.position)
+			if d < travel_dist:
+				travel_dist = d
+				hit_collider = hit.collider
+	if hit_collider and hit_collider.has_method("take_damage"):
+		hit_collider.take_damage(pistol_damage)
+	var end := muzzle + aim * travel_dist
+	tracer.points = PackedVector2Array([muzzle, end])
 	tracer.show()
-	get_tree().create_timer(0.05).timeout.connect(tracer.hide)
+	_animate_ballistic_shot(muzzle, end, aim, hit_collider)
 	$SfxShot.play()
 	_play_action("shoot")
 	_noise(shot_noise)
@@ -203,8 +232,12 @@ func reload() -> void:
 		return
 	reloading = true
 	$SfxReload.play()
+	if _play_action("reload") and reload_time > 0.0:
+		sprite.speed_scale = 1.5 / reload_time
 	await get_tree().create_timer(reload_time).timeout
 	reloading = false
+	if _action == "reload":
+		_action = ""
 	if is_dead():
 		return
 	var n := mini(mag_size - ammo, reserve)
@@ -271,7 +304,197 @@ func muzzle_position() -> Vector2:
 
 func _update_anim() -> void:
 	if _action != "":
+		if _action == "reload":
+			var pick := Facing.resolve(sprite, "reload", facing)
+			if pick[0] != &"":
+				sprite.flip_h = pick[1]
+				if sprite.animation != pick[0]:
+					var f := sprite.frame
+					var p := sprite.frame_progress
+					sprite.play(pick[0])
+					sprite.set_frame_and_progress(f, p)
+		return
+	if aiming and _moving:
+		sprite.speed_scale = aim_walk_speed / walk_speed
+		var pick := Facing.resolve(sprite, "aim_walk", facing)
+		Facing.play(sprite, "aim_walk" if pick[0] != &"" else "aim", facing)
 		return
 	# correndo, o mesmo ciclo de andar fica mais rápido; os passos acompanham
 	sprite.speed_scale = run_speed / walk_speed if _running else 1.0
 	Facing.play(sprite, "aim" if aiming else ("walk" if _moving else "idle"), facing)
+
+
+# Liga ou desliga a lanterna tática (tecla T).
+func toggle_flashlight() -> void:
+	flashlight_on = not flashlight_on
+	if has_node("Flashlight"):
+		$Flashlight.enabled = flashlight_on
+		$Flashlight.visible = flashlight_on
+
+
+# Posiciona a lanterna no trilho da pistola ao mirar ou no colete tático ao caminhar.
+func _update_flashlight(delta: float) -> void:
+	if not has_node("Flashlight"):
+		return
+	var fl: PointLight2D = $Flashlight
+	fl.enabled = flashlight_on
+	fl.visible = flashlight_on
+	if not flashlight_on:
+		return
+	var dir_name := Facing.dir_name(facing)
+	var target_pos: Vector2
+	var target_ang := facing.angle()
+	var target_energy := 1.08
+	if reloading or _action == "reload":
+		target_pos = Vector2(-7.0 if dir_name == "left" else 7.0, -21.0)
+		target_ang += 0.22 if dir_name != "left" else -0.22
+		target_energy = 0.80
+	elif aiming or _action == "shoot":
+		var m := muzzle_position()
+		target_pos = m - global_position + Vector2(0.0, 0.5)
+		if m.distance_squared_to(get_global_mouse_position()) > 4.0:
+			target_ang = m.direction_to(get_global_mouse_position()).angle()
+		target_energy = 1.15
+	else:
+		match dir_name:
+			"left":
+				target_pos = Vector2(-5.5, -20.0)
+			"right":
+				target_pos = Vector2(5.5, -20.0)
+			"up":
+				target_pos = Vector2(3.5, -22.0)
+			_:
+				target_pos = Vector2(3.5, -19.0)
+	var pos_rate := minf(1.0, (28.0 if aiming else 18.0) * delta)
+	var ang_rate := minf(1.0, (28.0 if aiming else 14.0) * delta)
+	fl.position = fl.position.lerp(target_pos, pos_rate)
+	fl.rotation = lerp_angle(fl.rotation, target_ang, ang_rate)
+	fl.energy = lerpf(fl.energy, target_energy, minf(1.0, 12.0 * delta))
+	if fl.has_node("Lens"):
+		fl.get_node("Lens").visible = not (dir_name == "up" and not aiming)
+
+
+func _setup_tracer_style() -> void:
+	tracer.width = 1.6
+	var curve := Curve.new()
+	curve.add_point(Vector2(0.0, 0.25))
+	curve.add_point(Vector2(0.7, 0.65))
+	curve.add_point(Vector2(1.0, 1.0))
+	tracer.width_curve = curve
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	grad.colors = PackedColorArray([
+		Color(0.55, 0.58, 0.62, 0.0),
+		Color8(227, 154, 59, 210),
+		Color8(248, 236, 200, 255),
+	])
+	tracer.gradient = grad
+
+
+# Anima o projétil 9 mm em alta velocidade, clarão no cano, cápsula ejetada e impacto no alvo.
+func _animate_ballistic_shot(muzzle: Vector2, end: Vector2, aim: Vector2, hit_collider: Object) -> void:
+	var scene_root := get_parent()
+	if scene_root == null:
+		get_tree().create_timer(0.05).timeout.connect(tracer.hide)
+		return
+
+	# 1. Clarão rápido na boca do cano (luz dinâmica + faísca pixelada)
+	var flash := Node2D.new()
+	flash.global_position = muzzle
+	flash.rotation = aim.angle()
+	var spark_outer := Polygon2D.new()
+	spark_outer.color = Color8(227, 154, 59, 230)
+	spark_outer.polygon = PackedVector2Array([Vector2(-1, -2.5), Vector2(5.5, 0), Vector2(-1, 2.5), Vector2(1.5, 0)])
+	flash.add_child(spark_outer)
+	var spark_core := Polygon2D.new()
+	spark_core.color = Color8(248, 236, 200, 255)
+	spark_core.polygon = PackedVector2Array([Vector2(0, -1.2), Vector2(3.5, 0), Vector2(0, 1.2)])
+	flash.add_child(spark_core)
+	if has_node("AmbientLight"):
+		var m_light := PointLight2D.new()
+		m_light.texture = $AmbientLight.texture
+		m_light.color = Color8(235, 168, 72)
+		m_light.energy = 1.25
+		m_light.texture_scale = 0.28
+		flash.add_child(m_light)
+	scene_root.add_child(flash)
+	get_tree().create_timer(0.045).timeout.connect(flash.queue_free)
+
+	# 2. Cápsula de latão 9 mm ejetada lateralmente
+	var casing := Node2D.new()
+	casing.global_position = muzzle - aim * 2.5
+	var c_border := Polygon2D.new()
+	c_border.color = Color8(20, 24, 32)
+	c_border.polygon = PackedVector2Array([Vector2(-1.6, -1.1), Vector2(1.6, -1.1), Vector2(1.6, 1.1), Vector2(-1.6, 1.1)])
+	casing.add_child(c_border)
+	var c_brass := Polygon2D.new()
+	c_brass.color = Color8(212, 163, 73)
+	c_brass.polygon = PackedVector2Array([Vector2(-1.0, -0.6), Vector2(1.0, -0.6), Vector2(1.0, 0.6), Vector2(-1.0, 0.6)])
+	casing.add_child(c_brass)
+	scene_root.add_child(casing)
+	var eject_side := -1.0 if aim.x < 0.0 else 1.0
+	var eject_dir := (aim.rotated(-1.35 * eject_side) + Vector2(0.0, -0.5)).normalized()
+	var land_pos := casing.global_position + eject_dir * randf_range(8.0, 13.0) + Vector2(0.0, randf_range(16.0, 21.0))
+	var tw_c := casing.create_tween()
+	tw_c.tween_property(casing, "global_position", land_pos, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw_c.parallel().tween_property(casing, "rotation", randf_range(-5.0, 5.0), 0.22)
+	tw_c.tween_interval(0.55)
+	tw_c.tween_property(casing, "modulate:a", 0.0, 0.25)
+	tw_c.tween_callback(casing.queue_free)
+
+	# 3. Projétil 9 mm em deslocamento balístico rápido + rastro curto
+	var bullet := Node2D.new()
+	bullet.global_position = muzzle
+	bullet.rotation = aim.angle()
+	var b_outline := Polygon2D.new()
+	b_outline.color = Color8(20, 24, 32)
+	b_outline.polygon = PackedVector2Array([Vector2(-2.5, -1.3), Vector2(2.5, -1.0), Vector2(3.4, 0.0), Vector2(2.5, 1.0), Vector2(-2.5, 1.3)])
+	bullet.add_child(b_outline)
+	var b_core := Polygon2D.new()
+	b_core.color = Color8(248, 236, 200)
+	b_core.polygon = PackedVector2Array([Vector2(-1.8, -0.7), Vector2(2.2, -0.5), Vector2(2.8, 0.0), Vector2(2.2, 0.5), Vector2(-1.8, 0.7)])
+	bullet.add_child(b_core)
+	scene_root.add_child(bullet)
+
+	var total_dist := muzzle.distance_to(end)
+	var flight_time := clampf(total_dist / 1800.0, 0.035, 0.085)
+	var wake_len := minf(34.0, total_dist)
+	var is_zombie_hit := hit_collider != null and hit_collider.has_method("take_damage")
+	var had_hit := hit_collider != null
+	var tw_b := create_tween()
+	tw_b.tween_method(func(p: float) -> void:
+		var head := muzzle.lerp(end, p)
+		var tail_d := maxf(0.0, p * total_dist - wake_len)
+		var tail := muzzle + aim * tail_d
+		if is_instance_valid(bullet):
+			bullet.global_position = head
+		tracer.points = PackedVector2Array([tail, head])
+	, 0.0, 1.0, flight_time)
+	tw_b.tween_callback(func() -> void:
+		tracer.hide()
+		if is_instance_valid(bullet):
+			bullet.queue_free()
+		if had_hit and is_instance_valid(scene_root):
+			_spawn_impact_fx(scene_root, end, aim, is_zombie_hit)
+	)
+
+
+func _spawn_impact_fx(scene_root: Node, pos: Vector2, aim: Vector2, is_blood: bool) -> void:
+	var count := 4 if is_blood else 3
+	for i in count:
+		var p := Polygon2D.new()
+		p.global_position = pos
+		if is_blood:
+			p.color = Color8(138, 38, 38) if i % 2 == 0 else Color8(92, 24, 24)
+			p.polygon = PackedVector2Array([Vector2(-1.2, -1.2), Vector2(1.2, -1.2), Vector2(1.2, 1.2), Vector2(-1.2, 1.2)])
+		else:
+			p.color = Color8(227, 154, 59) if i == 0 else Color8(168, 174, 179)
+			p.polygon = PackedVector2Array([Vector2(-1.0, -0.8), Vector2(1.0, -0.8), Vector2(1.0, 0.8), Vector2(-1.0, 0.8)])
+		scene_root.add_child(p)
+		var base_dir := aim if is_blood else -aim
+		var dir := base_dir.rotated(randf_range(-0.65, 0.65))
+		var target := pos + dir * randf_range(5.0, 14.0) + (Vector2(0.0, randf_range(3.0, 8.0)) if is_blood else Vector2.ZERO)
+		var tw := p.create_tween()
+		tw.tween_property(p, "global_position", target, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(p, "modulate:a", 0.0, 0.16)
+		tw.tween_callback(p.queue_free)

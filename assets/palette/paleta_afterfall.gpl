@@ -1,28 +1,36 @@
 GIMP Palette
-Name: Afterfall
+Name: Afterfall Scavland
 Columns: 8
 #
- 26  26  46	outline
- 43  43  51	concrete_darkest
- 74  74  82	concrete_dark
-110 110 118	concrete_mid
-154 154 160	concrete_light
-200 200 196	concrete_highlight
- 59  36  24	rust_darkest
-107  58  31	rust_dark
-160  86  42	rust_mid
-208 138  74	rust_light
-224 180 138	skin_light
-176 122  82	skin_mid
-110  74  50	skin_dark
- 52  73  94	cloth_blue
- 90 107  58	cloth_olive
-138 123  79	cloth_khaki
-122  46  46	cloth_red
- 31  59  37	veg_darkest
- 63 107  52	veg_mid
-122 160  74	veg_light
- 92  70  50	wood_dark
-155 122  84	wood_light
-111 127  90	zombie_grey
-232 197  71	warning_yellow
+ 13  16  23	shadow_abyss
+ 20  24  32	shadow_outline
+ 30  36  46	shadow_deep
+ 42  49  61	shadow_ambient
+ 47  54  64	concrete_darkest
+ 68  76  87	concrete_dark
+ 95 104 115	concrete_mid
+132 140 148	concrete_light
+168 174 179	concrete_highlight
+ 38  25  20	rust_darkest
+ 66  40  29	rust_dark
+105  60  38	rust_mid
+145  85  48	rust_light
+184 118  68	rust_highlight
+ 56  43  33	wood_dark
+ 92  70  52	wood_mid
+130 101  74	wood_light
+ 27  38  30	foliage_darkest
+ 44  61  45	foliage_dark
+ 68  89  62	foliage_mid
+ 99 117  80	foliage_light
+128 138  96	foliage_dry
+196 158 126	skin_light
+153 114  86	skin_mid
+102  72  54	skin_dark
+ 54  69  84	cloth_slate_blue
+122 112  82	cloth_dirty_khaki
+ 86  99  82	zombie_necrotic_dark
+124 138 116	zombie_necrotic_light
+ 74  18  22	blood_dried
+150  33  39	blood_fresh
+227 168  69	amber_light_glow

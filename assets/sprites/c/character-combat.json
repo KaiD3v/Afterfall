@@ -5,38 +5,38 @@
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "protagonist_melee_down_1",
       "frame": {
-        "x": 64,
+        "x": 256,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 80
     },
     {
       "filename": "protagonist_melee_down_2",
       "frame": {
-        "x": 128,
+        "x": 512,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "protagonist_melee_down_3",
       "frame": {
-        "x": 192,
+        "x": 768,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
@@ -44,39 +44,39 @@
       "filename": "protagonist_melee_right_0",
       "frame": {
         "x": 0,
-        "y": 64,
-        "w": 64,
-        "h": 64
+        "y": 256,
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "protagonist_melee_right_1",
       "frame": {
-        "x": 64,
-        "y": 64,
-        "w": 64,
-        "h": 64
+        "x": 256,
+        "y": 256,
+        "w": 256,
+        "h": 256
       },
       "duration": 80
     },
     {
       "filename": "protagonist_melee_right_2",
       "frame": {
-        "x": 128,
-        "y": 64,
-        "w": 64,
-        "h": 64
+        "x": 512,
+        "y": 256,
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "protagonist_melee_right_3",
       "frame": {
-        "x": 192,
-        "y": 64,
-        "w": 64,
-        "h": 64
+        "x": 768,
+        "y": 256,
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
@@ -84,39 +84,39 @@
       "filename": "protagonist_melee_up_0",
       "frame": {
         "x": 0,
-        "y": 128,
-        "w": 64,
-        "h": 64
+        "y": 512,
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
     {
       "filename": "protagonist_melee_up_1",
       "frame": {
-        "x": 64,
-        "y": 128,
-        "w": 64,
-        "h": 64
+        "x": 256,
+        "y": 512,
+        "w": 256,
+        "h": 256
       },
       "duration": 80
     },
     {
       "filename": "protagonist_melee_up_2",
       "frame": {
-        "x": 128,
-        "y": 128,
-        "w": 64,
-        "h": 64
+        "x": 512,
+        "y": 512,
+        "w": 256,
+        "h": 256
       },
       "duration": 150
     },
     {
       "filename": "protagonist_melee_up_3",
       "frame": {
-        "x": 192,
-        "y": 128,
-        "w": 64,
-        "h": 64
+        "x": 768,
+        "y": 512,
+        "w": 256,
+        "h": 256
       },
       "duration": 120
     },
@@ -124,9 +124,39 @@
       "filename": "protagonist_aim_down_0",
       "frame": {
         "x": 0,
-        "y": 192,
-        "w": 64,
-        "h": 64
+        "y": 768,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_aim_down_1",
+      "frame": {
+        "x": 256,
+        "y": 768,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_aim_down_2",
+      "frame": {
+        "x": 512,
+        "y": 768,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_aim_down_3",
+      "frame": {
+        "x": 768,
+        "y": 768,
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
@@ -134,9 +164,39 @@
       "filename": "protagonist_aim_right_0",
       "frame": {
         "x": 0,
-        "y": 256,
-        "w": 64,
-        "h": 64
+        "y": 1024,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_aim_right_1",
+      "frame": {
+        "x": 256,
+        "y": 1024,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_aim_right_2",
+      "frame": {
+        "x": 512,
+        "y": 1024,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_aim_right_3",
+      "frame": {
+        "x": 768,
+        "y": 1024,
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
@@ -144,29 +204,179 @@
       "filename": "protagonist_aim_up_0",
       "frame": {
         "x": 0,
-        "y": 320,
-        "w": 64,
-        "h": 64
+        "y": 1280,
+        "w": 256,
+        "h": 256
       },
       "duration": 250
+    },
+    {
+      "filename": "protagonist_aim_up_1",
+      "frame": {
+        "x": 256,
+        "y": 1280,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_aim_up_2",
+      "frame": {
+        "x": 512,
+        "y": 1280,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_aim_up_3",
+      "frame": {
+        "x": 768,
+        "y": 1280,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 250
+    },
+    {
+      "filename": "protagonist_aim_walk_down_0",
+      "frame": {
+        "x": 0,
+        "y": 1536,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
+    },
+    {
+      "filename": "protagonist_aim_walk_down_1",
+      "frame": {
+        "x": 256,
+        "y": 1536,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
+    },
+    {
+      "filename": "protagonist_aim_walk_down_2",
+      "frame": {
+        "x": 512,
+        "y": 1536,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
+    },
+    {
+      "filename": "protagonist_aim_walk_down_3",
+      "frame": {
+        "x": 768,
+        "y": 1536,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
+    },
+    {
+      "filename": "protagonist_aim_walk_right_0",
+      "frame": {
+        "x": 0,
+        "y": 1792,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
+    },
+    {
+      "filename": "protagonist_aim_walk_right_1",
+      "frame": {
+        "x": 256,
+        "y": 1792,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
+    },
+    {
+      "filename": "protagonist_aim_walk_right_2",
+      "frame": {
+        "x": 512,
+        "y": 1792,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
+    },
+    {
+      "filename": "protagonist_aim_walk_right_3",
+      "frame": {
+        "x": 768,
+        "y": 1792,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
+    },
+    {
+      "filename": "protagonist_aim_walk_up_0",
+      "frame": {
+        "x": 0,
+        "y": 2048,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
+    },
+    {
+      "filename": "protagonist_aim_walk_up_1",
+      "frame": {
+        "x": 256,
+        "y": 2048,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
+    },
+    {
+      "filename": "protagonist_aim_walk_up_2",
+      "frame": {
+        "x": 512,
+        "y": 2048,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
+    },
+    {
+      "filename": "protagonist_aim_walk_up_3",
+      "frame": {
+        "x": 768,
+        "y": 2048,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 140
     },
     {
       "filename": "protagonist_shoot_down_0",
       "frame": {
         "x": 0,
-        "y": 384,
-        "w": 64,
-        "h": 64
+        "y": 2304,
+        "w": 256,
+        "h": 256
       },
       "duration": 60
     },
     {
       "filename": "protagonist_shoot_down_1",
       "frame": {
-        "x": 64,
-        "y": 384,
-        "w": 64,
-        "h": 64
+        "x": 256,
+        "y": 2304,
+        "w": 256,
+        "h": 256
       },
       "duration": 100
     },
@@ -174,19 +384,19 @@
       "filename": "protagonist_shoot_right_0",
       "frame": {
         "x": 0,
-        "y": 448,
-        "w": 64,
-        "h": 64
+        "y": 2560,
+        "w": 256,
+        "h": 256
       },
       "duration": 60
     },
     {
       "filename": "protagonist_shoot_right_1",
       "frame": {
-        "x": 64,
-        "y": 448,
-        "w": 64,
-        "h": 64
+        "x": 256,
+        "y": 2560,
+        "w": 256,
+        "h": 256
       },
       "duration": 100
     },
@@ -194,31 +404,151 @@
       "filename": "protagonist_shoot_up_0",
       "frame": {
         "x": 0,
-        "y": 512,
-        "w": 64,
-        "h": 64
+        "y": 2816,
+        "w": 256,
+        "h": 256
       },
       "duration": 60
     },
     {
       "filename": "protagonist_shoot_up_1",
       "frame": {
-        "x": 64,
-        "y": 512,
-        "w": 64,
-        "h": 64
+        "x": 256,
+        "y": 2816,
+        "w": 256,
+        "h": 256
       },
       "duration": 100
+    },
+    {
+      "filename": "protagonist_reload_down_0",
+      "frame": {
+        "x": 0,
+        "y": 3072,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 350
+    },
+    {
+      "filename": "protagonist_reload_down_1",
+      "frame": {
+        "x": 256,
+        "y": 3072,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 400
+    },
+    {
+      "filename": "protagonist_reload_down_2",
+      "frame": {
+        "x": 512,
+        "y": 3072,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 400
+    },
+    {
+      "filename": "protagonist_reload_down_3",
+      "frame": {
+        "x": 768,
+        "y": 3072,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 350
+    },
+    {
+      "filename": "protagonist_reload_right_0",
+      "frame": {
+        "x": 0,
+        "y": 3328,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 350
+    },
+    {
+      "filename": "protagonist_reload_right_1",
+      "frame": {
+        "x": 256,
+        "y": 3328,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 400
+    },
+    {
+      "filename": "protagonist_reload_right_2",
+      "frame": {
+        "x": 512,
+        "y": 3328,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 400
+    },
+    {
+      "filename": "protagonist_reload_right_3",
+      "frame": {
+        "x": 768,
+        "y": 3328,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 350
+    },
+    {
+      "filename": "protagonist_reload_up_0",
+      "frame": {
+        "x": 0,
+        "y": 3584,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 350
+    },
+    {
+      "filename": "protagonist_reload_up_1",
+      "frame": {
+        "x": 256,
+        "y": 3584,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 400
+    },
+    {
+      "filename": "protagonist_reload_up_2",
+      "frame": {
+        "x": 512,
+        "y": 3584,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 400
+    },
+    {
+      "filename": "protagonist_reload_up_3",
+      "frame": {
+        "x": 768,
+        "y": 3584,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 350
     }
   ],
   "meta": {
-    "app": "Afterfall M1",
-    "version": "1",
+    "app": "Afterfall Scavland HD",
+    "version": "2",
     "image": "character-combat.png",
     "format": "I8",
     "size": {
-      "w": 256,
-      "h": 576
+      "w": 1024,
+      "h": 3840
     },
     "scale": "1",
     "frameTags": [
@@ -246,58 +576,100 @@
       {
         "name": "aim_down",
         "from": 12,
-        "to": 12,
+        "to": 15,
         "direction": "forward",
-        "loop": false
+        "loop": true
       },
       {
         "name": "aim_right",
-        "from": 13,
-        "to": 13,
+        "from": 16,
+        "to": 19,
         "direction": "forward",
-        "loop": false
+        "loop": true
       },
       {
         "name": "aim_up",
-        "from": 14,
-        "to": 14,
+        "from": 20,
+        "to": 23,
         "direction": "forward",
-        "loop": false
+        "loop": true
+      },
+      {
+        "name": "aim_walk_down",
+        "from": 24,
+        "to": 27,
+        "direction": "forward",
+        "loop": true
+      },
+      {
+        "name": "aim_walk_right",
+        "from": 28,
+        "to": 31,
+        "direction": "forward",
+        "loop": true
+      },
+      {
+        "name": "aim_walk_up",
+        "from": 32,
+        "to": 35,
+        "direction": "forward",
+        "loop": true
       },
       {
         "name": "shoot_down",
-        "from": 15,
-        "to": 16,
+        "from": 36,
+        "to": 37,
         "direction": "forward",
         "loop": false
       },
       {
         "name": "shoot_right",
-        "from": 17,
-        "to": 18,
+        "from": 38,
+        "to": 39,
         "direction": "forward",
         "loop": false
       },
       {
         "name": "shoot_up",
-        "from": 19,
-        "to": 20,
+        "from": 40,
+        "to": 41,
+        "direction": "forward",
+        "loop": false
+      },
+      {
+        "name": "reload_down",
+        "from": 42,
+        "to": 45,
+        "direction": "forward",
+        "loop": false
+      },
+      {
+        "name": "reload_right",
+        "from": 46,
+        "to": 49,
+        "direction": "forward",
+        "loop": false
+      },
+      {
+        "name": "reload_up",
+        "from": 50,
+        "to": 53,
         "direction": "forward",
         "loop": false
       }
     ],
     "muzzle": {
       "down": [
-        32,
-        41
+        140,
+        118
       ],
       "right": [
-        46,
-        27
+        141,
+        118
       ],
       "up": [
-        32,
-        8
+        140,
+        114
       ]
     }
   }

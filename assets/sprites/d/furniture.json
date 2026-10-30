@@ -5,50 +5,50 @@
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "cabinet",
       "frame": {
-        "x": 64,
+        "x": 256,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "table",
       "frame": {
-        "x": 128,
+        "x": 512,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     },
     {
       "filename": "dresser",
       "frame": {
-        "x": 192,
+        "x": 768,
         "y": 0,
-        "w": 64,
-        "h": 64
+        "w": 256,
+        "h": 256
       },
       "duration": 250
     }
   ],
   "meta": {
-    "app": "Afterfall D",
-    "version": "1",
+    "app": "Afterfall Scavland HD",
+    "version": "2",
     "image": "furniture.png",
     "format": "I8",
     "size": {
-      "w": 256,
-      "h": 64
+      "w": 1024,
+      "h": 256
     },
     "scale": "1",
     "frameTags": [

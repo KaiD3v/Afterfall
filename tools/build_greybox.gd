@@ -56,23 +56,23 @@ const INTERIOR := [
 
 # símbolo: [cor (paleta_afterfall.gpl), sólido]
 const TILES := {
-	".": [Color8(43, 43, 51), false],     # asfalto
-	"z": [Color8(110, 110, 118), false],  # faixa de pedestre
-	"k": [Color8(154, 154, 160), false],  # azulejo
-	"+": [Color8(26, 26, 46), true],      # janela na parede
-	"P": [Color8(92, 70, 50), true],      # poste caído
-	"-": [Color8(110, 110, 118), false],  # calçada
-	",": [Color8(74, 74, 82), false],     # terreno
-	"_": [Color8(110, 74, 50), false],    # piso de madeira
-	"#": [Color8(26, 26, 46), true],      # limite / parede
-	"F": [Color8(92, 70, 50), true],      # cerca
-	"C": [Color8(107, 58, 31), true],     # carro destruído
-	"V": [Color8(63, 107, 52), true],     # vegetação
-	"H": [Color8(200, 200, 196), true],   # casa
-	"D": [Color8(155, 122, 84), true],    # porta
-	"G": [Color8(208, 138, 74), true],    # posto
-	"W": [Color8(52, 73, 94), true],      # oficina
-	"X": [Color8(74, 74, 82), true],      # sólido sob um sprite de prédio (sem contorno)
+	".": [Color8(36, 42, 54), false],     # asfalto
+	"z": [Color8(110, 117, 130), false],  # faixa de pedestre
+	"k": [Color8(142, 148, 158), false],  # azulejo
+	"+": [Color8(20, 24, 32), true],      # janela na parede
+	"P": [Color8(89, 64, 46), true],      # poste caído
+	"-": [Color8(110, 117, 130), false],  # calçada
+	",": [Color8(54, 61, 74), false],     # terreno
+	"_": [Color8(89, 64, 46), false],     # piso de madeira
+	"#": [Color8(20, 24, 32), true],      # limite / parede
+	"F": [Color8(89, 64, 46), true],      # cerca
+	"C": [Color8(138, 66, 40), true],     # carro destruído
+	"V": [Color8(66, 82, 58), true],      # vegetação
+	"H": [Color8(184, 188, 194), true],   # casa
+	"D": [Color8(133, 102, 74), true],    # porta
+	"G": [Color8(184, 98, 52), true],     # posto
+	"W": [Color8(46, 74, 107), true],     # oficina
+	"X": [Color8(54, 61, 74), true],      # sólido sob um sprite de prédio (sem contorno)
 }
 
 # Prédios: símbolo -> [sprite, canto superior esquerdo do bloco, rótulo]. Sem sprite, fica o bloco colorido.
@@ -84,16 +84,18 @@ const BUILDINGS := {
 
 # Containers do interior: [id, rótulo, tabela, tile, cor greybox]
 const CONTAINERS := [
-	[&"geladeira", "Geladeira", "res://data/loot/geladeira.tres", Vector2i(1, 2), Color8(200, 200, 196)],
-	[&"armario", "Armário", "res://data/loot/armario.tres", Vector2i(4, 2), Color8(155, 122, 84)],
-	[&"mesa", "Mesa", "res://data/loot/mesa.tres", Vector2i(10, 4), Color8(92, 70, 50)],
-	[&"comoda", "Cômoda", "res://data/loot/comoda.tres", Vector2i(13, 1), Color8(155, 122, 84)],
+	[&"geladeira", "Geladeira", "res://data/loot/geladeira.tres", Vector2i(1, 2), Color8(184, 188, 194)],
+	[&"armario", "Armário", "res://data/loot/armario.tres", Vector2i(4, 2), Color8(133, 102, 74)],
+	[&"mesa", "Mesa", "res://data/loot/mesa.tres", Vector2i(10, 4), Color8(89, 64, 46)],
+	[&"comoda", "Cômoda", "res://data/loot/comoda.tres", Vector2i(13, 1), Color8(133, 102, 74)],
 ]
 
 # Arte da Fase D. Sheet que ainda não existe é pulada: o mapa fica no greybox colorido.
 const STREET_TILES := "res://assets/sprites/d/street-tiles.json"
+const STREET_TILES_HD := "res://assets/sprites/d/street-tiles-hd.json"
 const STREET_PROPS := "res://assets/sprites/d/street-props.json"
 const INTERIOR_TILES := "res://assets/sprites/d/interior-tiles.json"
+const INTERIOR_TILES_HD := "res://assets/sprites/d/interior-tiles-hd.json"
 const FURNITURE := "res://assets/sprites/d/furniture.json"
 # Container -> móvel da sheet de móveis
 const FURNITURE_OF := {&"geladeira": "fridge", &"armario": "cabinet", &"mesa": "table", &"comoda": "dresser"}
@@ -114,6 +116,7 @@ const H := T / 2.0
 const SOLID := 1  # source do tile invisível com colisão (camada Walls)
 
 var tileset: TileSet
+var tileset_hd: TileSet
 var keys: Array
 var sheets := {}  # json -> {texture, rects: nome -> Rect2i, meta, source}
 
@@ -122,10 +125,11 @@ func _initialize() -> void:
 	DOOR = load("res://scenes/props/door.tscn")
 	CONTAINER = load("res://scenes/props/loot_container.tscn")
 	keys = TILES.keys()
-	for path in [STREET_TILES, STREET_PROPS, INTERIOR_TILES, FURNITURE]:
+	for path in [STREET_TILES, STREET_TILES_HD, STREET_PROPS, INTERIOR_TILES, INTERIOR_TILES_HD, FURNITURE]:
 		if FileAccess.file_exists(path):
 			sheets[path] = _sheet(path)
 	tileset = _tileset()
+	tileset_hd = _tileset_hd()
 
 	# Bairro: prédio com sprite vira sólido sem cor, menos a fileira de cima do bloco, que fica
 	# livre para o jogador passar atrás do telhado (3/4). Porta da casa na frente do tile D.
@@ -145,9 +149,14 @@ func _initialize() -> void:
 			var s := Sprite2D.new()
 			s.name = b[2].capitalize() + "Sprite"
 			s.texture = load(b[0])
+			s.scale = Vector2(0.25, 0.25)
 			s.centered = false
 			s.offset = Vector2(0, -s.texture.get_height())  # origem na base: ordena com quem passa na frente
-			s.position = Vector2(b[1].x * T, b[1].y * T + s.texture.get_height())
+			var w_tiles := 3 if ch == "H" else 4
+			var world_w := s.texture.get_width() * 0.25
+			var bx: float = b[1].x * T + (w_tiles * T - world_w) * 0.5
+			var by: float = (b[1].y + 3) * T
+			s.position = Vector2(bx, by)
 			_add(hood, s)
 		else:
 			var l := Label.new()
@@ -155,10 +164,11 @@ func _initialize() -> void:
 			l.text = b[2]
 			l.position = Vector2((b[1] - Vector2i(0, 1)) * T) + Vector2(2, 4)
 			l.add_theme_font_size_override("font_size", 10)
-			l.add_theme_color_override("font_color", Color8(232, 197, 71))
+			l.add_theme_color_override("font_color", Color8(227, 154, 59))
 			_add(hood, l)
 	if sheets.has(STREET_PROPS):
 		_props(hood, map)
+	_atmosphere(hood, false)
 	var door_tile := _find(NEIGHBORHOOD, "D")
 	_door(hood, "HouseDoor", "enter_house", _center(door_tile) + Vector2(0, 28))
 	_marker(hood, "HouseExit", _center(door_tile) + Vector2(0, 32))
@@ -167,6 +177,7 @@ func _initialize() -> void:
 
 	# Interior: porta de saída acima do tile D; containers nos cômodos (o móvel é o container).
 	var house := _scene("HouseInterior", INTERIOR, true)
+	_atmosphere(house, true)
 	door_tile = _find(INTERIOR, "D")
 	_door(house, "ExitDoor", "exit_house", _center(door_tile) + Vector2(0, -28))
 	_marker(house, "PlayerSpawn", _center(door_tile) + Vector2(0, -32))
@@ -208,7 +219,7 @@ func _tileset() -> TileSet:
 		var c: Color = TILES[keys[i]][0]
 		img.fill_rect(Rect2i(i * T, 0, T, T), c)
 		if TILES[keys[i]][1] and keys[i] != "X":  # contorno de 1 px nos sólidos, para ler o bloco
-			var o := Color8(26, 26, 46) if c != Color8(26, 26, 46) else Color8(43, 43, 51)
+			var o := Color8(20, 24, 32) if c != Color8(20, 24, 32) else Color8(36, 42, 54)
 			for k in T:
 				for p in [Vector2i(i * T + k, 0), Vector2i(i * T + k, T - 1), Vector2i(i * T, k), Vector2i(i * T + T - 1, k)]:
 					img.set_pixelv(p, o)
@@ -252,6 +263,28 @@ func _tileset() -> TileSet:
 	return ts
 
 
+func _tileset_hd() -> TileSet:
+	var ts := TileSet.new()
+	ts.tile_size = Vector2i(128, 128)
+	for path in [STREET_TILES_HD, INTERIOR_TILES_HD]:
+		if not sheets.has(path):
+			continue
+		var art := TileSetAtlasSource.new()
+		art.texture = sheets[path].texture
+		art.texture_region_size = Vector2i(128, 128)
+		sheets[path].source = ts.add_source(art)
+		for r in sheets[path].rects.values():
+			var at := Vector2i(r.position) / 128
+			art.create_tile(at)
+			for flags in [[false, true, false], [false, false, true], [true, false, true]]:
+				var alt := art.create_alternative_tile(at)
+				var d := art.get_tile_data(at, alt)
+				d.flip_h = flags[0]
+				d.flip_v = flags[1]
+				d.transpose = flags[2]
+	return ts
+
+
 func _scene(scene_name: String, map: Array, interior: bool) -> Node2D:
 	var scene := Node2D.new()
 	scene.name = scene_name
@@ -259,14 +292,21 @@ func _scene(scene_name: String, map: Array, interior: bool) -> Node2D:
 	var layer := TileMapLayer.new()
 	layer.name = "Ground"
 	layer.tile_set = tileset
-	layer.z_index = -1  # chão sempre por baixo
+	layer.z_index = -2  # chão lógico por baixo
 	_add(scene, layer)
+	var layer_hd := TileMapLayer.new()
+	layer_hd.name = "GroundHD"
+	layer_hd.tile_set = tileset_hd
+	layer_hd.scale = Vector2(0.25, 0.25)
+	layer_hd.z_index = -1  # chão 4x HD por cima do Ground lógico
+	_add(scene, layer_hd)
 	var walls := TileMapLayer.new()
 	walls.name = "Walls"
 	walls.tile_set = tileset
 	_add(scene, walls)
 	var under := _ground_under(map)
 	var sheet := INTERIOR_TILES if interior else STREET_TILES
+	var sheet_hd := INTERIOR_TILES_HD if interior else STREET_TILES_HD
 	for y in map.size():
 		for x in map[y].length():
 			var ch: String = map[y][x]
@@ -278,6 +318,8 @@ func _scene(scene_name: String, map: Array, interior: bool) -> Node2D:
 				layer.set_cell(cell, 0, Vector2i(keys.find(ch), 0))
 			else:
 				layer.set_cell(cell, sheets[sheet].source, Vector2i(sheets[sheet].rects[pick[0]].position) / T, pick[1])
+				if sheets.has(sheet_hd):
+					layer_hd.set_cell(cell, sheets[sheet_hd].source, Vector2i(sheets[sheet_hd].rects[pick[0]].position) / 128, pick[1])
 	return scene
 
 
@@ -415,16 +457,45 @@ func _run(map: Array, cell: Vector2i, dir: Vector2i) -> int:
 	return n
 
 
-# Quadro de 64×64 com a pegada centralizada e a base na linha 62: origem no meio da base da pegada.
+# Quadro de 256×256 (escala 0.25 = 64×64 unidades) com a pegada centralizada e a base na linha 250.
 func _prop(parent: Node, frame: String, cell: Vector2i) -> void:
 	var fp: Array = sheets[STREET_PROPS].meta.footprint[frame]
 	var s := Sprite2D.new()
 	s.name = "%s_%d_%d" % [frame, cell.x, cell.y]
 	s.texture = _atlas(STREET_PROPS, frame)
+	s.scale = Vector2(0.25, 0.25)
 	s.centered = false
-	s.offset = Vector2(-32, -63)
+	s.offset = Vector2(-128, -251)
 	s.position = Vector2((cell.x + fp[0] / 2.0) * T, (cell.y + fp[1]) * T)
 	_add(parent, s)
+
+
+func _atmosphere(scene: Node2D, interior: bool) -> void:
+	var mod := CanvasModulate.new()
+	mod.name = "AtmosphereModulate"
+	mod.color = Color(0.74, 0.77, 0.84, 1.0) if interior else Color(0.62, 0.68, 0.78, 1.0)
+	_add(scene, mod)
+	if not ResourceLoader.exists("res://assets/sprites/fx/point_light.png"):
+		return
+	var ltex: Texture2D = load("res://assets/sprites/fx/point_light.png")
+	var lights := [
+		["KitchenLight", Vector2(2.5 * T, 4.0 * T), Color(0.85, 0.90, 0.96, 1.0), 0.55, 0.9],
+		["RoomLight", Vector2(10.0 * T, 4.5 * T), Color(0.95, 0.72, 0.42, 1.0), 0.70, 1.2],
+	] if interior else [
+		["HousePorchLight", Vector2(10.5 * T, 12.2 * T), Color(0.96, 0.68, 0.32, 1.0), 0.85, 1.1],
+		["GasStationLight", Vector2(48.0 * T, 6.8 * T), Color(0.98, 0.66, 0.28, 1.0), 1.15, 1.5],
+		["WorkshopLight", Vector2(12.0 * T, 24.8 * T), Color(0.95, 0.65, 0.30, 1.0), 0.85, 1.2],
+		["CrossingGlow", Vector2(29.5 * T, 16.5 * T), Color(0.65, 0.76, 0.92, 1.0), 0.45, 1.8],
+	]
+	for spec in lights:
+		var pt := PointLight2D.new()
+		pt.name = spec[0]
+		pt.position = spec[1]
+		pt.color = spec[2]
+		pt.energy = spec[3]
+		pt.texture = ltex
+		pt.texture_scale = spec[4]
+		_add(scene, pt)
 
 
 func _add(scene: Node, child: Node) -> void:

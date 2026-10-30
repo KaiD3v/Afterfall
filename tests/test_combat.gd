@@ -79,13 +79,17 @@ func _run() -> void:
 	check("sem fôlego o machete falha", not player.melee())
 	player.exhausted = false
 
-	# 5. Pistola: 2 tiros matam a 100 px; pente de 12; recarga usa a reserva.
+	# 5. Pistola: 2 tiros matam a 100 px; tiro alinhado ao cano; pente de 12; recarga usa a reserva.
 	player.ammo = player.mag_size
 	player.pistol_spread = 0.0
+	player.facing = Vector2.RIGHT
 	z = await spawn(player.position + Vector2(100, 0), Vector2.RIGHT)
 	for i in 2:
 		player._weapon_wait = 0.0
 		player.shoot(Vector2.RIGHT)
+		if i == 0:
+			var pts: PackedVector2Array = player.get_node("Tracer").points
+			check("tiro sai na linha exata do cano (y=%.1f -> %.1f)" % [pts[0].y, pts[1].y], is_equal_approx(pts[0].y, player.muzzle_position().y) and is_equal_approx(pts[0].y, pts[1].y))
 		await physics_frame
 	check("2 tiros matam", dead(z))
 	await frames(0.5)
@@ -97,8 +101,10 @@ func _run() -> void:
 	check("pente dá 12 tiros (deu %d)" % (shots + 2), shots + 2 == 12 and player.ammo == 0)
 	var reserve0: int = player.reserve
 	player.reload()
-	await frames(player.reload_time + 0.1)
-	check("recarga enche o pente com a reserva", player.ammo == 12 and player.reserve == reserve0 - 12)
+	await frames(0.2)
+	check("recarga toca animação reload_*", player.reloading and player._action == "reload" and String(player.get_node("Sprite").animation).begins_with("reload"))
+	await frames(player.reload_time)
+	check("recarga enche o pente com a reserva e destrava ação", player.ammo == 12 and player.reserve == reserve0 - 12 and player._action == "")
 
 	# 6. Zumbi ataca de perto, 15 por golpe, 1 por segundo; jogador mais rápido que ele.
 	player.health = player.max_health

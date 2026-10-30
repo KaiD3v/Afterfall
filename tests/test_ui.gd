@@ -55,6 +55,17 @@ func _run() -> void:
 	await frames_for(0.1)
 	check("parado: idle", sprite.animation == &"idle_right" and sprite.speed_scale == 1.0)
 
+	for d in ["down", "right", "up"]:
+		add_anim(frames, "aim_" + d, tex, 4, true)
+		add_anim(frames, "aim_walk_" + d, tex, 4, true)
+		add_anim(frames, "reload_" + d, tex, 4, false)
+	var x_aim0 := player.position.x
+	Input.action_press("aim")
+	await hold("move_right", 0.5)
+	Input.action_release("aim")
+	check("andando e mirando: aim_walk e velocidade reduzida (~50 px/s)", String(sprite.animation).begins_with("aim_walk") and is_equal_approx(sprite.speed_scale, player.aim_walk_speed / player.walk_speed) and absf((player.position.x - x_aim0) / 0.5 - player.aim_walk_speed) < 4.0)
+	await frames_for(0.1)
+
 	# 2. Golpe no frame de contato quando existe melee_*.
 	add_anim(frames, "melee_right", tex, 4, false)
 	player.position = Vector2(760, 592)
@@ -117,11 +128,24 @@ func _run() -> void:
 	check("sem erro com o foco liberado na troca de cena", main.interior == null)
 	check("de volta à rua: passos da rua", player.surface == &"street")
 
-	# 5. Mira: dispersão cresce com a distância; cor avisa pente vazio; cursor escondido.
+	# 5. Mira: dispersão cresce com a distância e ao andar mirando; cor avisa pente vazio; cursor escondido.
 	var cross: Node2D = hud.get_node("Crosshair")
 	check("abertura a 100 px = 7 px (±4°)", cross.gap_at(100.0) == 7.0)
 	check("abertura a 300 px = 21 px", cross.gap_at(300.0) == 21.0)
 	check("abertura mínima de perto", cross.gap_at(10.0) == cross.MIN_GAP)
+	player._moving = true
+	check("andando mirando: dispersão aumenta (±9° -> 16 px a 100 px)", player.current_spread() > player.pistol_spread and cross.gap_at(100.0) == 16.0)
+	player._moving = false
+	Input.action_press("flashlight")
+	await physics_frame
+	await physics_frame
+	Input.action_release("flashlight")
+	check("tecla T desliga a lanterna", not player.flashlight_on and not player.get_node("Flashlight").visible)
+	Input.action_press("flashlight")
+	await physics_frame
+	await physics_frame
+	Input.action_release("flashlight")
+	check("tecla T religa a lanterna", player.flashlight_on and player.get_node("Flashlight").visible)
 	player.ammo = 0
 	check("pente vazio muda a cor", cross.color_now() == cross.EMPTY)
 	player.ammo = player.mag_size

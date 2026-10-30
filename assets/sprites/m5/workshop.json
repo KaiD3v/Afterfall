@@ -5,29 +5,28 @@
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 128,
-        "h": 96
+        "w": 768,
+        "h": 544
       },
       "duration": 250
     }
   ],
   "meta": {
-    "app": "Afterfall M5",
-    "version": "1",
+    "app": "Afterfall Scavland HD",
+    "version": "2",
     "image": "workshop.png",
     "format": "I8",
     "size": {
-      "w": 128,
-      "h": 96
+      "w": 768,
+      "h": 544
     },
     "scale": "1",
     "frameTags": [
       {
-        "name": "static",
+        "name": "workshop",
         "from": 0,
         "to": 0,
-        "direction": "forward",
-        "loop": true
+        "direction": "forward"
       }
     ]
   }
