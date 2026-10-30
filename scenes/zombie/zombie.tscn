@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scenes/zombie/zombie.gd" id="1"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/zombie_frames.tres" id="2"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/groan.mp3" id="3"]
 [ext_resource type="Texture2D" path="res://assets/sprites/fx/drop_shadow.png" id="4"]
+[ext_resource type="Script" path="res://scripts/components/health.gd" id="health"]
 
 [sub_resource type="RectangleShape2D" id="feet"]
 size = Vector2(12, 6)
@@ -25,6 +26,10 @@ scale = Vector2(0.25, 0.25)
 sprite_frames = ExtResource("2")
 animation = &"idle_down"
 offset = Vector2(0, -14)
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("health")
+maximum = 60.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("feet")

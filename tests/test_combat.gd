@@ -62,21 +62,21 @@ func _run() -> void:
 	await frames(1.0)
 
 	# 4. Machete: 3 golpes matam; cada golpe custa stamina; sem fôlego não golpeia.
-	player.stamina = player.max_stamina
+	player.stamina.current = player.stamina.maximum
 	z = await spawn(player.position + Vector2(24, 0), Vector2.LEFT)
 	player.facing = Vector2.RIGHT
 	var hits := 0
 	for i in 3:
-		var s0: float = player.stamina
+		var s0: float = player.stamina.current
 		if player.melee():
 			hits += 1
-		check("golpe %d custa 20 de stamina" % (i + 1), is_equal_approx(s0 - player.stamina, 20.0))
+		check("golpe %d custa 20 de stamina" % (i + 1), is_equal_approx(s0 - player.stamina.current, 20.0))
 		await frames(0.55)
 	check("3 golpes de machete matam", hits == 3 and dead(z))
 	await frames(0.5)
-	player.exhausted = true
+	player.stamina.exhausted = true
 	check("sem fôlego o machete falha", not player.melee())
-	player.exhausted = false
+	player.stamina.exhausted = false
 
 	# 5. Pistola: 2 tiros matam a 100 px; tiro alinhado ao cano; pente de 12; recarga usa a reserva.
 	player.ammo = player.mag_size
@@ -107,10 +107,10 @@ func _run() -> void:
 	player.pistol_cooldown = cooldown0
 
 	# 6. Zumbi ataca de perto, 15 por golpe, 1 por segundo; jogador mais rápido que ele.
-	player.health = player.max_health
+	player.health.current = player.health.maximum
 	z = await spawn(player.position + Vector2(40, 0), Vector2.LEFT)
 	await frames(2.6)
-	check("zumbi causou 45 de dano em ~2,6 s (vida %.0f)" % player.health, player.health == 55.0)
+	check("zumbi causou 45 de dano em ~2,6 s (vida %.0f)" % player.health.current, player.health.current == 55.0)
 	check("zumbi persegue mais devagar que o jogador anda", z.chase_speed < player.walk_speed)
 	z.queue_free()
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/player.gd" id="1"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/character_frames.tres" id="2"]
@@ -8,6 +8,8 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/fx/drop_shadow.png" id="6"]
 [ext_resource type="Texture2D" path="res://assets/sprites/fx/flashlight_cone.png" id="7"]
 [ext_resource type="Texture2D" path="res://assets/sprites/fx/point_light.png" id="8"]
+[ext_resource type="Script" path="res://scripts/components/health.gd" id="health"]
+[ext_resource type="Script" path="res://scripts/components/stamina.gd" id="stamina"]
 
 [sub_resource type="RectangleShape2D" id="feet"]
 size = Vector2(12, 6)
@@ -51,6 +53,13 @@ texture_scale = 1.0
 modulate = Color(0.95, 0.98, 1, 0.85)
 scale = Vector2(0.028, 0.028)
 texture = ExtResource("8")
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("health")
+maximum = 100.0
+
+[node name="Stamina" type="Node" parent="."]
+script = ExtResource("stamina")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("feet")

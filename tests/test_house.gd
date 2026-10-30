@@ -26,10 +26,10 @@ func _run() -> void:
 	var zs := get_nodes_in_group("zombies")
 	check("os 4 zumbis da cena acham o jogador", zs.size() == 4 and zs.all(func(z): return z.player == player))
 	var z0: Node = zs[0]
-	z0.take_damage(10.0)
-	check("zumbi da cena leva dano e persegue", z0.health == 50.0 and z0.state == z0.State.CHASE)
+	z0.health.damage(10.0)
+	check("zumbi da cena leva dano e persegue", z0.health.current == 50.0 and z0.state == z0.State.CHASE)
 	z0.state = z0.State.IDLE
-	z0.health = z0.max_health
+	z0.health.current = z0.health.maximum
 
 	# 1. Porta: E na frente da casa entra; spawn do interior; bairro e zumbis fora da árvore.
 	player.position = main.get_node("Neighborhood/HouseExit").position
@@ -75,9 +75,9 @@ func _run() -> void:
 	check("liberou um slot: pega o que ficou", rs.items.size() == 8 and rs.loot_of(&"teste_cheio", full.table).is_empty())
 
 	# 4. Bandagem cura 30 e é consumida; com vida cheia não gasta.
-	player.health = 50.0
-	check("bandagem cura", player.use_bandage() and player.health == 80.0 and rs.items.size() == 7)
-	player.health = player.max_health
+	player.health.current = 50.0
+	check("bandagem cura", player.use_bandage() and player.health.current == 80.0 and rs.items.size() == 7)
+	player.health.current = player.health.maximum
 	check("vida cheia não gasta bandagem", not player.use_bandage() and rs.items.size() == 7)
 
 	# 5. Loot fixo na run: o mesmo container não sorteia de novo; nova run sorteia.

@@ -28,7 +28,7 @@ func _run() -> void:
 	Input.action_press("sprint")
 	var x0 := player.position.x
 	var t := 0
-	while not player.exhausted and t < 10 * HZ:
+	while not player.stamina.exhausted and t < 10 * HZ:
 		await physics_frame
 		t += 1
 	print("fôlego cheio durou %.2f s, %.0f px" % [t / HZ, player.position.x - x0])
@@ -39,30 +39,30 @@ func _run() -> void:
 	x0 = player.position.x
 	await frames(1.0)
 	check("sem fôlego anda a ~80 px/s", absf(player.position.x - x0 - 80.0) < 3.0)
-	check("golpe recusado sem fôlego", not player.spend_stamina(10.0))
+	check("golpe recusado sem fôlego", not player.stamina.spend(10.0))
 	Input.action_release("sprint")
 	Input.action_release("move_right")
 
 	# 3. Recupera: 0,8 s de espera + 25/15 s regenerando ≈ 2,47 s desde que esgotou
 	# (1 s já passou no passo 2).
 	t = 0
-	while player.exhausted and t < 10 * HZ:
+	while player.stamina.exhausted and t < 10 * HZ:
 		await physics_frame
 		t += 1
 	print("recuperou o fôlego %.2f s após esgotar" % (1.0 + t / HZ))
 	check("recupera em ~2,5 s", absf(1.0 + t / HZ - 2.47) < 0.1)
-	check("golpe aceito com fôlego", player.spend_stamina(10.0))
+	check("golpe aceito com fôlego", player.stamina.spend(10.0))
 
 	# 4. HUD acompanha.
 	await physics_frame
 	var bar: float = hud.get_node("Stamina/Fill").size.x
-	check("barra de stamina no HUD (%.0f px)" % bar, bar == roundf(60.0 * player.stamina / player.max_stamina))
+	check("barra de stamina no HUD (%.0f px)" % bar, bar == roundf(60.0 * player.stamina.current / player.stamina.maximum))
 
 	# 5. Vida e morte.
-	player.take_damage(60.0)
-	check("vida 40 após 60 de dano", player.health == 40.0 and not player.is_dead())
-	player.take_damage(60.0)
-	player.take_damage(10.0)
+	player.health.damage(60.0)
+	check("vida 40 após 60 de dano", player.health.current == 40.0 and not player.is_dead())
+	player.health.damage(60.0)
+	player.health.damage(10.0)
 	check("morte detectada uma vez", player.is_dead() and deaths == 1)
 	check("aviso de morte visível", hud.get_node("Result").visible)
 	x0 = player.position.x

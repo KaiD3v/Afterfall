@@ -76,9 +76,9 @@ func _run() -> void:
 	await physics_frame
 	player.facing = Vector2.RIGHT
 	check("golpe aceito", player.melee())
-	check("sem dano antes do contato", z.health == 60.0)
+	check("sem dano antes do contato", z.health.current == 60.0)
 	await frames_for(0.25)  # 10 fps: frame 2 (contato) em 0,2 s
-	check("dano no frame de contato (vida %.0f)" % z.health, z.health == 35.0)
+	check("dano no frame de contato (vida %.0f)" % z.health.current, z.health.current == 35.0)
 	await frames_for(0.3)
 	check("ação termina e volta ao idle (%s)" % sprite.animation, player.action == "" and String(sprite.animation).begins_with("idle"))
 	z.queue_free()
@@ -188,34 +188,34 @@ func zombie_cases(tex: Texture2D) -> void:
 		return zz
 
 	player.position = Vector2(760, 592)
-	player.health = player.max_health
+	player.health.current = player.health.maximum
 	var z: Node = spawn.call(Vector2(18, 0))
 	await frames_for(0.1)
 	check("zumbi começa a morder (%s)" % z.action, z.action == "attack")
-	check("sem dano no preparo", player.health == 100.0)
+	check("sem dano no preparo", player.health.current == 100.0)
 	await frames_for(0.25)
-	check("dano no contato da mordida (vida %.0f)" % player.health, player.health == 85.0)
+	check("dano no contato da mordida (vida %.0f)" % player.health.current, player.health.current == 85.0)
 	for i in 120:  # espera a próxima mordida começar (frame 0, o preparo)
 		if z.action == "attack" and z.get_node("Sprite").frame == 0:
 			break
 		await physics_frame
-	var hp: float = player.health
+	var hp: float = player.health.current
 	player.position.x -= 60.0  # recua no preparo, antes do contato
 	await frames_for(0.35)
-	check("recuar no preparo esquiva (vida %.0f → %.0f)" % [hp, player.health], player.health == hp)
+	check("recuar no preparo esquiva (vida %.0f → %.0f)" % [hp, player.health.current], player.health.current == hp)
 	player.position = z.position + Vector2(-18, 0)
-	z.take_damage(10.0)
+	z.health.damage(10.0)
 	check("tranco ao apanhar", z.action == "hurt")
 	await physics_frame
 	await physics_frame
 	check("parado durante o tranco", z.velocity == Vector2.ZERO)
 	await frames_for(0.3)
 	check("tranco termina", z.action != "hurt")
-	z.take_damage(100.0)
+	z.health.damage(100.0)
 	check("morte toca a animação", z.action == "death" and z.get_node("Sprite").animation == &"death_right")
 	await frames_for(1.2)  # 5 frames a 10 fps + fade de 0,4 s
 	check("corpo some depois de cair", not is_instance_valid(z))
-	player.health = player.max_health
+	player.health.current = player.health.maximum
 
 
 func add_anim(frames: SpriteFrames, anim: String, tex: Texture2D, count: int, loop: bool) -> void:

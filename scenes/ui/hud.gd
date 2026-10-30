@@ -22,10 +22,10 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	health_fill.size.x = roundf(BAR_W * player.health / player.max_health)
-	stamina_fill.size.x = roundf(BAR_W * player.stamina / player.max_stamina)
+	health_fill.size.x = roundf(BAR_W * player.health.current / player.health.maximum)
+	stamina_fill.size.x = roundf(BAR_W * player.stamina.current / player.stamina.maximum)
 	# sem fôlego: barra escurece até recuperar (paleta Scavland: ferrugem escura vs verde-oliva tático)
-	stamina_fill.color = Color8(66, 40, 29) if player.exhausted else Color8(99, 117, 80)
+	stamina_fill.color = Color8(66, 40, 29) if player.stamina.exhausted else Color8(99, 117, 80)
 	ammo.text = "RECARREGANDO" if player.reloading else "%d | %d" % [player.ammo, player.reserve]
 	inventory.text = "Inventário: %s (%d livres)" % [_items_text(), RunState.SLOTS - RunState.items.size()]
 	var f = player.focus  # sem tipo: o foco pode ter sido liberado na troca bairro ↔ interior

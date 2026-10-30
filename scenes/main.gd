@@ -19,7 +19,7 @@ var _dead_for := -1.0  # segundos desde a morte; -1 = vivo
 
 
 func _ready() -> void:
-	add_to_group("main")
+	add_to_group(Groups.MAIN)
 	player.died.connect(_on_player_died)
 	_fit_camera($Neighborhood)
 	$AmbInside.volume_linear = 0.0
@@ -100,6 +100,6 @@ func _fit_camera(world: Node) -> void:
 	var used: Rect2i = world.get_node("Ground").get_used_rect()
 	cam.limit_left = 0
 	cam.limit_top = 0
-	cam.limit_right = used.end.x * 32
-	cam.limit_bottom = used.end.y * 32
+	cam.limit_right = used.end.x * World.TILE
+	cam.limit_bottom = used.end.y * World.TILE
 	cam.reset_smoothing()

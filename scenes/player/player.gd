@@ -1,18 +1,11 @@
 # Protagonista: movimento em 4 direções, corrida com stamina, vida, machete e pistola.
 # Valores iniciais; ajustar no playtest.
-extends CharacterBody2D
-
-signal died
+extends Actor
 
 @export var walk_speed := 80.0     # px/s = 2,5 tiles/s
 @export var aim_walk_speed := 50.0 # px/s andando enquanto mira
 @export var run_speed := 130.0
-@export var max_health := 100.0
-@export var max_stamina := 100.0
-@export var run_cost := 25.0       # stamina por segundo correndo (4 s de fôlego cheio)
-@export var stamina_regen := 15.0  # stamina por segundo parado ou andando
-@export var regen_delay := 0.8     # segundos sem gastar antes de recuperar
-@export var recover_at := 25.0     # sem fôlego: só volta a correr ou golpear acima disso
+@export var run_cost := 25.0       # stamina por segundo correndo (4 s de fôlego cheio); o resto no nó Stamina
 @export var interact_range := 32.0
 @export var bandage_heal := 30.0
 
@@ -35,39 +28,27 @@ signal died
 @export var reload_time := 1.5
 @export var reserve := 24               # munição fora do pente; o loot soma a ela
 
-const MELEE_CONTACT_FRAME := 2  # melee_*: 0 antecipação, 1 golpe, 2 contato, 3 recuperação
 const STEP_FRAMES := [0, 2]     # walk_*: frames de contato do pé com o chão
 const STEPS := {&"street": preload("res://assets/audio/steps_street.tres"), &"wood": preload("res://assets/audio/steps_wood.tres")}
 
-var health := max_health
-var stamina := max_stamina
-var exhausted := false
 var ammo := mag_size
 var reloading := false
-var facing := Vector2.DOWN
 var aiming := false
 var flashlight_on := true
 var _moving := false
-var action := ""         # animação de ação tocando (melee, shoot); trava a de movimento
-var _hit_pending := false # golpe esperando o frame de contato
 var focus: Node2D        # interagível mais próximo ao alcance; a HUD mostra o aviso de E
 var surface := &"street"  # piso dos passos; main.gd troca para wood dentro da casa
 var _running := false
 var steps_taken := 0  # para teste e, depois, para o ruído dos passos
-var _regen_wait := 0.0
 var _weapon_wait := 0.0
 
-@onready var sprite: AnimatedSprite2D = $Sprite
+@onready var stamina: Stamina = $Stamina
 @onready var tracer: Line2D = $Tracer
 
 
 func _ready() -> void:
-	# exports chegam depois dos inicializadores; lê os máximos já ajustados no inspetor
-	health = max_health
-	stamina = max_stamina
-	ammo = mag_size
-	sprite.animation_finished.connect(func(): action = "")
-	sprite.frame_changed.connect(_on_frame_changed)
+	super()
+	ammo = mag_size  # exports chegam depois dos inicializadores
 	_setup_tracer_style()
 
 
@@ -78,16 +59,12 @@ func _physics_process(delta: float) -> void:
 	# Mirando (botão direito), o clique atira; sem mirar, o clique golpeia com o machete.
 	aiming = Input.is_action_pressed("aim")
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	var running := dir != Vector2.ZERO and not aiming and Input.is_action_pressed("sprint") and not exhausted
+	var running := dir != Vector2.ZERO and not aiming and Input.is_action_pressed("sprint") and not stamina.exhausted
 	_running = running
 	if running:
-		_drain(run_cost * delta)
+		stamina.drain(run_cost * delta)
 	else:
-		_regen_wait -= delta
-		if _regen_wait <= 0.0:
-			stamina = minf(stamina + stamina_regen * delta, max_stamina)
-		if exhausted and stamina >= recover_at:
-			exhausted = false
+		stamina.recover(delta)
 	_moving = dir != Vector2.ZERO
 	var speed := aim_walk_speed if aiming else (run_speed if running else walk_speed)
 	velocity = dir * speed
@@ -129,7 +106,7 @@ func interact() -> bool:
 func _nearest_interactable() -> Node2D:
 	var best: Node2D = null
 	var best_dist := interact_range
-	for n in get_tree().get_nodes_in_group("interactables"):
+	for n in get_tree().get_nodes_in_group(Groups.INTERACTABLES):
 		var d := global_position.distance_to(n.global_position)
 		if d <= best_dist:
 			best = n
@@ -149,43 +126,43 @@ func _update_focus() -> void:
 
 
 func use_bandage() -> bool:
-	if is_dead() or health >= max_health or not RunState.take_item(&"bandage"):
+	if is_dead() or health.is_full() or not RunState.take_item(&"bandage"):
 		return false
-	health = minf(health + bandage_heal, max_health)
+	health.heal(bandage_heal)
 	return true
 
 
 # Com animação melee_* na sheet, o dano sai no frame de contato; sem ela, na hora.
 func melee() -> bool:
-	if is_dead() or _weapon_wait > 0.0 or reloading or not spend_stamina(machete_cost):
+	if is_dead() or _weapon_wait > 0.0 or reloading or not stamina.spend(machete_cost):
 		return false
 	_weapon_wait = machete_cooldown
 	$SfxMachete.play()
-	_noise(melee_noise)
-	if _play_action("melee"):
-		_hit_pending = true
-	else:
+	Noises.emit(self, melee_noise)
+	if not play_action("melee", true):
 		_melee_hit()
 	return true
 
 
 # ponytail: acerto por distância e ângulo no frame de contato, sem Area2D; basta para 3–5 zumbis.
 func _melee_hit() -> void:
-	for z in get_tree().get_nodes_in_group("zombies"):
+	for z in get_tree().get_nodes_in_group(Groups.ZOMBIES):
 		var to: Vector2 = z.global_position - global_position
 		if to.length() <= machete_range and absf(rad_to_deg(facing.angle_to(to))) <= machete_half_angle:
-			z.take_damage(machete_damage)
+			z.health.damage(machete_damage, self)
+
+
+func _on_contact() -> void:
+	_melee_hit()
 
 
 func _on_frame_changed() -> void:
+	super()
 	var anim := String(sprite.animation)
 	if (anim.begins_with("walk") or anim.begins_with("aim_walk")) and sprite.frame in STEP_FRAMES:
 		$SfxSteps.stream = STEPS[surface]
 		$SfxSteps.play()
 		steps_taken += 1
-	if _hit_pending and sprite.frame == MELEE_CONTACT_FRAME:
-		_hit_pending = false
-		_melee_hit()
 
 
 # Dispersão atual da pistola em graus: aumenta ao andar mirando.
@@ -207,7 +184,7 @@ func shoot(dir: Vector2) -> bool:
 	var hit_collider: Object = null
 	# Testa colisão tanto no plano dos pés quanto na projeção do cano da arma (paredes e zumbis)
 	for ray_origin: Vector2 in [global_position, muzzle + Vector2(0.0, 24.0), muzzle]:
-		var ray := PhysicsRayQueryParameters2D.create(ray_origin, ray_origin + aim * pistol_range, 1 | 4)
+		var ray := PhysicsRayQueryParameters2D.create(ray_origin, ray_origin + aim * pistol_range, Layers.WORLD | Layers.ZOMBIES)
 		ray.exclude = [get_rid()]
 		var hit := get_world_2d().direct_space_state.intersect_ray(ray)
 		if hit:
@@ -215,15 +192,16 @@ func shoot(dir: Vector2) -> bool:
 			if d < travel_dist:
 				travel_dist = d
 				hit_collider = hit.collider
-	if hit_collider and hit_collider.has_method("take_damage"):
-		hit_collider.take_damage(pistol_damage)
+	var target := Health.of(hit_collider)
+	if target:
+		target.damage(pistol_damage, self)
 	var end := muzzle + aim * travel_dist
 	tracer.points = PackedVector2Array([muzzle, end])
 	tracer.show()
 	_animate_ballistic_shot(muzzle, end, aim, hit_collider)
 	$SfxShot.play()
-	_play_action("shoot")
-	_noise(shot_noise)
+	play_action("shoot")
+	Noises.emit(self, shot_noise)
 	return true
 
 
@@ -232,7 +210,7 @@ func reload() -> void:
 		return
 	reloading = true
 	$SfxReload.play()
-	if _play_action("reload") and reload_time > 0.0:
+	if play_action("reload") and reload_time > 0.0:
 		sprite.speed_scale = 1.5 / reload_time
 	await get_tree().create_timer(reload_time).timeout
 	reloading = false
@@ -245,47 +223,9 @@ func reload() -> void:
 	reserve -= n
 
 
-# Custo fixo de uma ação. false = sem stamina, a ação não acontece.
-func spend_stamina(cost: float) -> bool:
-	if exhausted or stamina < cost:
-		return false
-	_drain(cost)
-	return true
-
-
-# Ponto único de dano para jogador e zumbis (plano, seção 4).
-func take_damage(amount: float) -> void:
-	if is_dead():
-		return
-	health = maxf(health - amount, 0.0)
-	sprite.modulate = Color(1.6, 0.6, 0.6)
-	get_tree().create_timer(0.1).timeout.connect(func(): sprite.modulate = Color.WHITE)
-	if is_dead():
-		velocity = Vector2.ZERO
-		died.emit()
-
-
-func is_dead() -> bool:
-	return health <= 0.0
-
-
-func _noise(radius: float) -> void:
-	get_tree().call_group("zombies", "hear", global_position, radius)
-
-
-func _drain(amount: float) -> void:
-	stamina = maxf(stamina - amount, 0.0)
-	_regen_wait = regen_delay
-	if stamina == 0.0:
-		exhausted = true
-
-
-# Toca estado_direção da ação (melee, shoot) se a sheet tiver; devolve se tocou.
-func _play_action(state: String) -> bool:
-	if not Facing.play_action(sprite, state, facing):
-		return false
-	action = state
-	return true
+func _on_died() -> void:
+	velocity = Vector2.ZERO
+	super()
 
 
 # Boca do cano no mundo, a partir do ponto que o Codex marcou no frame de mira de cada direção.
@@ -459,7 +399,7 @@ func _animate_ballistic_shot(muzzle: Vector2, end: Vector2, aim: Vector2, hit_co
 	var total_dist := muzzle.distance_to(end)
 	var flight_time := clampf(total_dist / 1800.0, 0.035, 0.085)
 	var wake_len := minf(34.0, total_dist)
-	var is_zombie_hit := hit_collider != null and hit_collider.has_method("take_damage")
+	var is_zombie_hit := Health.of(hit_collider) != null
 	var had_hit := hit_collider != null
 	var tw_b := create_tween()
 	tw_b.tween_method(func(p: float) -> void:

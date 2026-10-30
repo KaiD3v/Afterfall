@@ -25,16 +25,16 @@ func _run() -> void:
 		print("--- run %d" % run)
 
 		# Estado inicial limpo.
-		check("vida, stamina e munição cheias", player.health == 100.0 and player.stamina == 100.0 and player.ammo == 12 and player.reserve == 24)
+		check("vida, stamina e munição cheias", player.health.current == 100.0 and player.stamina.current == 100.0 and player.ammo == 12 and player.reserve == 24)
 		check("inventário vazio e loot não sorteado", rs.items.is_empty() and [&"geladeira", &"armario", &"mesa", &"comoda"].all(func(id): return not rs.has_rolled(id)))
 		check("números da run zerados", rs.kills == 0 and rs.looted == 0 and rs.run_time < 0.5)
-		check("4 zumbis vivos, cheios", get_nodes_in_group("zombies").size() == 4 and get_nodes_in_group("zombies").all(func(z): return z.health == z.max_health))
+		check("4 zumbis vivos, cheios", get_nodes_in_group("zombies").size() == 4 and get_nodes_in_group("zombies").all(func(z): return z.health.current == z.health.maximum))
 		check("no bairro, no ponto de nascimento", main.interior == null and player.position == Vector2(336, 464))
 		check("resultado escondido", not main.get_node("HUD/Result").visible)
 		check("mortes acumuladas = %d" % (run - 1), rs.deaths == run - 1)
 
 		# Joga: mata um zumbi, saqueia a casa, sai.
-		get_nodes_in_group("zombies")[0].take_damage(60.0)
+		get_nodes_in_group("zombies")[0].health.damage(60.0)
 		check("zumbi morto conta", rs.kills == 1)
 		player.position = main.get_node("Neighborhood/HouseExit").position
 		player.interact()
@@ -52,7 +52,7 @@ func _run() -> void:
 		check("saiu da casa", main.interior == null)
 
 		# Morre: resultado na tela com os números da run.
-		player.take_damage(150.0)
+		player.health.damage(150.0)
 		await physics_frame
 		var text: String = main.get_node("HUD/Result/Text").text
 		check("resultado visível", main.get_node("HUD/Result").visible)

@@ -5,7 +5,7 @@ extends Node2D
 
 
 func _ready() -> void:
-	add_to_group("interactables")
+	add_to_group(Groups.INTERACTABLES)
 
 
 func set_focus(_on: bool) -> void:
@@ -17,4 +17,4 @@ func prompt() -> String:
 
 
 func interact(_player: Node) -> void:
-	get_tree().call_group("main", action)
+	get_tree().call_group(Groups.MAIN, action)

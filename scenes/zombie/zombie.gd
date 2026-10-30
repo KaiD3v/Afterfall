@@ -1,11 +1,10 @@
 # Zumbi básico: parado até ver o jogador ou ouvir um ruído; persegue quem vê e ataca de perto.
 # ponytail: anda em linha reta até o alvo, sem pathfinding; obstáculo só é contornado deslizando.
 # Se travar demais no playtest, trocar por NavigationAgent2D com navegação no TileSet.
-extends CharacterBody2D
+extends Actor
 
 enum State { IDLE, INVESTIGATE, CHASE }
 
-@export var max_health := 60.0
 @export var walk_speed := 35.0         # investigando um ruído
 @export var chase_speed := 60.0        # perseguindo; o jogador anda a 80
 @export var sight_range := 140.0
@@ -14,28 +13,19 @@ enum State { IDLE, INVESTIGATE, CHASE }
 @export var attack_range := 20.0
 @export var attack_damage := 15.0
 @export var attack_cooldown := 1.0
-@export var facing := Vector2.DOWN
 
-var health := 0.0
 var state := State.IDLE
 var target_pos := Vector2.ZERO
-var player: Node2D
+var player: Actor
 var _attack_wait := 0.0
-var action := ""         # attack, hurt ou death tocando; trava o andar
-var _hit_pending := false # mordida esperando o frame de contato
 
-const ATTACK_CONTACT_FRAME := 2  # attack_*: 0 preparo, 1 avanço, 2 contato, 3 recuperação
-
-@onready var sprite: AnimatedSprite2D = $Sprite
 @onready var groan: AudioStreamPlayer2D = $Groan
 
 
 func _ready() -> void:
-	health = max_health
-	add_to_group("zombies")
-	player = get_tree().get_first_node_in_group("player")
-	sprite.animation_finished.connect(_on_animation_finished)
-	sprite.frame_changed.connect(_on_frame_changed)
+	super()
+	add_to_group(Groups.ZOMBIES)
+	player = get_tree().get_first_node_in_group(Groups.PLAYER)
 	_update_frame()
 
 
@@ -57,10 +47,8 @@ func _physics_process(delta: float) -> void:
 			facing = to.normalized()
 			if _attack_wait <= 0.0:
 				_attack_wait = attack_cooldown
-				if _play_action("attack"):
-					_hit_pending = true  # dá para fugir no preparo
-				else:
-					player.take_damage(attack_damage)
+				if not play_action("attack", true):  # com a animação, dá para fugir no preparo
+					player.health.damage(attack_damage, self)
 		elif to.length() < 4.0:
 			state = State.IDLE  # chegou ao ruído ou à última posição vista e não achou ninguém
 		else:
@@ -77,61 +65,51 @@ func sees(point: Vector2) -> bool:
 		return false
 	if dist > feel_range and absf(rad_to_deg(facing.angle_to(to))) > sight_half_angle:
 		return false
-	var ray := PhysicsRayQueryParameters2D.create(global_position, point, 1)  # só paredes bloqueiam a visão
+	var ray := PhysicsRayQueryParameters2D.create(global_position, point, Layers.WORLD)  # só paredes bloqueiam a visão
 	return get_world_2d().direct_space_state.intersect_ray(ray).is_empty()
 
 
-# Chamado por tiros e golpes (call_group "zombies").
+# Chamado pelos ruídos do mundo (Noises.emit).
 func hear(pos: Vector2, radius: float) -> void:
 	if state != State.CHASE and global_position.distance_to(pos) <= radius:
 		state = State.INVESTIGATE
 		target_pos = pos
 
 
-func take_damage(amount: float) -> void:
-	if health <= 0.0:
-		return
-	health = maxf(health - amount, 0.0)
-	sprite.modulate = Color(1.6, 0.6, 0.6)
-	get_tree().create_timer(0.1).timeout.connect(func(): sprite.modulate = Color.WHITE)
-	_hit_pending = false  # apanhar interrompe a mordida
-	if health > 0.0:
+func _on_damaged(amount: float, source: Node) -> void:
+	super(amount, source)
+	_contact_pending = false  # apanhar interrompe a mordida
+	if not is_dead():
 		state = State.CHASE  # quem apanha vira para quem bateu
 		target_pos = player.global_position
-		_play_action("hurt")
-		return
-	remove_from_group("zombies")
+		play_action("hurt")
+
+
+func _on_died() -> void:
+	remove_from_group(Groups.ZOMBIES)
 	RunState.kills += 1
 	set_physics_process(false)
 	$CollisionShape2D.set_deferred("disabled", true)
-	if not _play_action("death"):
+	if not play_action("death"):
 		_fade_out()
+	super()
 
 
 func _fade_out() -> void:
 	create_tween().tween_property(sprite, "modulate:a", 0.0, 0.4).finished.connect(queue_free)
 
 
-func _play_action(anim: String) -> bool:
-	if not Facing.play_action(sprite, anim, facing):
-		return false
-	action = anim
-	return true
-
-
-func _on_frame_changed() -> void:
-	if _hit_pending and action == "attack" and sprite.frame == ATTACK_CONTACT_FRAME:
-		_hit_pending = false
-		# só acerta se o jogador ainda está perto: recuar no preparo esquiva
-		if player.global_position.distance_to(global_position) <= attack_range + 4.0:
-			player.take_damage(attack_damage)
+# Frame de contato da mordida: só acerta se o jogador ainda está perto; recuar no preparo esquiva.
+func _on_contact() -> void:
+	if player.global_position.distance_to(global_position) <= attack_range + 4.0:
+		player.health.damage(attack_damage, self)
 
 
 func _on_animation_finished() -> void:
 	if action == "death":
 		_fade_out()  # corpo some depois de cair
 		return
-	action = ""
+	super()
 
 
 func _update_frame() -> void:

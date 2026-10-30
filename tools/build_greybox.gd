@@ -75,7 +75,7 @@ const GRASS_CHANCE := 5    # % dos tiles de terreno com grama alta (decoração,
 
 var DOOR: PackedScene  # carregados em _initialize, depois dos autoloads (RunState)
 var CONTAINER: PackedScene
-const T := 32
+const T := World.TILE
 const H := T / 2.0
 const SOLID := 1  # source do tile invisível com colisão (camada Walls)
 
@@ -115,11 +115,11 @@ func _initialize() -> void:
 			var s := Sprite2D.new()
 			s.name = b[2].capitalize() + "Sprite"
 			s.texture = load(b[0])
-			s.scale = Vector2(0.25, 0.25)
+			s.scale = Vector2.ONE * World.ART_SCALE
 			s.centered = false
 			s.offset = Vector2(0, -s.texture.get_height())  # origem na base: ordena com quem passa na frente
 			var w_tiles := 3 if ch == "H" else 4
-			var world_w := s.texture.get_width() * 0.25
+			var world_w := s.texture.get_width() * World.ART_SCALE
 			var bx: float = b[1].x * T + (w_tiles * T - world_w) * 0.5
 			var by: float = (b[1].y + 3) * T
 			s.position = Vector2(bx, by)
@@ -263,7 +263,7 @@ func _scene(scene_name: String, map: Array, interior: bool) -> Node2D:
 	var layer_hd := TileMapLayer.new()
 	layer_hd.name = "GroundHD"
 	layer_hd.tile_set = tileset_hd
-	layer_hd.scale = Vector2(0.25, 0.25)
+	layer_hd.scale = Vector2.ONE * World.ART_SCALE
 	layer_hd.z_index = -1  # chão 4x HD por cima do Ground lógico
 	_add(scene, layer_hd)
 	var walls := TileMapLayer.new()
@@ -429,7 +429,7 @@ func _prop(parent: Node, frame: String, cell: Vector2i) -> void:
 	var s := Sprite2D.new()
 	s.name = "%s_%d_%d" % [frame, cell.x, cell.y]
 	s.texture = _atlas(STREET_PROPS, frame)
-	s.scale = Vector2(0.25, 0.25)
+	s.scale = Vector2.ONE * World.ART_SCALE
 	s.centered = false
 	s.offset = Vector2(-128, -251)
 	s.position = Vector2((cell.x + fp[0] / 2.0) * T, (cell.y + fp[1]) * T)
