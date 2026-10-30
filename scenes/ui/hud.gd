@@ -1,4 +1,4 @@
-# HUD mínimo: retrato, vida, stamina, cartão da arma (pente em traços + reserva),
+# HUD mínimo: retrato, vida, stamina, cartão da arma (pente em traços + reserva), relógio (dia e hora),
 # mensagens e tela de resultado. Fome, sede e temperatura (Needs, Temperature) ficam escondidas até
 # os sistemas existirem (fora da v0.1).
 # Tudo por sinais dos componentes do jogador e do RunState; nada é lido a cada frame.
@@ -36,21 +36,29 @@ func _ready() -> void:
 	player.firearm.changed.connect(_on_ammo)
 	player.aim_changed.connect(_on_aim)
 	RunState.equipment.changed.connect(_on_weapons)
+	RunState.stats.minute_changed.connect(_on_clock)
 	player.focus_changed.connect(_on_focus)
 	player.died.connect(_update_prompt)
 	toast.hide()
 	_on_health()
 	_on_stamina()
 	_on_weapons()
+	_on_clock()
 	_on_focus(player.focus)
 
 
 # Chamado por main.gd quando o jogador morre.
 func show_result() -> void:
 	var t := int(RunState.stats.time)
-	result.get_node("Text").text = "VOCÊ MORREU\n\nSobreviveu %d:%02d · %d zumbis · %d itens\nMortes: %d\n\n%s para uma nova run" % [
-		t / 60, t % 60, RunState.stats.kills, RunState.stats.looted, RunState.deaths, Keys.label(&"interact")]
+	result.get_node("Text").text = "VOCÊ MORREU\n\nDias sobrevividos: %d\nSobreviveu %d:%02d · %d zumbis · %d itens\nMortes: %d\n\n%s para uma nova run" % [
+		RunState.stats.days(), t / 60, t % 60, RunState.stats.kills, RunState.stats.looted, RunState.deaths, Keys.label(&"interact")]
 	result.show()
+
+
+# Dia corrente (o primeiro é o 1) e hora do relógio de jogo.
+func _on_clock() -> void:
+	var m := RunState.stats.minute()
+	$Clock.text = "Dia %d · %02d:%02d" % [RunState.stats.days() + 1, m / 60, m % 60]
 
 
 func _on_health() -> void:

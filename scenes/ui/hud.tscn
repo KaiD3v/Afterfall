@@ -255,6 +255,18 @@ offset_bottom = 28.0
 theme_override_colors/font_color = Color(0.372549, 0.407843, 0.45098, 1)
 text = "+24"
 
+[node name="Clock" type="Label" parent="."]
+offset_left = 376.0
+offset_top = 4.0
+offset_right = 476.0
+offset_bottom = 18.0
+theme_override_colors/font_color = Color(0.658824, 0.682353, 0.701961, 1)
+theme_override_colors/font_outline_color = Color(0.0509804, 0.0627451, 0.0901961, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 16
+text = "Dia 1 · 08:00"
+horizontal_alignment = 2
+
 [node name="Result" type="ColorRect" parent="."]
 visible = false
 anchors_preset = 15
