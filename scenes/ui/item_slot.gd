@@ -40,6 +40,10 @@ var locked := false:        # travado (arma recarregando): não sai nem entra it
 		locked = value
 		queue_redraw()
 var drop_state := Drop.NONE
+var badge := "":            # texto no canto do slot com item (munição da arma de fogo)
+	set(value):
+		badge = value
+		queue_redraw()
 
 var _hover := false
 var _icon := TextureRect.new()
@@ -115,6 +119,8 @@ func _draw() -> void:
 		draw_rect(r.grow(-2), FILL)
 		for c in [Vector2(2, 2), Vector2(slot_size.x - 3, 2), Vector2(2, slot_size.y - 3), Vector2(slot_size.x - 3, slot_size.y - 3)]:
 			draw_rect(Rect2(c, Vector2.ONE), RIVET)
+	if badge and item():
+		draw_string(get_theme_default_font(), Vector2(0, slot_size.y - 3), badge, HORIZONTAL_ALIGNMENT_RIGHT, slot_size.x - 3, 16, HOVER)
 	if short_caption and item() == null:
 		draw_string(get_theme_default_font(), Vector2(0, slot_size.y - 4), short_caption, HORIZONTAL_ALIGNMENT_CENTER, slot_size.x, 16, LABEL)
 	if drop_state == Drop.ACCEPT:

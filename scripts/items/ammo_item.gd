@@ -6,6 +6,14 @@ extends ItemData
 @export var amount := 6
 
 
+func type_name() -> String:
+	return "Munição"
+
+
+func stats() -> Array[Dictionary]:
+	return [stat("Balas", amount, str(amount))]
+
+
 func on_pickup(user: Node) -> bool:
 	user.firearm.reserve += amount
 	return false

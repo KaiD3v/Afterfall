@@ -88,9 +88,9 @@ func _run(main: Node) -> void:
 	menu.activate(menu.bag_slots[_index(bag, HELMET)])
 	check("botão direito no capacete da mochila equipa", gear.get_at(HEAD) == HELMET)
 	head_slot.hovered.emit(head_slot)
-	check("passar o mouse mostra nome e descrição", menu._name.text == HELMET.display_name and menu._desc.text == HELMET.description)
+	check("passar o mouse mostra a ficha do item e a ação no rodapé", menu.sheet.visible and menu.sheet.item == HELMET and menu._name.text == HELMET.display_name and menu._desc.text.begins_with("Botão direito: desequipar"))
 	head_slot.unhovered.emit(head_slot)
-	check("ao sair do item o rodapé volta à dica", menu._name.text == "" and menu._desc.text.begins_with("Arraste"))
+	check("ao sair do item a ficha some e o rodapé volta à dica", not menu.sheet.visible and menu._name.text == "" and menu._desc.text.begins_with("Arraste"))
 	check("armas em slots de 48 px, cabeça e corpo em 32", _gear_slot(menu, MELEE).size == ItemSlot.LARGE and _gear_slot(menu, FIREARM).size == ItemSlot.LARGE and head_slot.size == ItemSlot.SMALL and body_slot.size == ItemSlot.SMALL)
 	check("slots vazios com rótulo curto", menu.gear_slots.map(func(s): return s.short_caption) == ["ELMO", "BRANCA", "FOGO", "CORPO"])
 
@@ -125,6 +125,37 @@ func _run(main: Node) -> void:
 	check("na recarga a arma de fogo trava e avisa", gun_slot.locked and gun_slot._get_drag_data(Vector2.ZERO) == null and menu._name.text == "Recarregando: espere a arma")
 	player.firearm.reloading = false
 	check("e destrava depois", not gun_slot.locked)
+
+	# 4c. I3: números do item, comparação com o equipado, munição no slot, mochila cheia.
+	check("números do machete na ficha", _labels(MACHETE.stats()) == ["Dano 25", "Alcance 0,9 m", "Fôlego 20/golpe", "Espera 0,5 s", "Ruído 2 m"])
+	check("números da pistola", _labels(PISTOL.stats()) == ["Dano 40", "Pente 12", "Alcance 10 m", "Recarga 1,5 s", "Ruído 10 m"])
+	check("bandagem e capacete", _labels(BANDAGE.stats()) == ["Cura +30"] and HELMET.stats()[0].text.contains("sem efeito"))
+	var axe := WeaponItem.new()
+	axe.display_name = "Machado"
+	axe.slot = MELEE
+	var axe_data: MeleeData = MACHETE.weapon.duplicate()
+	axe_data.damage = 45.0
+	axe_data.cooldown = 0.8
+	axe.weapon = axe_data
+	bag.clear()
+	bag.add(axe)
+	var axe_slot: ItemSlot = menu.bag_slots[0]
+	axe_slot.hovered.emit(axe_slot)
+	var diffs: Dictionary = _diff_labels(menu.sheet)
+	check("ficha compara com o machete equipado (%s)" % diffs, menu.sheet.compare_to == MACHETE and diffs.get("+20") == ItemSheet.BETTER and diffs.get("+0,3") == ItemSheet.WORSE)
+	check("rodapé avisa a troca ao equipar", menu._desc.text == "Botão direito: equipar (troca com o equipado)")
+	check("ficha fica dentro da tela", menu.root.get_global_rect().encloses(menu.sheet.get_global_rect()))
+	var gun_badge: String = _gear_slot(menu, FIREARM).badge
+	check("slot da pistola mostra a munição (%s)" % gun_badge, gun_badge == "%d|%d" % [player.firearm.ammo, player.firearm.reserve])
+	player.firearm.reloading = true
+	check("e REC na recarga", _gear_slot(menu, FIREARM).badge == "REC")
+	player.firearm.reloading = false
+	for i in 8:
+		bag.add(BANDAGE)
+	check("mochila cheia muda a cor do contador", menu._bag_title.get_theme_color("font_color") == menu.WARN)
+	bag.clear()
+	check("e volta ao normal", menu._bag_title.get_theme_color("font_color") == menu.TEXT)
+
 	menu._unhandled_input(_key(KEY_ESCAPE))
 	check("Esc fecha e devolve o controle", not menu.is_open() and not player.input_locked)
 
@@ -142,6 +173,19 @@ func _index(bag: Inventory, item: ItemData) -> int:
 		if bag.get_at(i) == item:
 			return i
 	return -1
+
+
+func _labels(stats: Array[Dictionary]) -> Array:
+	return stats.map(func(s): return "%s %s" % [s.label, s.text])
+
+
+# Textos de diferença na ficha ("+20") -> cor.
+func _diff_labels(sheet: Control) -> Dictionary:
+	var out := {}
+	for c in sheet.get_children():
+		if c is Label and not c.is_queued_for_deletion() and (c.text.begins_with("+") or c.text.begins_with("-")) and c.position.x > 60:
+			out[c.text] = c.get_theme_color("font_color")
+	return out
 
 
 func _gear_slot(menu: Node, slot: int) -> ItemSlot:

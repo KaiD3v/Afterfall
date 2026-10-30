@@ -6,3 +6,9 @@ enum Slot { MELEE, FIREARM, HEAD, BODY }
 
 @export var slot := Slot.MELEE
 @export var equip_sound: AudioStream  # toca no menu quando o item é equipado
+
+const SLOT_NAMES := {Slot.MELEE: "Arma branca", Slot.FIREARM: "Arma de fogo", Slot.HEAD: "Capacete", Slot.BODY: "Colete"}
+
+
+func type_name() -> String:
+	return SLOT_NAMES[slot]

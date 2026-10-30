@@ -47,6 +47,7 @@ var _desc: Label
 var _frames := {}  # tamanho do slot -> moldura gerada
 var _hovered: ItemSlot
 var _audio := AudioStreamPlayer.new()
+var sheet := ItemSheet.new()  # ficha do item sob o mouse, ao lado do slot
 var _message_id := 0  # um aviso novo cancela a volta do anterior
 
 @onready var root: Control = $Root
@@ -59,9 +60,9 @@ func _ready() -> void:
 	_build()
 	RunState.inventory.changed.connect(_refresh)
 	RunState.equipment.changed.connect(_refresh)
-	player.firearm.changed.connect(_update_locks)
+	player.firearm.changed.connect(_on_firearm_changed)
 	player.died.connect(_on_player_died)
-	_update_locks()
+	_on_firearm_changed()
 	root.hide()
 	_refresh()
 
@@ -182,11 +183,14 @@ func _play(stream: AudioStream) -> void:
 		_audio.play()
 
 
-# A arma de fogo não sai nem entra no slot durante a recarga.
-func _update_locks() -> void:
+# A arma de fogo não sai nem entra no slot durante a recarga, e o slot mostra a munição.
+func _on_firearm_changed() -> void:
 	var slot := gear_slot(EquipmentItem.Slot.FIREARM)
-	if slot:
-		slot.locked = player.firearm.reloading
+	if slot == null:
+		return
+	var gun := player.firearm
+	slot.locked = gun.reloading
+	slot.badge = "REC" if gun.reloading else "%d|%d" % [gun.ammo, gun.reserve]
 
 
 func gear_slot(slot: int) -> ItemSlot:
@@ -202,6 +206,7 @@ func _refresh() -> void:
 	if _bag_title:
 		var bag := RunState.inventory
 		_bag_title.text = "MOCHILA  %d/%d" % [bag.size(), bag.capacity]
+		_bag_title.add_theme_color_override("font_color", WARN if bag.is_full() else TEXT)  # cheia: avisa
 
 
 func _on_hovered(slot: ItemSlot) -> void:
@@ -221,13 +226,35 @@ func _show_details(slot: ItemSlot) -> void:
 	var item := slot.item() if slot else null
 	if item:
 		_name.text = item.display_name
-		_desc.text = item.description
-	elif slot:
+		_desc.text = _action_hint(slot, item)
+		sheet.show_for(item, _equipped_like(slot, item), slot.get_global_rect(), root.get_global_rect())
+		return
+	sheet.hide()
+	if slot:
 		_name.text = slot.caption if slot.caption else "Bloco vazio"
 		_desc.text = "Vazio. Arraste um item para cá."
 	else:
 		_name.text = ""
 		_desc.text = "Arraste para mover · Botão direito ou 2 cliques: usar"  # a tecla de fechar está no título
+
+
+# O que o botão direito faz com este item, para o rodapé.
+func _action_hint(slot: ItemSlot, item: ItemData) -> String:
+	if slot.container == RunState.equipment:
+		return "Botão direito: desequipar · arraste para a mochila"
+	if item is EquipmentItem:
+		var swap := " (troca com o equipado)" if _equipped_like(slot, item) else ""
+		return "Botão direito: equipar" + swap
+	if item is HealItem:
+		return "Botão direito: usar · Q usa sem abrir o menu"
+	return "Arraste para mover"
+
+
+# O item equipado no mesmo slot que este, para a ficha comparar (só para itens da mochila).
+func _equipped_like(slot: ItemSlot, item: ItemData) -> ItemData:
+	if slot.container == RunState.equipment or not item is EquipmentItem:
+		return null
+	return RunState.equipment.get_at(item.slot)
 
 
 func _build() -> void:
@@ -271,6 +298,7 @@ func _build() -> void:
 	_desc = _label(panel, "", Vector2(8, 208), TEXT)
 	_desc.size = Vector2(PANEL.size.x - 16, 22)
 	_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	root.add_child(sheet)  # por cima do painel
 
 
 # O protagonista parado, de frente, recortado no corpo (sem a margem do quadro) e 2× maior.
