@@ -54,7 +54,7 @@ func _run(main: Node) -> void:
 	var ammo0: int = player.firearm.ammo
 	check("desequipa o machete para a mochila", ItemTransfer.swap(gear, MELEE, bag, bag.first_free()) and bag.count(&"machete") == 1)
 	check("sem machete o golpe não sai", player.melee_weapon.data == null and not player.melee())
-	check("desequipa a pistola: sem tiro, HUD avisa", ItemTransfer.swap(gear, FIREARM, bag, bag.first_free()) and not player.shoot(Vector2.RIGHT) and main.get_node("HUD/Ammo").text == "SEM ARMA")
+	check("desequipa a pistola: sem tiro, HUD avisa", ItemTransfer.swap(gear, FIREARM, bag, bag.first_free()) and not player.shoot(Vector2.RIGHT) and not main.get_node("HUD/WeaponCard/Mag").visible and main.get_node("HUD/WeaponCard/FirearmIcon").texture == null)
 	ItemTransfer.swap(bag, _index(bag, MACHETE), gear, MELEE)
 	ItemTransfer.swap(bag, _index(bag, PISTOL), gear, FIREARM)
 	check("reequipadas, voltam à mão (pente como estava)", player.melee() and player.firearm.data == PISTOL.weapon and player.firearm.ammo == ammo0)

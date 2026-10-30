@@ -4,6 +4,7 @@ class_name Player
 extends Actor
 
 signal focus_changed(target: Interactable)  # null = nada ao alcance
+signal aim_changed  # a HUD sublinha a arma que o clique vai usar
 
 @export var walk_speed := 80.0     # px/s = 2,5 tiles/s
 @export var aim_walk_speed := 50.0 # px/s andando enquanto mira
@@ -45,7 +46,10 @@ func _physics_process(delta: float) -> void:
 		return
 	# Mirando (botão direito), o clique atira; sem mirar, o clique golpeia com o machete.
 	var free := not input_locked
-	aiming = free and Input.is_action_pressed("aim")
+	var aim := free and Input.is_action_pressed("aim")
+	if aim != aiming:
+		aiming = aim
+		aim_changed.emit()
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down") if free else Vector2.ZERO
 	var running := dir != Vector2.ZERO and not aiming and Input.is_action_pressed("sprint") and not stamina.exhausted
 	_running = running
