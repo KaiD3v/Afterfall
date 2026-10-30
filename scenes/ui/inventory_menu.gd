@@ -1,43 +1,47 @@
-# Menu do inventário (tecla da ação inventory, hoje E, abre e fecha; Esc fecha): equipamento em
-# volta do protagonista e a mochila em blocos. Arrastar e soltar move, troca, equipa e desequipa;
+# Menu do inventário (tecla da ação inventory, hoje E, abre e fecha; Esc fecha): painel compacto
+# embaixo, com abas (Mochila, Diário, Status, Crafting). A aba Mochila tem o equipamento em volta
+# do protagonista e a mochila em blocos; as outras são páginas futuras ("Em breve"). Arrastar e soltar move, troca, equipa e desequipa;
 # botão direito ou duplo clique usa ou equipa (na mochila) e desequipa (no equipamento). Toda troca
 # passa por _transfer: som, pulso no slot, e recusa com motivo no rodapé. O mundo não pausa: o
 # jogador só fica parado.
 # Saque: abrir um móvel (open_loot) mostra o conteúdo dele num painel ao lado; dá para pegar item
 # por item (arrastar, botão direito), pegar tudo (botão ou a tecla de interação) e deixar coisas lá.
-# Painel e textos são elementos simples feitos por código (Guia de estilo, seção 7); molduras dos
-# slots e ícones dos itens vêm do gerador de imagem (assets/sprites/ui).
+# Painel, abas e molduras são elementos simples feitos por código (Guia de estilo, seção 7); os
+# ícones dos itens vêm do gerador de imagem (assets/sprites/ui).
 extends CanvasLayer
 
-const PANEL := Rect2(84, 17, 312, 236)  # na resolução do jogo (480×270); grade de 4 px
-const PANEL_LOOTING := Vector2(8, 17)   # com um móvel aberto, o painel vai para a esquerda
-const LOOT_PANEL := Rect2(324, 17, 148, 140)  # conteúdo do móvel, à direita
-const LOOT_AT := Vector2(22, 26)        # grade do móvel dentro do painel dele, 3 colunas
+const PANEL := Rect2(152, 146, 176, 118)  # embaixo e no centro da tela (480×270)
+const PANEL_LOOTING := Vector2(112, 146)    # com um móvel aberto, o painel abre espaço à direita
+const LOOT_PANEL := Rect2(292, 146, 76, 96)  # conteúdo do móvel
+const LOOT_AT := Vector2(6, 24)             # grade do móvel dentro do painel dele, 3 colunas
 const BG := Color8(30, 36, 46)          # shadow_deep
 const BORDER_OUT := Color8(20, 24, 32)  # shadow_outline
 const BORDER_IN := Color8(68, 76, 87)   # concrete_dark
-const RIVET := Color8(132, 140, 148)    # concrete_light
 const TEXT := Color8(168, 174, 179)     # concrete_highlight
 const DIM := Color8(95, 104, 115)       # concrete_mid
 const TITLE := Color8(227, 168, 69)     # amber_light_glow
 const WARN := Color8(184, 118, 68)      # rust_highlight: avisos no rodapé
 const MESSAGE_TIME := 1.6               # segundos que um aviso fica no rodapé
-const DIM_WORLD := Color(0, 0, 0, 0.4)  # véu sobre o mundo, que continua rodando atrás
-const GAP := 4
-# Slots de equipamento encostados no retrato: [slot, posição na área do equipamento, tamanho,
-# nome, rótulo curto, ícone da silhueta]. Armas em 48 px: o item mais importante.
-const GEAR := [
-	[EquipmentItem.Slot.HEAD, Vector2(56, 0), ItemSlot.SMALL, "Capacete", "ELMO", "res://data/items/helmet.tres"],
-	[EquipmentItem.Slot.MELEE, Vector2(4, 52), ItemSlot.LARGE, "Arma branca", "BRANCA", "res://data/items/machete.tres"],
-	[EquipmentItem.Slot.FIREARM, Vector2(92, 52), ItemSlot.LARGE, "Arma de fogo", "FOGO", "res://data/items/pistol_9mm.tres"],
-	[EquipmentItem.Slot.BODY, Vector2(56, 116), ItemSlot.SMALL, "Colete", "CORPO", "res://data/items/vest.tres"],
+const DIM_WORLD := Color(0, 0, 0, 0.35)  # véu sobre o mundo, que continua rodando atrás
+const SLOT_GAP := 2
+# Abas: [id, título, o que a página vai ter]. Página nova = uma linha aqui e uma cena no lugar do
+# "Em breve" (page_for). Só a mochila existe hoje.
+const TABS := [
+	[&"bag", "MOCHILA", ""],
+	[&"journal", "DIÁRIO", "Missões e anotações da run"],
+	[&"status", "STATUS", "Vida, fôlego e atributos"],
+	[&"crafting", "CRAFTING", "Receitas com o que você carrega"],
 ]
-const GEAR_AT := Vector2(8, 40)   # área do equipamento dentro do painel (144×148)
-const PORTRAIT_SCALE := 0.5       # retrato 2× o tamanho do jogo (arte em 4×)
-const PORTRAIT_TOP := 36          # topo do retrato, logo abaixo do slot da cabeça
-const BAG_AT := Vector2(176, 60)  # mochila 3×3, centrada na metade direita
+# Equipamento em duas colunas em volta do retrato: [slot, posição na página, nome, ícone da silhueta]
+const GEAR := [
+	[EquipmentItem.Slot.HEAD, Vector2(8, 26), "Capacete", "res://data/items/helmet.tres"],
+	[EquipmentItem.Slot.BODY, Vector2(8, 50), "Colete", "res://data/items/vest.tres"],
+	[EquipmentItem.Slot.MELEE, Vector2(58, 26), "Arma branca", "res://data/items/machete.tres"],
+	[EquipmentItem.Slot.FIREARM, Vector2(58, 50), "Arma de fogo", "res://data/items/pistol_9mm.tres"],
+]
+const PORTRAIT_AT := Vector2(30, 28)  # retrato no tamanho do jogo, entre as colunas
+const BAG_AT := Vector2(98, 26)       # mochila 3×3
 const BAG_COLUMNS := 3
-const SLOT_FRAMES := "res://assets/sprites/ui/slots.png"  # slot_32 e slot_48 (gerador de imagem), em 4×
 
 @export var player: Player
 @export var pauses_game := false  # false: o mundo segue (tensão do gênero); true: pausa ao abrir
@@ -46,10 +50,13 @@ const SLOT_FRAMES := "res://assets/sprites/ui/slots.png"  # slot_32 e slot_48 (g
 
 var gear_slots: Array[ItemSlot] = []
 var bag_slots: Array[ItemSlot] = []
-var _bag_title: Label
+var tab := 0  # aba aberta (índice em TABS)
+var pages := {}  # id da aba -> página (Control)
+var _tab_title: Label
+var _bag_count: Label  # "2/9" no título, só na mochila
+var _ammo: Label       # munição embaixo do slot da arma de fogo
 var _name: Label
 var _desc: Label
-var _frames := {}  # tamanho do slot -> moldura gerada
 var _hovered: ItemSlot
 var _audio := AudioStreamPlayer.new()
 var sheet := ItemSheet.new()  # ficha do item sob o mouse, ao lado do slot
@@ -109,6 +116,7 @@ func toggle() -> void:
 
 func open() -> void:
 	root.show()
+	get_tree().call_group(Groups.HIDE_WITH_MENU, "hide")
 	player.input_locked = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if pauses_game:
@@ -127,6 +135,7 @@ func open_loot(container: Node) -> void:
 	for i in loot_slots.size():
 		loot_slots[i].bind(_loot_inv, i)
 	_loot_title.text = String(container.label).to_upper()
+	select_tab(0)  # o saque é na mochila
 	_panel.position = PANEL_LOOTING
 	_loot_box.show()
 	open()
@@ -140,7 +149,7 @@ func take_all() -> void:
 	if result.got:
 		_play(stow_sound)
 		_show_details(null)
-		_name.text = "Pegou: " + ", ".join(result.got)
+		_footer("Pegou: " + ", ".join(result.got), "", TITLE)
 	if result.full:
 		var left := loot_slots.filter(func(s): return s.item() != null)
 		_warn(left[0] if left else loot_slots[0], "Mochila cheia: o resto ficou no móvel")
@@ -150,6 +159,7 @@ func take_all() -> void:
 
 func close() -> void:
 	root.hide()
+	get_tree().call_group(Groups.HIDE_WITH_MENU, "show")
 	if _loot_inv and _loot_inv.changed.is_connected(_refresh):
 		_loot_inv.changed.disconnect(_refresh)
 	_loot_inv = null
@@ -239,9 +249,7 @@ func _warn(slot: ItemSlot, text: String) -> void:
 	_play(reject_sound)
 	_message_id += 1
 	var id := _message_id
-	_name.text = text
-	_name.add_theme_color_override("font_color", WARN)
-	_desc.text = ""
+	_footer(text, "", WARN)
 	get_tree().create_timer(MESSAGE_TIME).timeout.connect(func():
 		if id == _message_id and is_instance_valid(_name):
 			_show_details(_hovered))
@@ -253,14 +261,14 @@ func _play(stream: AudioStream) -> void:
 		_audio.play()
 
 
-# A arma de fogo não sai nem entra no slot durante a recarga, e o slot mostra a munição.
+# A arma de fogo não sai nem entra no slot durante a recarga; a munição aparece embaixo do slot.
 func _on_firearm_changed() -> void:
 	var slot := gear_slot(EquipmentItem.Slot.FIREARM)
 	if slot == null:
 		return
 	var gun := player.firearm
 	slot.locked = gun.reloading
-	slot.badge = "REC" if gun.reloading else "%d|%d" % [gun.ammo, gun.reserve]
+	_ammo.text = "" if not gun.is_equipped() else ("REC" if gun.reloading else "%d|%d" % [gun.ammo, gun.reserve])
 
 
 func gear_slot(slot: int) -> ItemSlot:
@@ -273,10 +281,10 @@ func gear_slot(slot: int) -> ItemSlot:
 func _refresh() -> void:
 	for s in gear_slots + bag_slots + (loot_slots if looting else []):
 		s.refresh()
-	if _bag_title:
+	if _bag_count:
 		var bag := RunState.inventory
-		_bag_title.text = "MOCHILA  %d/%d" % [bag.size(), bag.capacity]
-		_bag_title.add_theme_color_override("font_color", WARN if bag.is_full() else TEXT)  # cheia: avisa
+		_bag_count.text = "%d/%d" % [bag.size(), bag.capacity]
+		_bag_count.add_theme_color_override("font_color", WARN if bag.is_full() else DIM)  # cheia: avisa
 
 
 func _on_hovered(slot: ItemSlot) -> void:
@@ -292,34 +300,40 @@ func _on_unhovered(slot: ItemSlot) -> void:
 
 func _show_details(slot: ItemSlot) -> void:
 	_message_id += 1  # um aviso pendente não volta por cima disto
-	_name.add_theme_color_override("font_color", TITLE)
 	var item := slot.item() if slot else null
 	if item:
-		_name.text = item.display_name
-		_desc.text = _action_hint(slot, item)
+		_footer(item.display_name, _action_hint(slot, item), TITLE)
 		sheet.show_for(item, _equipped_like(slot, item), slot.get_global_rect(), root.get_global_rect())
 		return
 	sheet.hide()
 	if slot:
-		_name.text = slot.caption if slot.caption else "Bloco vazio"
-		_desc.text = "Vazio. Arraste um item para cá."
+		_footer(slot.caption if slot.caption else "Bloco vazio", "vazio", TITLE)
+	elif TABS[tab][0] != &"bag":
+		_footer("", TABS[tab][2], DIM)
 	else:
-		_name.text = ""
-		_desc.text = "Arraste para mover · Botão direito ou 2 cliques: usar"  # a tecla de fechar está no título
+		_footer("", "Arraste para mover · botão direito: usar", DIM)
+
+
+# Rodapé de uma linha: nome em destaque e, logo depois, a dica.
+func _footer(title: String, hint: String, color: Color) -> void:
+	_name.text = title
+	_name.add_theme_color_override("font_color", color)
+	_desc.text = ("· " + hint) if title and hint else hint
+	var w := 0.0 if title == "" else _name.get_theme_default_font().get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 4
+	_desc.position.x = _name.position.x + w
 
 
 # O que o botão direito faz com este item, para o rodapé.
 func _action_hint(slot: ItemSlot, item: ItemData) -> String:
 	if _is_loot(slot):
-		return "Botão direito: pegar · %s pega tudo" % Keys.label(&"interact")
+		return "botão direito: pegar"
 	if slot.container == RunState.equipment:
-		return "Botão direito: desequipar · arraste para a mochila"
+		return "botão direito: desequipar"
 	if item is EquipmentItem:
-		var swap := " (troca com o equipado)" if _equipped_like(slot, item) else ""
-		return "Botão direito: equipar" + swap
+		return "botão direito: trocar" if _equipped_like(slot, item) else "botão direito: equipar"
 	if item is HealItem:
-		return "Botão direito: usar · Q usa sem abrir o menu"
-	return "Arraste para mover"
+		return "botão direito: usar"
+	return "arraste para mover"
 
 
 # O item equipado no mesmo slot que este, para a ficha comparar (itens da mochila e do móvel).
@@ -330,53 +344,114 @@ func _equipped_like(slot: ItemSlot, item: ItemData) -> ItemData:
 
 
 func _build() -> void:
-	if ResourceLoader.exists(SLOT_FRAMES):
-		for spec in [[ItemSlot.SMALL, Rect2(0, 0, 128, 128)], [ItemSlot.LARGE, Rect2(128, 0, 192, 192)]]:
-			var frame := AtlasTexture.new()
-			frame.atlas = load(SLOT_FRAMES)
-			frame.region = spec[1]
-			_frames[spec[0]] = frame
 	var veil := ColorRect.new()
 	veil.color = DIM_WORLD
 	veil.set_anchors_preset(Control.PRESET_FULL_RECT)
 	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(veil)
-	var panel := Control.new()
-	panel.position = PANEL.position
-	panel.size = PANEL.size
-	panel.draw.connect(_draw_panel.bind(panel))
-	root.add_child(panel)
-	_panel = panel
+	_panel = _box(root, PANEL)
+	_panel.draw.connect(func(): _panel.draw_rect(Rect2(4, 18, PANEL.size.x - 8, 1), BORDER_IN))
+	_panel.draw.connect(func(): _panel.draw_rect(Rect2(4, PANEL.size.y - 17, PANEL.size.x - 8, 1), BORDER_IN))
+	for i in TABS.size():
+		_panel.add_child(_tab_button(i))
+	_tab_title = _label(_panel, "", Vector2(80, 3), TITLE)
+	_bag_count = _label(_panel, "", Vector2(PANEL.size.x - 24, 3), DIM)
+	for t in TABS:
+		pages[t[0]] = _bag_page() if t[0] == &"bag" else _soon_page(t[2])
+		_panel.add_child(pages[t[0]])
+	_name = _label(_panel, "", Vector2(6, PANEL.size.y - 15), TITLE)
+	_desc = _label(_panel, "", Vector2(6, PANEL.size.y - 15), TEXT)
 	_build_loot_box()
-	_label(panel, "INVENTÁRIO", Vector2(8, 6), TITLE)
-	_label(panel, "%s · fechar" % Keys.label(&"inventory"), Vector2(PANEL.size.x - 58, 6), DIM)
-	_label(panel, "EQUIPAMENTO", Vector2(8, 24), TEXT)
-	_bag_title = _label(panel, "MOCHILA", Vector2(BAG_AT.x, 24), TEXT)
-	_portrait(panel)
+	root.add_child(sheet)  # por cima de tudo
+	select_tab(0)
 
+
+# Troca a aba: mostra a página dela e o título; o contador da mochila só na mochila.
+func select_tab(index: int) -> void:
+	tab = index
+	for i in TABS.size():
+		pages[TABS[i][0]].visible = i == index
+	_tab_title.text = TABS[index][1]
+	_bag_count.visible = TABS[index][0] == &"bag"
+	for b in _panel.get_children():
+		if b.has_meta("tab"):
+			b.queue_redraw()
+	if _name:
+		_show_details(null)
+
+
+# Página da mochila: equipamento em duas colunas em volta do retrato e a mochila 3×3.
+func _bag_page() -> Control:
+	var page := Control.new()
+	page.size = PANEL.size
+	page.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for g in GEAR:
-		var s := _slot(panel, GEAR_AT + g[1], g[2])
-		s.caption = g[3]
-		s.short_caption = g[4]
-		var sample: ItemData = load(g[5])
+		var s := _slot(page, g[1])
+		s.caption = g[2]
+		var sample: ItemData = load(g[3])
 		s.placeholder = sample.icon
 		s.bind(RunState.equipment, g[0])
 		gear_slots.append(s)
+	page.add_child(_portrait())
+	var gun_slot: ItemSlot = gear_slot(EquipmentItem.Slot.FIREARM)
+	_ammo = _label(page, "", gun_slot.position + Vector2(-4, ItemSlot.SIZE.y), TITLE)
+	page.draw.connect(func(): page.draw_rect(Rect2(BAG_AT.x - 10, 24, 1, 66), BORDER_IN))
 	for i in RunState.inventory.capacity:
-		var at := Vector2(i % BAG_COLUMNS, i / BAG_COLUMNS) * (ItemSlot.SMALL + Vector2(GAP, GAP))
-		var s := _slot(panel, BAG_AT + at, ItemSlot.SMALL)
+		var at := Vector2(i % BAG_COLUMNS, i / BAG_COLUMNS) * (ItemSlot.SIZE + Vector2(SLOT_GAP, SLOT_GAP))
+		var s := _slot(page, BAG_AT + at)
 		s.bind(RunState.inventory, i)
 		bag_slots.append(s)
-
-	_name = _label(panel, "", Vector2(8, 198), TITLE)
-	_desc = _label(panel, "", Vector2(8, 208), TEXT)
-	_desc.size = Vector2(PANEL.size.x - 16, 22)
-	_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	root.add_child(sheet)  # por cima do painel
+	return page
 
 
-# O protagonista parado, de frente, recortado no corpo (sem a margem do quadro) e 2× maior.
-func _portrait(panel: Control) -> void:
+# Página de uma aba que ainda não existe.
+func _soon_page(what: String) -> Control:
+	var page := Control.new()
+	page.size = PANEL.size
+	page.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var l := _label(page, "Em breve", Vector2(0, 52), DIM)
+	l.size.x = PANEL.size.x
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	page.set_meta("soon", what)
+	return page
+
+
+# Ícone de aba 12×12 (pictograma simples por código): âmbar e sublinhado se ativo, clicável.
+func _tab_button(index: int) -> Control:
+	var b := Control.new()
+	b.position = Vector2(6 + index * 18, 4)
+	b.size = Vector2(12, 14)
+	b.set_meta("tab", index)
+	b.tooltip_text = TABS[index][1].capitalize()
+	b.gui_input.connect(func(e):
+		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+			select_tab(index))
+	b.draw.connect(func():
+		var col := TITLE if index == tab else DIM
+		match TABS[index][0]:
+			&"bag":  # mochila
+				b.draw_rect(Rect2(2, 3, 8, 8), col)
+				b.draw_rect(Rect2(4, 1, 4, 2), col)
+				b.draw_rect(Rect2(3, 6, 6, 1), BG)
+			&"journal":  # caderno
+				b.draw_rect(Rect2(2, 1, 8, 10), col)
+				b.draw_rect(Rect2(3, 2, 1, 8), BG)
+				b.draw_rect(Rect2(5, 4, 4, 1), BG)
+				b.draw_rect(Rect2(5, 6, 4, 1), BG)
+			&"status":  # figura
+				b.draw_rect(Rect2(5, 1, 3, 3), col)
+				b.draw_rect(Rect2(3, 5, 7, 2), col)
+				b.draw_rect(Rect2(4, 7, 5, 4), col)
+			&"crafting":  # martelo
+				b.draw_rect(Rect2(2, 2, 7, 3), col)
+				b.draw_rect(Rect2(5, 5, 2, 6), col)
+		if index == tab:
+			b.draw_rect(Rect2(0, 13, 12, 1), TITLE))
+	return b
+
+
+# O protagonista parado, de frente, recortado no corpo e no tamanho do jogo.
+func _portrait() -> TextureRect:
 	var frame := player.sprite.sprite_frames.get_frame_texture(&"idle_down", 0) as AtlasTexture
 	var used := Rect2(frame.get_image().get_used_rect())
 	var body := AtlasTexture.new()
@@ -385,54 +460,49 @@ func _portrait(panel: Control) -> void:
 	var portrait := TextureRect.new()
 	portrait.texture = body
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	portrait.size = (used.size * PORTRAIT_SCALE).round()
-	portrait.position = (GEAR_AT + Vector2(72 - portrait.size.x / 2, PORTRAIT_TOP)).round()
+	portrait.size = (used.size * World.ART_SCALE).round()
+	portrait.position = PORTRAIT_AT
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_child(portrait)
+	return portrait
 
 
-# Painel do móvel aberto: título, 2 fileiras de 3 blocos e o botão de pegar tudo.
+# Painel do móvel aberto: título, 2 fileiras de 3 blocos e "F pegar tudo" (clicável).
 func _build_loot_box() -> void:
-	_loot_box = Control.new()
-	_loot_box.position = LOOT_PANEL.position
-	_loot_box.size = LOOT_PANEL.size
-	_loot_box.draw.connect(_draw_loot_box)
+	_loot_box = _box(root, LOOT_PANEL)
+	_loot_box.draw.connect(func(): _loot_box.draw_rect(Rect2(4, 18, LOOT_PANEL.size.x - 8, 1), BORDER_IN))
 	_loot_box.hide()
-	root.add_child(_loot_box)
-	_loot_title = _label(_loot_box, "", Vector2(8, 6), TITLE)
+	_loot_title = _label(_loot_box, "", Vector2(6, 3), TITLE)
 	for i in LootMemory.CAPACITY:
-		var at := Vector2(i % BAG_COLUMNS, i / BAG_COLUMNS) * (ItemSlot.SMALL + Vector2(GAP, GAP))
-		loot_slots.append(_slot(_loot_box, LOOT_AT + at, ItemSlot.SMALL))
+		var at := Vector2(i % BAG_COLUMNS, i / BAG_COLUMNS) * (ItemSlot.SIZE + Vector2(SLOT_GAP, SLOT_GAP))
+		loot_slots.append(_slot(_loot_box, LOOT_AT + at))
 	var take := Button.new()
-	take.text = "PEGAR TUDO · %s" % Keys.label(&"interact")
-	take.position = Vector2(8, 106)
-	take.size = Vector2(LOOT_PANEL.size.x - 16, 24)
+	take.text = "%s pegar tudo" % Keys.label(&"interact")
+	take.flat = true
+	take.position = Vector2(4, 70)
 	take.focus_mode = Control.FOCUS_NONE
-	for state in [["normal", BORDER_IN], ["hover", TITLE], ["pressed", TITLE]]:  # metal do painel
-		var box := StyleBoxFlat.new()
-		box.bg_color = BORDER_OUT
-		box.border_color = state[1]
-		box.set_border_width_all(1)
-		take.add_theme_stylebox_override(state[0], box)
-	take.add_theme_color_override("font_color", TEXT)
+	take.add_theme_color_override("font_color", DIM)
 	take.add_theme_color_override("font_hover_color", TITLE)
 	take.pressed.connect(take_all)
 	_loot_box.add_child(take)
 
 
-func _draw_loot_box() -> void:
-	var r := Rect2(Vector2.ZERO, _loot_box.size)
-	_loot_box.draw_rect(r, BORDER_OUT)
-	_loot_box.draw_rect(r.grow(-1), BORDER_IN)
-	_loot_box.draw_rect(r.grow(-2), BORDER_OUT)
-	_loot_box.draw_rect(r.grow(-3), BG)
-	_loot_box.draw_rect(Rect2(4, 18, _loot_box.size.x - 8, 1), BORDER_IN)
+# Caixa de metal escuro com moldura de 1 px.
+func _box(parent: Control, r: Rect2) -> Control:
+	var c := Control.new()
+	c.position = r.position
+	c.size = r.size
+	c.draw.connect(func():
+		var rr := Rect2(Vector2.ZERO, c.size)
+		c.draw_rect(rr, BORDER_OUT)
+		c.draw_rect(rr.grow(-1), BORDER_IN)
+		c.draw_rect(rr.grow(-2), BG))
+	parent.add_child(c)
+	return c
 
 
-func _slot(parent: Control, at: Vector2, at_size: Vector2) -> ItemSlot:
-	var s := ItemSlot.new(at_size)
+func _slot(parent: Control, at: Vector2) -> ItemSlot:
+	var s := ItemSlot.new()
 	s.position = at
-	s.frame_texture = _frames.get(at_size)
 	s.activated.connect(activate)
 	s.drop_requested.connect(_transfer)
 	s.rejected.connect(_reject)
@@ -451,17 +521,3 @@ func _label(parent: Control, text: String, at: Vector2, color: Color) -> Label:
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(l)
 	return l
-
-
-# Metal escuro com moldura dupla e rebites nos cantos, nas cores da HUD.
-func _draw_panel(panel: Control) -> void:
-	var r := Rect2(Vector2.ZERO, panel.size)
-	panel.draw_rect(r, BORDER_OUT)
-	panel.draw_rect(r.grow(-1), BORDER_IN)
-	panel.draw_rect(r.grow(-2), BORDER_OUT)
-	panel.draw_rect(r.grow(-3), BG)
-	panel.draw_rect(Rect2(4, 18, panel.size.x - 8, 1), BORDER_IN)  # separa o título
-	panel.draw_rect(Rect2(4, 194, panel.size.x - 8, 1), BORDER_IN)  # separa os detalhes
-	panel.draw_rect(Rect2(156, 22, 1, 168), BORDER_IN)              # equipamento | mochila
-	for c in [Vector2(4, 4), Vector2(panel.size.x - 6, 4), Vector2(4, panel.size.y - 6), Vector2(panel.size.x - 6, panel.size.y - 6)]:
-		panel.draw_rect(Rect2(c, Vector2(2, 2)), RIVET)

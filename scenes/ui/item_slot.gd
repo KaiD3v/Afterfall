@@ -15,16 +15,14 @@ signal blocked(slot: ItemSlot)                         # tentou arrastar um slot
 
 enum Drop { NONE, ACCEPT, REJECT }
 
-const SMALL := Vector2(32, 32)  # ícones em 4× (128×128) cabem reduzidos a 1/4, como o resto da arte
-const LARGE := Vector2(48, 48)  # armas: mais destaque (moldura slot_48)
-const FRAME := Color8(68, 76, 87)        # concrete_dark
+const SIZE := Vector2(20, 20)  # slot compacto; o ícone tem 16 px
+const ICON := 16               # ícones em 4× (128×128) reduzidos exatamente à metade na tela 4×
 const FRAME_DARK := Color8(20, 24, 32)   # shadow_outline
-const FILL := Color8(30, 36, 46)         # shadow_deep
-const RIVET := Color8(132, 140, 148)     # concrete_light
+const FILL := Color8(47, 54, 64)         # concrete_darkest: slot com item
+const EMPTY := Color8(36, 42, 52)        # slot vazio, um tom abaixo
 const HOVER := Color8(227, 168, 69)      # amber_light_glow
 const ERROR := Color8(150, 33, 39)       # blood_fresh
 const GHOST := Color(0.89, 0.66, 0.27, 0.45)  # silhueta do slot vazio, âmbar apagado
-const LABEL := Color8(95, 104, 115)      # concrete_mid
 const REJECT_DIM := Color(1, 1, 1, 0.35)  # slot que recusa o item arrastado
 const PULSE := 1.25                      # escala do ícone ao entrar no slot
 
@@ -32,18 +30,11 @@ var container: Object  # get_at, can_put, put
 var key := 0
 var placeholder: Texture2D  # ícone apagado do slot vazio (equipamento: silhueta do tipo)
 var caption := ""           # nome do slot, para o menu ("Capacete")
-var short_caption := ""     # rótulo curto escrito dentro do slot vazio ("ELMO")
-var slot_size := SMALL
-var frame_texture: Texture2D  # moldura gerada; sem ela, a moldura é desenhada aqui
 var locked := false:        # travado (arma recarregando): não sai nem entra item
 	set(value):
 		locked = value
 		queue_redraw()
 var drop_state := Drop.NONE
-var badge := "":            # texto no canto do slot com item (munição da arma de fogo)
-	set(value):
-		badge = value
-		queue_redraw()
 
 var _hover := false
 var _icon := TextureRect.new()
@@ -52,16 +43,16 @@ var _flash := 0.0           # 1 = contorno vermelho cheio, some em 0,3 s
 var _drag_from: ItemSlot
 
 
-func _init(at_size := SMALL) -> void:
-	slot_size = at_size
-	custom_minimum_size = slot_size
-	size = slot_size
+func _init() -> void:
+	custom_minimum_size = SIZE
+	size = SIZE
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_icon.size = slot_size
-	_icon.pivot_offset = slot_size / 2
+	_icon.size = Vector2(ICON, ICON)
+	_icon.position = (SIZE - _icon.size) / 2
+	_icon.pivot_offset = _icon.size / 2
 	_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(_icon)
 	mouse_entered.connect(func():
@@ -108,21 +99,11 @@ func _process(_delta: float) -> void:
 		queue_redraw()
 
 
-# Moldura de metal rebitado (elemento simples feito por código; troca pela gerada quando houver).
+# Moldura de 1 px e fundo escuro (elemento simples feito por código), mais claro com item.
 func _draw() -> void:
-	var r := Rect2(Vector2.ZERO, slot_size)
-	if frame_texture:
-		draw_texture_rect(frame_texture, r, false)
-	else:
-		draw_rect(r, FRAME_DARK)
-		draw_rect(r.grow(-1), FRAME)
-		draw_rect(r.grow(-2), FILL)
-		for c in [Vector2(2, 2), Vector2(slot_size.x - 3, 2), Vector2(2, slot_size.y - 3), Vector2(slot_size.x - 3, slot_size.y - 3)]:
-			draw_rect(Rect2(c, Vector2.ONE), RIVET)
-	if badge and item():
-		draw_string(get_theme_default_font(), Vector2(0, slot_size.y - 3), badge, HORIZONTAL_ALIGNMENT_RIGHT, slot_size.x - 3, 16, HOVER)
-	if short_caption and item() == null:
-		draw_string(get_theme_default_font(), Vector2(0, slot_size.y - 4), short_caption, HORIZONTAL_ALIGNMENT_CENTER, slot_size.x, 16, LABEL)
+	var r := Rect2(Vector2.ZERO, SIZE)
+	draw_rect(r, FRAME_DARK)
+	draw_rect(r.grow(-1), FILL if item() else EMPTY)
 	if drop_state == Drop.ACCEPT:
 		draw_rect(r.grow(-1), HOVER, false, 2.0 if _hover else 1.0)
 	elif _hover and drop_state == Drop.NONE:
@@ -173,8 +154,8 @@ func _get_drag_data(_at: Vector2) -> Variant:
 	var preview := TextureRect.new()
 	preview.texture = it.icon
 	preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	preview.size = slot_size
-	preview.position = -slot_size / 2
+	preview.size = Vector2(ICON, ICON)
+	preview.position = -preview.size / 2
 	preview.modulate = Color(1, 1, 1, 0.8)
 	var holder := Control.new()  # o preview fica centrado no cursor
 	holder.add_child(preview)

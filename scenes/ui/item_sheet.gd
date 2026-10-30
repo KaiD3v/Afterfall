@@ -1,10 +1,10 @@
-# Ficha do item ao lado do slot sob o mouse: nome, tipo, números (ItemData.stats) e descrição.
+# Ficha curta do item ao lado do slot sob o mouse: nome, tipo e números (ItemData.stats).
 # Com compare_to (o item equipado no mesmo slot), cada número mostra a diferença: verde se o
 # item da ficha é melhor, ferrugem se é pior. Painel e textos são elementos simples por código.
 class_name ItemSheet
 extends Control
 
-const WIDTH := 150
+const MIN_WIDTH := 70  # a ficha cresce até o texto mais largo
 const VALUE_X := 56  # coluna dos valores (cabe "Proteção")
 const PAD := 5
 const LINE := 10
@@ -32,7 +32,7 @@ func show_for(it: ItemData, other: ItemData, slot_rect: Rect2, bounds: Rect2) ->
 	compare_to = other if other != it else null
 	for c in get_children():
 		c.queue_free()
-	var y := PAD
+	var y := 1  # a fonte já tem respiro em cima
 	y = _line(it.display_name, y, TITLE)
 	y = _line(it.type_name() + (" · vs. equipado" if compare_to else ""), y, DIM)
 	var theirs := {}
@@ -41,18 +41,14 @@ func show_for(it: ItemData, other: ItemData, slot_rect: Rect2, bounds: Rect2) ->
 			theirs[s.label] = s
 	for s in it.stats():
 		y = _stat(s, theirs.get(s.label), y)
-	if it.description:
-		y += 2
-		var desc := Label.new()
-		desc.text = it.description
-		desc.position = Vector2(PAD, y)
-		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		desc.custom_minimum_size = Vector2(WIDTH - PAD * 2, 0)  # largura fixa: quebra a linha nela
-		desc.add_theme_color_override("font_color", TEXT)
-		add_child(desc)
-		desc.size = desc.get_minimum_size()
-		y += int(desc.size.y)
-	size = Vector2(WIDTH, y + PAD)
+	var w := MIN_WIDTH
+	for c in get_children():
+		if not c.is_queued_for_deletion():
+			w = maxi(w, int(c.position.x + c.get_minimum_size().x) + PAD)
+	for c in get_children():  # diferenças da comparação encostam na borda direita
+		if c.has_meta("diff"):
+			c.position.x = w - PAD - c.get_minimum_size().x
+	size = Vector2(w, y + 4)  # a última linha precisa de respiro embaixo
 	# à direita do slot; sem espaço, à esquerda; sempre dentro dos limites
 	var at := Vector2(slot_rect.end.x + GAP, slot_rect.position.y)
 	if at.x + size.x > bounds.end.x:
@@ -79,16 +75,18 @@ func _stat(s: Dictionary, other, y: int) -> int:
 	if other != null and s.value != other.value:
 		var diff: float = s.value - other.value
 		var better: bool = (diff > 0) == s.higher_is_better
-		_label(("+" if diff > 0 else "-") + ItemData.num(absf(diff)), Vector2(WIDTH - PAD - 30, y), BETTER if better else WORSE)
+		var d := _label(("+" if diff > 0 else "-") + ItemData.num(absf(diff)), Vector2(VALUE_X + 70, y), BETTER if better else WORSE)
+		d.set_meta("diff", true)
 	return y + LINE
 
 
-func _label(text: String, at: Vector2, color: Color) -> void:
+func _label(text: String, at: Vector2, color: Color) -> Label:
 	var l := Label.new()
 	l.text = text
 	l.position = at
 	l.add_theme_color_override("font_color", color)
 	add_child(l)
+	return l
 
 
 func _draw() -> void:

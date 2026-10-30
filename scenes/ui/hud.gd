@@ -21,6 +21,8 @@ var _toast_timer: Tween
 
 func _ready() -> void:
 	$Crosshair.player = player
+	for n in [$BottomPanel, $Inventory]:
+		n.add_to_group(Groups.HIDE_WITH_MENU)
 	RunState.message.connect(_show_toast)
 	RunState.inventory.changed.connect(_on_inventory)
 	player.health.changed.connect(_on_health)
