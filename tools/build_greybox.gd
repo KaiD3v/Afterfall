@@ -1,58 +1,22 @@
-# Gera o bairro e o interior da casa a partir dos mapas ASCII abaixo, com a arte da Fase D:
+# Gera o bairro e o interior da casa a partir dos mapas ASCII de data/maps/, com a arte da Fase D:
 #   scenes/world/neighborhood_greybox.tscn e scenes/world/house_interior.tscn
 # Rodar: godot --headless --path . --script res://tools/build_greybox.gd
 # ponytail: greybox descartável; quando a arte final cobrir tudo, os mapas passam a ser editados no editor.
 extends SceneTree
 
-const NEIGHBORHOOD := [
-	"############################################################",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-CCCC-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,VV,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,V,,,,-....-,,,V,,,,,,,,,GGGG,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,GGGG,,,,,,,,,#",
-	"#,,,,FFFFFFFFFFF,,,,,,,,,,,-....-,,,,,,,,,,,,,GGGG,,,,,,,,,#",
-	"#,,,,F,,,,,,,,,F,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,F,,,,,,,,,F,,,,,,,,,,,-.C..-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,F,,,HHH,,,F,,,,,,,,,,,-.C..-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,F,,,HHH,,,F,,,,,,,V,,,-....-,,,,,,,PP,,,,,,,,,,,,,,,,,#",
-	"#,,,,F,,,HDH,,,F,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,F,,,,,,,,,F,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,V,,,#",
-	"#,,,,FFFFF,FFFFF,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#---------------------------zzzz---------------------------#",
-	"#C.........................z....z.........................C#",
-	"#C..................CC.....z....z.........................C#",
-	"#C.........................z....z.....CC..................C#",
-	"#C.........................z....z.........................C#",
-	"#---------------------------zzzz---------------------------#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,WWWW,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,WWWW,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,WWWW,,,,,,,,,,,,,-..C.-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-..C.-,,,,,,,VV,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,V,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,V,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-....-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"#,,,,,,,,,,,,,,,,,,,,,,,,,,-CCCC-,,,,,,,,,,,,,,,,,,,,,,,,,,#",
-	"############################################################",
-]
+# Mapas ASCII em data/maps/, um caractere por tile (legenda em TILES). O interior é a casa:
+# cozinha de azulejo à esquerda, sala/quarto à direita, porta de saída embaixo.
+const NEIGHBORHOOD_MAP := "res://data/maps/neighborhood.txt"
+const INTERIOR_MAP := "res://data/maps/house_interior.txt"
 
-# Casa por dentro: cozinha (azulejo) à esquerda, sala/quarto à direita, porta de saída embaixo.
-const INTERIOR := [
-	"###+######+####",
-	"#kkkkk#_______#",
-	"#kkkkk#_______#",
-	"#kkkkk________#",
-	"#kkkkk#_______#",
-	"#kkkkk#_______#",
-	"#kkkkk#_______#",
-	"#kkkkk#_______#",
-	"#########D#####",
-]
+
+# Linhas do mapa, sem linha vazia no fim. Os testes leem pelo mesmo caminho.
+static func read_map(path: String) -> Array:
+	var rows := []
+	for line in FileAccess.get_file_as_string(path).split("
+", false):
+		rows.append(line.strip_edges())
+	return rows
 
 # símbolo: [cor (paleta_afterfall.gpl), sólido]
 const TILES := {
@@ -133,7 +97,9 @@ func _initialize() -> void:
 
 	# Bairro: prédio com sprite vira sólido sem cor, menos a fileira de cima do bloco, que fica
 	# livre para o jogador passar atrás do telhado (3/4). Porta da casa na frente do tile D.
-	var map := NEIGHBORHOOD.duplicate()
+	var hood_map := read_map(NEIGHBORHOOD_MAP)
+	var inner_map := read_map(INTERIOR_MAP)
+	var map := hood_map.duplicate()
 	for ch in BUILDINGS:
 		if not ResourceLoader.exists(BUILDINGS[ch][0]):
 			continue
@@ -169,16 +135,16 @@ func _initialize() -> void:
 	if sheets.has(STREET_PROPS):
 		_props(hood, map)
 	_atmosphere(hood, false)
-	var door_tile := _find(NEIGHBORHOOD, "D")
+	var door_tile := _find(hood_map, "D")
 	_door(hood, "HouseDoor", "enter_house", _center(door_tile) + Vector2(0, 28))
 	_marker(hood, "HouseExit", _center(door_tile) + Vector2(0, 32))
 	_marker(hood, "PlayerSpawn", _center(Vector2i(10, 14)))  # calçada em frente ao portão
 	_save(hood, "res://scenes/world/neighborhood_greybox.tscn")
 
 	# Interior: porta de saída acima do tile D; containers nos cômodos (o móvel é o container).
-	var house := _scene("HouseInterior", INTERIOR, true)
+	var house := _scene("HouseInterior", inner_map, true)
 	_atmosphere(house, true)
-	door_tile = _find(INTERIOR, "D")
+	door_tile = _find(inner_map, "D")
 	_door(house, "ExitDoor", "exit_house", _center(door_tile) + Vector2(0, -28))
 	_marker(house, "PlayerSpawn", _center(door_tile) + Vector2(0, -32))
 	for c in CONTAINERS:

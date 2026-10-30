@@ -31,6 +31,10 @@ func loot_of(container_id: StringName, table: LootTable) -> Array:
 	return _loot[container_id]
 
 
+func has_rolled(container_id: StringName) -> bool:
+	return _loot.has(container_id)
+
+
 func is_looted(container_id: StringName) -> bool:
 	return _loot.has(container_id) and _loot[container_id].is_empty()
 

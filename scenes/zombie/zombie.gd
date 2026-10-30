@@ -21,7 +21,7 @@ var state := State.IDLE
 var target_pos := Vector2.ZERO
 var player: Node2D
 var _attack_wait := 0.0
-var _action := ""         # attack, hurt ou death tocando; trava o andar
+var action := ""         # attack, hurt ou death tocando; trava o andar
 var _hit_pending := false # mordida esperando o frame de contato
 
 const ATTACK_CONTACT_FRAME := 2  # attack_*: 0 preparo, 1 avanço, 2 contato, 3 recuperação
@@ -48,7 +48,7 @@ func _physics_process(delta: float) -> void:
 		target_pos = player.global_position
 
 	velocity = Vector2.ZERO
-	if _action != "":
+	if action != "":
 		pass  # atacando ou tomando o tranco: parado
 	elif state != State.IDLE:
 		var to := target_pos - global_position
@@ -112,15 +112,15 @@ func _fade_out() -> void:
 	create_tween().tween_property(sprite, "modulate:a", 0.0, 0.4).finished.connect(queue_free)
 
 
-func _play_action(action: String) -> bool:
-	if not Facing.play_action(sprite, action, facing):
+func _play_action(anim: String) -> bool:
+	if not Facing.play_action(sprite, anim, facing):
 		return false
-	_action = action
+	action = anim
 	return true
 
 
 func _on_frame_changed() -> void:
-	if _hit_pending and _action == "attack" and sprite.frame == ATTACK_CONTACT_FRAME:
+	if _hit_pending and action == "attack" and sprite.frame == ATTACK_CONTACT_FRAME:
 		_hit_pending = false
 		# só acerta se o jogador ainda está perto: recuar no preparo esquiva
 		if player.global_position.distance_to(global_position) <= attack_range + 4.0:
@@ -128,14 +128,14 @@ func _on_frame_changed() -> void:
 
 
 func _on_animation_finished() -> void:
-	if _action == "death":
+	if action == "death":
 		_fade_out()  # corpo some depois de cair
 		return
-	_action = ""
+	action = ""
 
 
 func _update_frame() -> void:
-	if _action != "":
+	if action != "":
 		return
 	# ciclo de andar no ritmo da perseguição; investigando, mais lento, para o pé não deslizar
 	sprite.speed_scale = velocity.length() / chase_speed if velocity != Vector2.ZERO else 1.0

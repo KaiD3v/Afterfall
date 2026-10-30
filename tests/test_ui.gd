@@ -80,7 +80,7 @@ func _run() -> void:
 	await frames_for(0.25)  # 10 fps: frame 2 (contato) em 0,2 s
 	check("dano no frame de contato (vida %.0f)" % z.health, z.health == 35.0)
 	await frames_for(0.3)
-	check("ação termina e volta ao idle (%s)" % sprite.animation, player._action == "" and String(sprite.animation).begins_with("idle"))
+	check("ação termina e volta ao idle (%s)" % sprite.animation, player.action == "" and String(sprite.animation).begins_with("idle"))
 	z.queue_free()
 
 	# 2b. Cano da pistola: ponto do JSON (frame 48×48) vira posição no mundo; esquerda espelha.
@@ -133,9 +133,12 @@ func _run() -> void:
 	check("abertura a 100 px = 7 px (±4°)", cross.gap_at(100.0) == 7.0)
 	check("abertura a 300 px = 21 px", cross.gap_at(300.0) == 21.0)
 	check("abertura mínima de perto", cross.gap_at(10.0) == cross.MIN_GAP)
-	player._moving = true
+	Input.action_press("move_right")
+	await physics_frame  # physics_frame sai antes do _physics_process: 2 frames para o jogador ler
+	await physics_frame
 	check("andando mirando: dispersão aumenta (±9° -> 16 px a 100 px)", player.current_spread() > player.pistol_spread and cross.gap_at(100.0) == 16.0)
-	player._moving = false
+	Input.action_release("move_right")
+	await physics_frame
 	Input.action_press("flashlight")
 	await physics_frame
 	await physics_frame
@@ -188,12 +191,12 @@ func zombie_cases(tex: Texture2D) -> void:
 	player.health = player.max_health
 	var z: Node = spawn.call(Vector2(18, 0))
 	await frames_for(0.1)
-	check("zumbi começa a morder (%s)" % z._action, z._action == "attack")
+	check("zumbi começa a morder (%s)" % z.action, z.action == "attack")
 	check("sem dano no preparo", player.health == 100.0)
 	await frames_for(0.25)
 	check("dano no contato da mordida (vida %.0f)" % player.health, player.health == 85.0)
 	for i in 120:  # espera a próxima mordida começar (frame 0, o preparo)
-		if z._action == "attack" and z.get_node("Sprite").frame == 0:
+		if z.action == "attack" and z.get_node("Sprite").frame == 0:
 			break
 		await physics_frame
 	var hp: float = player.health
@@ -202,14 +205,14 @@ func zombie_cases(tex: Texture2D) -> void:
 	check("recuar no preparo esquiva (vida %.0f → %.0f)" % [hp, player.health], player.health == hp)
 	player.position = z.position + Vector2(-18, 0)
 	z.take_damage(10.0)
-	check("tranco ao apanhar", z._action == "hurt")
+	check("tranco ao apanhar", z.action == "hurt")
 	await physics_frame
 	await physics_frame
 	check("parado durante o tranco", z.velocity == Vector2.ZERO)
 	await frames_for(0.3)
-	check("tranco termina", z._action != "hurt")
+	check("tranco termina", z.action != "hurt")
 	z.take_damage(100.0)
-	check("morte toca a animação", z._action == "death" and z.get_node("Sprite").animation == &"death_right")
+	check("morte toca a animação", z.action == "death" and z.get_node("Sprite").animation == &"death_right")
 	await frames_for(1.2)  # 5 frames a 10 fps + fade de 0,4 s
 	check("corpo some depois de cair", not is_instance_valid(z))
 	player.health = player.max_health

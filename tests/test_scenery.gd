@@ -17,9 +17,9 @@ func _initialize() -> void:
 
 func _run(hood: Node2D, house: Node2D) -> void:
 	await physics_frame
-	var src: String = load(BUILDER).source_code
-	var map := _map(src, "NEIGHBORHOOD")
-	var inner := _map(src, "INTERIOR")
+	var builder: GDScript = load(BUILDER)
+	var map: Array = builder.read_map(builder.NEIGHBORHOOD_MAP)
+	var inner: Array = builder.read_map(builder.INTERIOR_MAP)
 
 	# 1. Colisão: toda célula sólida do mapa tem o tile invisível; chão não.
 	for scene in [[hood, map, "bairro"], [house, inner, "casa"]]:
@@ -91,16 +91,6 @@ func _run(hood: Node2D, house: Node2D) -> void:
 
 	print("RESULT: ", "FAIL" if failed else "PASS")
 	quit(1 if failed else 0)
-
-
-func _map(src: String, name: String) -> Array:
-	var block := src.substr(src.find("const %s := [" % name))
-	block = block.substr(0, block.find("]\n"))
-	var rows := []
-	for line in block.split("\n"):
-		if line.strip_edges().begins_with("\""):
-			rows.append(line.strip_edges().trim_prefix("\"").trim_suffix("\","))
-	return rows
 
 
 func _names(json_path: String) -> Dictionary:

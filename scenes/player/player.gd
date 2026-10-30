@@ -48,7 +48,7 @@ var facing := Vector2.DOWN
 var aiming := false
 var flashlight_on := true
 var _moving := false
-var _action := ""         # animação de ação tocando (melee, shoot); trava a de movimento
+var action := ""         # animação de ação tocando (melee, shoot); trava a de movimento
 var _hit_pending := false # golpe esperando o frame de contato
 var focus: Node2D        # interagível mais próximo ao alcance; a HUD mostra o aviso de E
 var surface := &"street"  # piso dos passos; main.gd troca para wood dentro da casa
@@ -66,7 +66,7 @@ func _ready() -> void:
 	health = max_health
 	stamina = max_stamina
 	ammo = mag_size
-	sprite.animation_finished.connect(func(): _action = "")
+	sprite.animation_finished.connect(func(): action = "")
 	sprite.frame_changed.connect(_on_frame_changed)
 	_setup_tracer_style()
 
@@ -236,8 +236,8 @@ func reload() -> void:
 		sprite.speed_scale = 1.5 / reload_time
 	await get_tree().create_timer(reload_time).timeout
 	reloading = false
-	if _action == "reload":
-		_action = ""
+	if action == "reload":
+		action = ""
 	if is_dead():
 		return
 	var n := mini(mag_size - ammo, reserve)
@@ -284,7 +284,7 @@ func _drain(amount: float) -> void:
 func _play_action(state: String) -> bool:
 	if not Facing.play_action(sprite, state, facing):
 		return false
-	_action = state
+	action = state
 	return true
 
 
@@ -303,8 +303,8 @@ func muzzle_position() -> Vector2:
 
 
 func _update_anim() -> void:
-	if _action != "":
-		if _action == "reload":
+	if action != "":
+		if action == "reload":
 			var pick := Facing.resolve(sprite, "reload", facing)
 			if pick[0] != &"":
 				sprite.flip_h = pick[1]
@@ -345,11 +345,11 @@ func _update_flashlight(delta: float) -> void:
 	var target_pos: Vector2
 	var target_ang := facing.angle()
 	var target_energy := 1.08
-	if reloading or _action == "reload":
+	if reloading or action == "reload":
 		target_pos = Vector2(-7.0 if dir_name == "left" else 7.0, -21.0)
 		target_ang += 0.22 if dir_name != "left" else -0.22
 		target_energy = 0.80
-	elif aiming or _action == "shoot":
+	elif aiming or action == "shoot":
 		var m := muzzle_position()
 		target_pos = m - global_position + Vector2(0.0, 0.5)
 		if m.distance_squared_to(get_global_mouse_position()) > 4.0:
