@@ -28,6 +28,7 @@ func _run() -> void:
 	var player: CharacterBody2D = main.get_node("Player")
 	var needs: Node = player.needs
 	var hud: Node = main.get_node("HUD")
+	needs.sheltered = true  # sem frio (S5) na noite que este teste atravessa
 	check("começa com fome e sede cheias, barras cheias", needs.hunger > 99.9 and needs.thirst > 99.9 and hud.hunger_fill.size.x == hud._needs_w.x and hud.thirst_fill.size.x == hud._needs_w.y)
 
 	# Quadro a quadro: a sede zera (anota e bebe de novo) até a fome zerar.

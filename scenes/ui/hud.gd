@@ -1,5 +1,5 @@
 # HUD mínimo: retrato, vida, stamina, cartão da arma (pente em traços + reserva), relógio (dia e hora),
-# fome e sede (Needs), mensagens e tela de resultado. A temperatura fica escondida até o sistema existir.
+# fome e sede (Needs), moodles, selo de frio no retrato, mensagens e tela de resultado.
 # Tudo por sinais dos componentes do jogador e do RunState; nada é lido a cada frame.
 extends CanvasLayer
 
@@ -88,6 +88,7 @@ func _on_needs() -> void:
 	_moodle($Moodles/Hunger, _level(n.hunger / n.maximum))
 	_moodle($Moodles/Thirst, _level(n.thirst / n.maximum))
 	_moodle($Moodles/Tired, 0 if n.awake < n.tired_hours else (1 if n.awake < n.exhausted_hours else 2))
+	_moodle($Temperature, 0 if n.cold < n.cold_shows else (1 if n.cold < n.cold_hurts else 2), false)
 
 
 # Fome ou sede: 0 acima de LOW, 1 abaixo, 2 zerada (já tira vida).
@@ -97,13 +98,15 @@ static func _level(fraction: float) -> int:
 
 # Moodles na linha abaixo do painel: só os ativos aparecem (o HBox junta os visíveis à esquerda).
 # Nível 1: pictograma âmbar; nível 2: fundo de sangue e pisca. Só mexe quando o nível muda.
-func _moodle(badge: Control, level: int) -> void:
+# recolor = false mantém as cores do selo (o floco do frio no retrato) e só mostra e pisca.
+func _moodle(badge: Control, level: int, recolor := true) -> void:
 	if _moodle_level.get(badge, 0) == level:
 		return
 	_moodle_level[badge] = level
 	badge.visible = level > 0
-	badge.color = PALE if level == 2 else AMBER
-	badge.bg = BLOOD if level == 2 else BADGE_BG
+	if recolor:
+		badge.color = PALE if level == 2 else AMBER
+		badge.bg = BLOOD if level == 2 else BADGE_BG
 	if _blink.has(badge):
 		_blink[badge].kill()
 		_blink.erase(badge)

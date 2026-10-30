@@ -2,6 +2,8 @@
 # empilha o local atual fora da árvore (congelado, sem ouvir nada) e põe o novo; sair desempilha.
 # Morte: tela de resultado; E começa uma nova run recarregando a cena do zero.
 # Sono (cama da casa): a tela escurece, o relógio avança 8 h e o jogador acorda descansado.
+# Noite: o bairro escurece aos poucos (18:00 a 21:00) e clareia (05:00 a 08:00), pela cor da sua
+# camada AtmosphereModulate; o interior tem as luzes dele e não muda.
 # Ambiente: cada local tem o seu loop; todos tocam o tempo todo e a troca só mexe no volume.
 extends Node2D
 
@@ -9,10 +11,13 @@ const FADE_TIME := 0.25
 const RESTART_DELAY := 1.0  # evita pular o resultado com um E apertado no susto
 const AMBIENCE_FADE := FADE_TIME * 2  # a troca dura o escurecer e o clarear da porta
 const SLEEP_FADE := 0.6
+const NIGHT_TINT := Color(0.16, 0.19, 0.30)  # cor do bairro na noite fechada
 
 var _stack: Array[Dictionary] = []  # locais de onde se entrou: {location, back}
 var _busy := false
 var _dead_for := -1.0  # segundos desde a morte; -1 = vivo
+var _hood_tint: CanvasModulate  # camada de cor do bairro
+var _day_tint: Color
 
 @onready var player: Player = $Player
 @onready var location: Location = $Neighborhood
@@ -24,6 +29,11 @@ func _ready() -> void:
 	player.died.connect(_on_player_died)
 	_arrive(location)
 	_ambience(location.ambience, 0.0)
+	_hood_tint = location.get_node_or_null(^"AtmosphereModulate")
+	if _hood_tint:
+		_day_tint = _hood_tint.color
+		RunState.stats.minute_changed.connect(_on_clock)
+		_on_clock()
 
 
 func _process(delta: float) -> void:
@@ -70,6 +80,20 @@ func sleep() -> bool:
 	return true
 
 
+func _on_clock() -> void:
+	_hood_tint.color = _day_tint.lerp(NIGHT_TINT, darkness(RunState.stats.minute()))
+
+
+# Quanto a noite escurece o bairro (0 dia, 1 noite fechada), pelo minuto do dia.
+static func darkness(minute_of_day: int) -> float:
+	var h := minute_of_day / 60.0
+	if h < 5.0 or h >= 21.0:
+		return 1.0
+	if h < 8.0:
+		return (8.0 - h) / 3.0
+	return 0.0 if h < 18.0 else (h - 18.0) / 3.0
+
+
 # Dentro de algum local que não é o primeiro (a casa).
 func is_inside() -> bool:
 	return not _stack.is_empty()
@@ -108,6 +132,7 @@ func _show(next: Location) -> void:
 func _arrive(next: Location) -> void:
 	location = next
 	player.surface = next.surface
+	player.needs.sheltered = is_inside()
 	var cam: Camera2D = player.get_node("Camera2D")
 	var rect := next.bounds()
 	cam.limit_left = rect.position.x
