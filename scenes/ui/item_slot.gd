@@ -82,8 +82,7 @@ func _draw() -> void:
 		for c in [Vector2(2, 2), Vector2(slot_size.x - 3, 2), Vector2(2, slot_size.y - 3), Vector2(slot_size.x - 3, slot_size.y - 3)]:
 			draw_rect(Rect2(c, Vector2.ONE), RIVET)
 	if short_caption and item() == null:
-		var font := ThemeDB.fallback_font
-		draw_string(font, Vector2(0, slot_size.y - 3), short_caption, HORIZONTAL_ALIGNMENT_CENTER, slot_size.x, 6, LABEL)
+		draw_string(get_theme_default_font(), Vector2(0, slot_size.y - 4), short_caption, HORIZONTAL_ALIGNMENT_CENTER, slot_size.x, 16, LABEL)
 	if _hover:
 		draw_rect(r.grow(-1), HOVER, false, 1.0)
 

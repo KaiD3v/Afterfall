@@ -32,6 +32,7 @@ window/stretch/mode="canvas_items"
 
 theme/default_font_antialiasing=0
 theme/default_font_subpixel_positioning=0
+theme/custom="res://assets/ui/theme.tres"
 
 [input]
 

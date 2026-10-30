@@ -92,7 +92,7 @@ func _run(main: Node) -> void:
 	head_slot.unhovered.emit(head_slot)
 	check("ao sair do item o rodapé volta à dica", menu._name.text == "" and menu._desc.text.begins_with("Arraste"))
 	check("armas em slots de 48 px, cabeça e corpo em 32", _gear_slot(menu, MELEE).size == ItemSlot.LARGE and _gear_slot(menu, FIREARM).size == ItemSlot.LARGE and head_slot.size == ItemSlot.SMALL and body_slot.size == ItemSlot.SMALL)
-	check("slots vazios com rótulo curto", menu.gear_slots.map(func(s): return s.short_caption) == ["CABEÇA", "BRANCA", "FOGO", "CORPO"])
+	check("slots vazios com rótulo curto", menu.gear_slots.map(func(s): return s.short_caption) == ["ELMO", "BRANCA", "FOGO", "CORPO"])
 	menu._unhandled_input(_key(KEY_ESCAPE))
 	check("Esc fecha e devolve o controle", not menu.is_open() and not player.input_locked)
 

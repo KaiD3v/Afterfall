@@ -18,7 +18,7 @@ const GAP := 4
 # Slots de equipamento encostados no retrato: [slot, posição na área do equipamento, tamanho,
 # nome, rótulo curto, ícone da silhueta]. Armas em 48 px: o item mais importante.
 const GEAR := [
-	[EquipmentItem.Slot.HEAD, Vector2(56, 0), ItemSlot.SMALL, "Capacete", "CABEÇA", "res://data/items/helmet.tres"],
+	[EquipmentItem.Slot.HEAD, Vector2(56, 0), ItemSlot.SMALL, "Capacete", "ELMO", "res://data/items/helmet.tres"],
 	[EquipmentItem.Slot.MELEE, Vector2(4, 52), ItemSlot.LARGE, "Arma branca", "BRANCA", "res://data/items/machete.tres"],
 	[EquipmentItem.Slot.FIREARM, Vector2(92, 52), ItemSlot.LARGE, "Arma de fogo", "FOGO", "res://data/items/pistol_9mm.tres"],
 	[EquipmentItem.Slot.BODY, Vector2(56, 116), ItemSlot.SMALL, "Colete", "CORPO", "res://data/items/vest.tres"],
@@ -186,7 +186,7 @@ func _build() -> void:
 		bag_slots.append(s)
 
 	_name = _label(panel, "", Vector2(8, 198), TITLE)
-	_desc = _label(panel, "", Vector2(8, 209), TEXT)
+	_desc = _label(panel, "", Vector2(8, 208), TEXT)
 	_desc.size = Vector2(PANEL.size.x - 16, 22)
 	_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
@@ -222,7 +222,6 @@ func _label(parent: Control, text: String, at: Vector2, color: Color) -> Label:
 	var l := Label.new()
 	l.text = text
 	l.position = at
-	l.add_theme_font_size_override("font_size", 8)
 	l.add_theme_color_override("font_color", color)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(l)

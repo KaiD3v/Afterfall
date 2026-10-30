@@ -105,7 +105,7 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(0.658824, 0.682353, 0.701961, 1)
 theme_override_colors/font_outline_color = Color(0.0509804, 0.0627451, 0.0901961, 1)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 16
 text = "VOCÊ MORREU"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -118,7 +118,7 @@ offset_bottom = 37.0
 theme_override_colors/font_color = Color(0.658824, 0.682353, 0.701961, 1)
 theme_override_colors/font_outline_color = Color(0.0509804, 0.0627451, 0.0901961, 1)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 16
 text = "12 | 24"
 
 [node name="BottomPanel" type="ColorRect" parent="."]
@@ -137,7 +137,7 @@ offset_bottom = 265.0
 theme_override_colors/font_color = Color(0.658824, 0.682353, 0.701961, 1)
 theme_override_colors/font_outline_color = Color(0.0509804, 0.0627451, 0.0901961, 1)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 16
 text = "Inventário: vazio (8 livres)"
 
 [node name="Toast" type="Label" parent="."]
@@ -149,7 +149,7 @@ offset_bottom = 234.0
 theme_override_colors/font_color = Color(0.890196, 0.658824, 0.270588, 1)
 theme_override_colors/font_outline_color = Color(0.0509804, 0.0627451, 0.0901961, 1)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 
 [node name="Prompt" type="Label" parent="."]
@@ -161,7 +161,7 @@ offset_bottom = 250.0
 theme_override_colors/font_color = Color(0.658824, 0.682353, 0.701961, 1)
 theme_override_colors/font_outline_color = Color(0.0509804, 0.0627451, 0.0901961, 1)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 
 [node name="Crosshair" type="Node2D" parent="."]

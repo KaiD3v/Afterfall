@@ -64,6 +64,7 @@ func _on_ammo() -> void:
 
 func _on_inventory() -> void:
 	inventory.text = "Inventário: %s (%d livres)" % [_items_text(), RunState.inventory.free_slots()]
+	$BottomPanel.size.x = inventory.get_minimum_size().x + 8  # o fundo acompanha o texto
 
 
 # Troca de foco: passa a ouvir o aviso do novo interativo (o do container muda ao esvaziar).
