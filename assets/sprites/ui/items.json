@@ -59,6 +59,26 @@
         "h": 128
       },
       "duration": 100
+    },
+    {
+      "filename": "food_can",
+      "frame": {
+        "x": 768,
+        "y": 0,
+        "w": 128,
+        "h": 128
+      },
+      "duration": 100
+    },
+    {
+      "filename": "water_bottle",
+      "frame": {
+        "x": 896,
+        "y": 0,
+        "w": 128,
+        "h": 128
+      },
+      "duration": 100
     }
   ],
   "meta": {
@@ -67,7 +87,7 @@
     "image": "items.png",
     "format": "I8",
     "size": {
-      "w": 768,
+      "w": 1024,
       "h": 128
     },
     "scale": "1",
@@ -106,6 +126,18 @@
         "name": "vest",
         "from": 5,
         "to": 5,
+        "direction": "forward"
+      },
+      {
+        "name": "food_can",
+        "from": 6,
+        "to": 6,
+        "direction": "forward"
+      },
+      {
+        "name": "water_bottle",
+        "from": 7,
+        "to": 7,
         "direction": "forward"
       }
     ]
