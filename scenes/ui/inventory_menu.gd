@@ -1,6 +1,8 @@
 # Menu do inventário (tecla da ação inventory, hoje E, abre e fecha; Esc fecha): equipamento em
-# volta do protagonista e a mochila em blocos. Arrastar e soltar move, troca, equipa e desequipa; botão direito usa ou
-# equipa (na mochila) e desequipa (no equipamento). O mundo não pausa: o jogador só fica parado.
+# volta do protagonista e a mochila em blocos. Arrastar e soltar move, troca, equipa e desequipa;
+# botão direito ou duplo clique usa ou equipa (na mochila) e desequipa (no equipamento). Toda troca
+# passa por _transfer: som, pulso no slot, e recusa com motivo no rodapé. O mundo não pausa: o
+# jogador só fica parado.
 # Painel e textos são elementos simples feitos por código (Guia de estilo, seção 7); molduras dos
 # slots e ícones dos itens vêm do gerador de imagem (assets/sprites/ui).
 extends CanvasLayer
@@ -13,6 +15,8 @@ const RIVET := Color8(132, 140, 148)    # concrete_light
 const TEXT := Color8(168, 174, 179)     # concrete_highlight
 const DIM := Color8(95, 104, 115)       # concrete_mid
 const TITLE := Color8(227, 168, 69)     # amber_light_glow
+const WARN := Color8(184, 118, 68)      # rust_highlight: avisos no rodapé
+const MESSAGE_TIME := 1.6               # segundos que um aviso fica no rodapé
 const DIM_WORLD := Color(0, 0, 0, 0.4)  # véu sobre o mundo, que continua rodando atrás
 const GAP := 4
 # Slots de equipamento encostados no retrato: [slot, posição na área do equipamento, tamanho,
@@ -32,6 +36,8 @@ const SLOT_FRAMES := "res://assets/sprites/ui/slots.png"  # slot_32 e slot_48 (g
 
 @export var player: Player
 @export var pauses_game := false  # false: o mundo segue (tensão do gênero); true: pausa ao abrir
+@export var stow_sound: AudioStream    # item guardado ou movido na mochila
+@export var reject_sound: AudioStream  # item recusado ou ação impossível
 
 var gear_slots: Array[ItemSlot] = []
 var bag_slots: Array[ItemSlot] = []
@@ -40,16 +46,22 @@ var _name: Label
 var _desc: Label
 var _frames := {}  # tamanho do slot -> moldura gerada
 var _hovered: ItemSlot
+var _audio := AudioStreamPlayer.new()
+var _message_id := 0  # um aviso novo cancela a volta do anterior
 
 @onready var root: Control = $Root
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS  # abre e fecha mesmo com o jogo pausado
+	_audio.bus = &"SFX"
+	add_child(_audio)
 	_build()
 	RunState.inventory.changed.connect(_refresh)
 	RunState.equipment.changed.connect(_refresh)
+	player.firearm.changed.connect(_update_locks)
 	player.died.connect(_on_player_died)
+	_update_locks()
 	root.hide()
 	_refresh()
 
@@ -97,23 +109,91 @@ func close() -> void:
 		get_tree().paused = false
 
 
-# Botão direito: na mochila, equipa o equipável ou usa o consumível; no equipamento, desequipa
-# para o primeiro bloco livre.
+# Botão direito ou duplo clique: na mochila, equipa o equipável (trocando com o que estava no
+# slot) ou usa o consumível; no equipamento, desequipa para o primeiro bloco livre.
 func activate(slot: ItemSlot) -> void:
 	var item := slot.item()
 	if item == null:
 		return
-	var bag := RunState.inventory
-	var gear := RunState.equipment
-	if slot.container == gear:
-		var free := bag.first_free()
-		if free >= 0:
-			ItemTransfer.swap(gear, slot.key, bag, free)
+	if slot.container == RunState.equipment:
+		var free := RunState.inventory.first_free()
+		if free < 0:
+			_warn(slot, "Mochila cheia")
+		else:
+			_transfer(slot, bag_slots[free])
 	elif item is EquipmentItem:
-		ItemTransfer.swap(bag, slot.key, gear, item.slot)
+		_transfer(slot, gear_slot(item.slot))
+	elif player.use_item(item):  # o som de uso toca no jogador
+		_show_details(slot)
 	else:
-		player.use_item(item)
-	_show_details(slot)
+		_warn(slot, _why_not_use(item))
+
+
+# Move ou troca entre dois slots; se não couber, recusa com o motivo.
+func _transfer(from: ItemSlot, to: ItemSlot) -> bool:
+	if not to.accepts(from):
+		_reject(from, to)
+		return false
+	var moving := from.item()
+	ItemTransfer.swap(from.container, from.key, to.container, to.key)
+	var gear := moving as EquipmentItem
+	var equipped := to.container == RunState.equipment and gear != null and gear.equip_sound != null
+	_play(gear.equip_sound if equipped else stow_sound)
+	_show_details(to)
+	return true
+
+
+func _reject(from: ItemSlot, to: ItemSlot) -> void:
+	_warn(to, _why_not(from, to))
+
+
+func _why_not(from: ItemSlot, to: ItemSlot) -> String:
+	if from.locked or to.locked:
+		return "Recarregando: espere a arma"
+	var moving := from.item()
+	if not to.container.can_put(to.key, moving):
+		return "%s não vai em %s" % [moving.display_name, to.caption.to_lower()]
+	return "%s não vai em %s" % [to.item().display_name, from.caption.to_lower()]  # a troca não volta
+
+
+func _why_not_use(item: ItemData) -> String:
+	if item is HealItem and player.health.is_full():
+		return "Vida cheia"
+	return "Não dá para usar agora"
+
+
+# Aviso no rodapé, com contorno vermelho no slot e som de recusa.
+func _warn(slot: ItemSlot, text: String) -> void:
+	slot.flash()
+	_play(reject_sound)
+	_message_id += 1
+	var id := _message_id
+	_name.text = text
+	_name.add_theme_color_override("font_color", WARN)
+	_desc.text = ""
+	get_tree().create_timer(MESSAGE_TIME).timeout.connect(func():
+		if id == _message_id and is_instance_valid(_name):
+			_show_details(_hovered))
+
+
+func _play(stream: AudioStream) -> void:
+	if stream:
+		_audio.stream = stream
+		_audio.play()
+
+
+# A arma de fogo não sai nem entra no slot durante a recarga.
+func _update_locks() -> void:
+	var slot := gear_slot(EquipmentItem.Slot.FIREARM)
+	if slot:
+		slot.locked = player.firearm.reloading
+
+
+func gear_slot(slot: int) -> ItemSlot:
+	for s in gear_slots:
+		if s.key == slot:
+			return s
+	return null
 
 
 func _refresh() -> void:
@@ -136,6 +216,8 @@ func _on_unhovered(slot: ItemSlot) -> void:
 
 
 func _show_details(slot: ItemSlot) -> void:
+	_message_id += 1  # um aviso pendente não volta por cima disto
+	_name.add_theme_color_override("font_color", TITLE)
 	var item := slot.item() if slot else null
 	if item:
 		_name.text = item.display_name
@@ -145,7 +227,7 @@ func _show_details(slot: ItemSlot) -> void:
 		_desc.text = "Vazio. Arraste um item para cá."
 	else:
 		_name.text = ""
-		_desc.text = "Arraste: mover ou equipar · Botão direito: usar · %s fecha" % Keys.label(&"inventory")
+		_desc.text = "Arraste para mover · Botão direito ou 2 cliques: usar"  # a tecla de fechar está no título
 
 
 func _build() -> void:
@@ -212,6 +294,9 @@ func _slot(parent: Control, at: Vector2, at_size: Vector2) -> ItemSlot:
 	s.position = at
 	s.frame_texture = _frames.get(at_size)
 	s.activated.connect(activate)
+	s.drop_requested.connect(_transfer)
+	s.rejected.connect(_reject)
+	s.blocked.connect(func(blocked_slot): _warn(blocked_slot, "Recarregando: espere a arma"))
 	s.hovered.connect(_on_hovered)
 	s.unhovered.connect(_on_unhovered)
 	parent.add_child(s)

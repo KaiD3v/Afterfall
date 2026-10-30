@@ -93,6 +93,38 @@ func _run(main: Node) -> void:
 	check("ao sair do item o rodapé volta à dica", menu._name.text == "" and menu._desc.text.begins_with("Arraste"))
 	check("armas em slots de 48 px, cabeça e corpo em 32", _gear_slot(menu, MELEE).size == ItemSlot.LARGE and _gear_slot(menu, FIREARM).size == ItemSlot.LARGE and head_slot.size == ItemSlot.SMALL and body_slot.size == ItemSlot.SMALL)
 	check("slots vazios com rótulo curto", menu.gear_slots.map(func(s): return s.short_caption) == ["ELMO", "BRANCA", "FOGO", "CORPO"])
+
+	# 4b. I2: resposta ao equipar (destinos acesos, recusa com motivo, duplo clique, som, trava).
+	bag.add(BANDAGE)
+	var b_slot: ItemSlot = menu.bag_slots[_index(bag, BANDAGE)]
+	b_slot.force_drag({"slot": b_slot}, null)
+	check("ao arrastar a bandagem, a cabeça recusa e a mochila aceita", head_slot.drop_state == ItemSlot.Drop.REJECT and menu.bag_slots[5].drop_state == ItemSlot.Drop.ACCEPT and b_slot.drop_state == ItemSlot.Drop.NONE)
+	root.gui_cancel_drag()
+	await process_frame
+	check("ao soltar, os slots voltam ao normal", head_slot.drop_state == ItemSlot.Drop.NONE and head_slot.modulate == Color.WHITE)
+	menu._reject(b_slot, head_slot)
+	check("recusa explica o motivo (\"%s\") e toca o som" % menu._name.text, menu._name.text == "Bandagem não vai em capacete" and menu._audio.stream == menu.reject_sound)
+	player.health.current = player.health.maximum
+	menu.activate(b_slot)
+	check("bandagem com a vida cheia avisa e não gasta", menu._name.text == "Vida cheia" and bag.count(&"bandage") == 1)
+	for i in 8:
+		bag.add(BANDAGE)
+	menu.activate(head_slot)
+	check("desequipar com a mochila cheia avisa", menu._name.text == "Mochila cheia" and gear.get_at(HEAD) == HELMET)
+	bag.clear()
+	var dbl := InputEventMouseButton.new()
+	dbl.button_index = MOUSE_BUTTON_LEFT
+	dbl.pressed = true
+	dbl.double_click = true
+	head_slot._gui_input(dbl)
+	check("duplo clique desequipa como o botão direito", gear.get_at(HEAD) == null and bag.count(&"helmet") == 1)
+	menu._transfer(menu.bag_slots[_index(bag, HELMET)], head_slot)
+	check("equipar toca o som do item e o ícone pulsa", gear.get_at(HEAD) == HELMET and menu._audio.stream == HELMET.equip_sound and head_slot._icon.scale.x > 1.0)
+	var gun_slot: ItemSlot = _gear_slot(menu, FIREARM)
+	player.firearm.reloading = true
+	check("na recarga a arma de fogo trava e avisa", gun_slot.locked and gun_slot._get_drag_data(Vector2.ZERO) == null and menu._name.text == "Recarregando: espere a arma")
+	player.firearm.reloading = false
+	check("e destrava depois", not gun_slot.locked)
 	menu._unhandled_input(_key(KEY_ESCAPE))
 	check("Esc fecha e devolve o controle", not menu.is_open() and not player.input_locked)
 

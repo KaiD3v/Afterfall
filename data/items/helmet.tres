@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="ArmorItem" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="ArmorItem" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/items/armor_item.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/items.png" id="icons"]
+[ext_resource type="AudioStream" path="res://assets/audio/ui/equip_gear.ogg" id="sfx"]
 
 [sub_resource type="AtlasTexture" id="icon"]
 atlas = ExtResource("icons")
@@ -15,3 +16,4 @@ id = &"helmet"
 display_name = "Capacete tático"
 description = "Casco riscado de alguém que não precisou mais dele. Ainda não protege nesta versão."
 icon = SubResource("icon")
+equip_sound = ExtResource("sfx")

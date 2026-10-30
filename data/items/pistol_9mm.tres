@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="WeaponItem" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="WeaponItem" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/items/weapon_item.gd" id="1"]
 [ext_resource type="Resource" path="res://data/weapons/pistol_9mm.tres" id="2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/items.png" id="icons"]
+[ext_resource type="AudioStream" path="res://assets/audio/ui/equip_weapon.ogg" id="sfx"]
 
 [sub_resource type="AtlasTexture" id="icon"]
 atlas = ExtResource("icons")
@@ -16,3 +17,4 @@ id = &"pistol_9mm"
 display_name = "Pistola 9 mm"
 description = "Pistola militar de 12 balas. Mata rápido, mas o tiro atrai os zumbis de longe."
 icon = SubResource("icon")
+equip_sound = ExtResource("sfx")

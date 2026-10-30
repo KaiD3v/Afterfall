@@ -132,8 +132,14 @@ func _update_focus() -> void:
 	focus_changed.emit(focus)
 
 
+# Usa um item da mochila (bandagem pela tecla Q ou pelo menu), com o som do item.
 func use_item(item: ItemData) -> bool:
-	return not is_dead() and RunState.inventory.use(item, self)
+	if is_dead() or not RunState.inventory.use(item, self):
+		return false
+	if item.use_sound:
+		$SfxItem.stream = item.use_sound
+		$SfxItem.play()
+	return true
 
 
 func _on_frame_changed() -> void:

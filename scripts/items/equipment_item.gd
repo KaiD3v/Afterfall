@@ -5,3 +5,4 @@ extends ItemData
 enum Slot { MELEE, FIREARM, HEAD, BODY }
 
 @export var slot := Slot.MELEE
+@export var equip_sound: AudioStream  # toca no menu quando o item é equipado

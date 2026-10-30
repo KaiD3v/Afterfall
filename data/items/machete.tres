@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="WeaponItem" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="WeaponItem" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/items/weapon_item.gd" id="1"]
 [ext_resource type="Resource" path="res://data/weapons/machete.tres" id="2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/items.png" id="icons"]
+[ext_resource type="AudioStream" path="res://assets/audio/ui/equip_weapon.ogg" id="sfx"]
 
 [sub_resource type="AtlasTexture" id="icon"]
 atlas = ExtResource("icons")
@@ -16,3 +17,4 @@ id = &"machete"
 display_name = "Machete"
 description = "Lâmina longa, gasta de tanto uso. Faz pouco barulho, mas gasta fôlego a cada golpe."
 icon = SubResource("icon")
+equip_sound = ExtResource("sfx")

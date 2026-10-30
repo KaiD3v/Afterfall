@@ -6,6 +6,7 @@ extends Resource
 @export var display_name := ""
 @export_multiline var description := ""  # aparece no menu do inventário
 @export var icon: Texture2D  # quadro de 128×128 (escala 0,25 = um slot de 32×32)
+@export var use_sound: AudioStream  # toca no menu quando o item é usado
 
 
 # Ao pegar do container: true = ocupa um slot do inventário; false = efeito na hora (munição).
