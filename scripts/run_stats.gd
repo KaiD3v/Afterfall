@@ -7,7 +7,7 @@ extends RefCounted
 signal minute_changed  # minuto de jogo virou (a cada 1,25 s reais): a HUD redesenha o relógio
 
 const DAY_SECONDS := 1800.0  # segundos reais por dia de jogo
-const START_HOUR := 8  # hora em que a run começa: ponto de partida, a confirmar com o autor
+const START_HOUR := 8  # hora em que a run começa (confirmada pelo autor em 2026-10-30)
 
 var time := 0.0:  # segundos vivo
 	set(value):
