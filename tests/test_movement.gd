@@ -64,6 +64,7 @@ func _run() -> void:
 	player.health.damage(60.0)
 	player.health.damage(10.0)
 	check("morte detectada uma vez", player.is_dead() and deaths == 1)
+	await frames(1.2)  # a tela de resultado espera a queda
 	check("aviso de morte visível", hud.get_node("Result").visible)
 	x0 = player.position.x
 	Input.action_press("move_left")

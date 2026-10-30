@@ -155,9 +155,17 @@ func _on_frame_changed() -> void:
 		steps_taken += 1
 
 
+# Cai (death_<dir>) e fica caído no último quadro; sem a animação na sheet, só para.
 func _on_died() -> void:
 	velocity = Vector2.ZERO
+	flashlight.hide()  # a luz ficaria flutuando acima do corpo caído
+	play_action("death")
 	super()
+
+
+func _on_animation_finished() -> void:
+	if action != "death":
+		super()
 
 
 func _update_anim() -> void:

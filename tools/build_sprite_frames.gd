@@ -7,7 +7,7 @@ extends SceneTree
 # SpriteFrames -> sheets que entram nele (movimento da Fase B, combate da Fase C).
 # Sheet que ainda não existe é pulada: a arte entra só gerando o JSON.
 const SHEETS := {
-	"res://assets/sprites/character_frames.tres": ["res://assets/sprites/b/character-move.json", "res://assets/sprites/c/character-combat.json"],
+	"res://assets/sprites/character_frames.tres": ["res://assets/sprites/b/character-move.json", "res://assets/sprites/c/character-combat.json", "res://assets/sprites/c/character-death.json"],
 	"res://assets/sprites/zombie_frames.tres": ["res://assets/sprites/b/zombie-move.json", "res://assets/sprites/c/zombie-combat.json"],
 }
 # Ações tocam uma vez e destravam o movimento ao terminar, mesmo que o JSON diga loop.

@@ -42,7 +42,9 @@ func new_run() -> void:
 
 func _on_player_died() -> void:
 	RunState.deaths += 1
-	_dead_for = 0.0
+	if player.action == "death":  # a tela de resultado espera o corpo cair
+		await player.sprite.animation_finished
+	_dead_for = 0.0  # o atraso do recomeço conta da tela de resultado
 	$HUD.show_result()
 
 

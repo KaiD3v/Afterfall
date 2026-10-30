@@ -56,6 +56,9 @@ func _run() -> void:
 		# Morre: resultado na tela com os números da run.
 		player.health.damage(150.0)
 		await physics_frame
+		check("o corpo cai antes do resultado", player.action == "death" and not main.get_node("HUD/Result").visible)
+		await frames(1.2)
+		check("e fica caído no último quadro", player.sprite.animation.begins_with("death") and player.sprite.frame == 4)
 		var text: String = main.get_node("HUD/Result/Text").text
 		check("resultado visível", main.get_node("HUD/Result").visible)
 		check("resultado mostra zumbis, itens e mortes", "1 zumbis" in text and "2 itens" in text and ("Mortes: %d" % run) in text)
