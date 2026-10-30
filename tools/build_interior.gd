@@ -20,6 +20,7 @@ const CONTAINERS := [
 	[&"mesa", "Mesa", "res://data/loot/mesa.tres", Vector2i(10, 4), Color8(89, 64, 46), "table"],
 	[&"comoda", "Cômoda", "res://data/loot/comoda.tres", Vector2i(13, 1), Color8(133, 102, 74), "dresser"],
 ]
+const BED_TILE := Vector2i(8, 2)  # cama no quarto, cabeceira para a parede de cima (S3: dormir)
 # Luzes: [nome, posição em tiles, cor, energia, escala]
 const LIGHTS := [
 	["KitchenLight", Vector2(2.5, 4.0), Color(0.85, 0.90, 0.96, 1.0), 0.55, 0.9],
@@ -80,7 +81,7 @@ func _initialize() -> void:
 		pt.texture_scale = spec[4]
 		_add(house, pt)
 
-	# Porta de saída acima do tile D; containers nos cômodos (o móvel é o container).
+	# Porta de saída acima do tile D; containers nos cômodos (o móvel é o container); a cama no quarto.
 	var door_tile := _find(map, "D")
 	var door: Node2D = load("res://scenes/props/door.tscn").instantiate()
 	door.name = "ExitDoor"
@@ -101,6 +102,11 @@ func _initialize() -> void:
 		box.color = c[4]
 		box.sprite = _atlas(furniture, c[5])
 		_add(house, box)
+	var bed: StaticBody2D = load("res://scenes/props/bed.tscn").instantiate()
+	bed.name = "Bed"
+	bed.position = _center(BED_TILE)
+	bed.sprite = _atlas(furniture, "bed")
+	_add(house, bed)
 
 	var packed := PackedScene.new()
 	packed.pack(house)

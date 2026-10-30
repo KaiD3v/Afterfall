@@ -1,12 +1,14 @@
 # Cena principal: o local atual (bairro com seus zumbis), jogador e HUD. Uma porta com destino
 # empilha o local atual fora da árvore (congelado, sem ouvir nada) e põe o novo; sair desempilha.
 # Morte: tela de resultado; E começa uma nova run recarregando a cena do zero.
+# Sono (cama da casa): a tela escurece, o relógio avança 8 h e o jogador acorda descansado.
 # Ambiente: cada local tem o seu loop; todos tocam o tempo todo e a troca só mexe no volume.
 extends Node2D
 
 const FADE_TIME := 0.25
 const RESTART_DELAY := 1.0  # evita pular o resultado com um E apertado no susto
 const AMBIENCE_FADE := FADE_TIME * 2  # a troca dura o escurecer e o clarear da porta
+const SLEEP_FADE := 0.6
 
 var _stack: Array[Dictionary] = []  # locais de onde se entrou: {location, back}
 var _busy := false
@@ -46,6 +48,26 @@ func _on_player_died() -> void:
 		await player.sprite.animation_finished
 	_dead_for = 0.0  # o atraso do recomeço conta da tela de resultado
 	$HUD.show_result()
+
+
+# Dorme SLEEP_HOURS (Needs) se puder; se não, o aviso diz o motivo. Cruzar 00:00 dormindo conta o dia.
+func sleep() -> bool:
+	var why := player.needs.why_not_sleep()
+	if why != "":
+		RunState.notify(why)
+		return false
+	if _busy:
+		return false
+	_busy = true
+	player.set_physics_process(false)
+	await create_tween().tween_property(fade, "color:a", 1.0, SLEEP_FADE).finished
+	player.needs.sleep()
+	RunState.stats.time += Needs.SLEEP_HOURS * Needs.HOUR
+	await create_tween().tween_property(fade, "color:a", 0.0, SLEEP_FADE).finished
+	player.set_physics_process(true)
+	_busy = false
+	RunState.notify("Dormiu %d h" % Needs.SLEEP_HOURS)
+	return true
 
 
 # Dentro de algum local que não é o primeiro (a casa).

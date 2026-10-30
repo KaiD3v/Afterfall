@@ -39,6 +39,16 @@
         "h": 256
       },
       "duration": 250
+    },
+    {
+      "filename": "bed",
+      "frame": {
+        "x": 1024,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "duration": 250
     }
   ],
   "meta": {
@@ -47,7 +57,7 @@
     "image": "furniture.png",
     "format": "I8",
     "size": {
-      "w": 1024,
+      "w": 1280,
       "h": 256
     },
     "scale": "1",
@@ -75,6 +85,12 @@
         "from": 3,
         "to": 3,
         "direction": "forward"
+      },
+      {
+        "name": "bed",
+        "from": 4,
+        "to": 4,
+        "direction": "forward"
       }
     ],
     "footprint": {
@@ -93,6 +109,10 @@
       "dresser": [
         1,
         1
+      ],
+      "bed": [
+        1,
+        2
       ]
     }
   }

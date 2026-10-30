@@ -14,6 +14,11 @@ var current := 0.0:
 		if current != value:
 			current = value
 			changed.emit()
+var cap := 0.0:  # teto atual (o cansaço baixa; até maximum): recupera só até aqui
+	set(value):
+		cap = value
+		if current > cap:
+			current = cap
 var exhausted := false:
 	set(value):
 		if exhausted != value:
@@ -23,6 +28,7 @@ var _regen_wait := 0.0
 
 
 func _ready() -> void:
+	cap = maximum
 	current = maximum
 
 
@@ -46,6 +52,6 @@ func drain(amount: float) -> void:
 func recover(delta: float) -> void:
 	_regen_wait -= delta
 	if _regen_wait <= 0.0:
-		current = minf(current + regen * delta, maximum)
+		current = minf(current + regen * delta, cap)
 	if exhausted and current >= recover_at:
 		exhausted = false
